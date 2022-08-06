@@ -44,9 +44,15 @@ struct kit_tests_list {
 extern struct kit_tests_list kit_tests_list;
 
 #ifdef _MSC_VER
+#  ifdef __cplusplus
+#    define KIT_EXTERN_C_ extern "C"
+#  else
+#    define KIT_EXTERN_C_
+#  endif
+
 #  pragma section(".CRT$XCU", read)
 #  define KIT_TEST_ON_START_2_(f, p)                               \
-    static void f(void);                                           \
+    KIT_EXTERN_C_ static void f(void);                             \
     __declspec(allocate(".CRT$XCU")) void (*f##_)(void) = f;       \
     __pragma(comment(linker, "/include:" p #f "_")) static void f( \
         void)
