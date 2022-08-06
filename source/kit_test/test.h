@@ -83,8 +83,8 @@ extern struct kit_tests_list kit_tests_list;
                                 KIT_TEST_FILE)(                      \
       int kit_test_index_, kit_test_report kit_test_report_)
 
-#define KIT_REQUIRE(ok) \
-  kit_test_report_(kit_test_index_, __FILE__, __LINE__, (ok))
+#define KIT_REQUIRE(...) \
+  kit_test_report_(kit_test_index_, __FILE__, __LINE__, (__VA_ARGS__))
 
 int kit_run_tests(int argc, char **argv);
 
