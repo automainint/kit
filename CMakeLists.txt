@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.16)
 option(KIT_ENABLE_LIBRARY "Enable library" ON)
 option(KIT_ENABLE_TESTING "Enable testing" ON)
 
+option(KIT_DISABLE_SYSTEM_MALLOC "Disable system memory allocator" OFF)
+option(KIT_DISABLE_SYSTEM_THREADS "Disable system threads" OFF)
+
 set(KIT_PROJECT kit)
 set(KIT_LIBRARY kit)
 set(KIT_TEST_LIBRARY kit_test)
@@ -27,6 +30,14 @@ if(KIT_ENABLE_LIBRARY OR KIT_ENABLE_TESTING)
     ${KIT_LIBRARY} INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source>)
   target_compile_features(${KIT_LIBRARY} PUBLIC c_std_11)
+
+  if(KIT_DISABLE_SYSTEM_MALLOC)
+    target_compile_definitions(${KIT_LIBRARY} PUBLIC KIT_DISABLE_SYSTEM_MALLOC)
+  endif()
+
+  if(KIT_DISABLE_SYSTEM_THREADS)
+    target_compile_definitions(${KIT_LIBRARY} PUBLIC KIT_DISABLE_SYSTEM_THREADS)
+  endif()
 
   add_library(${KIT_TEST_LIBRARY} STATIC)
   add_library(${KIT_PROJECT}::${KIT_TEST_LIBRARY} ALIAS ${KIT_TEST_LIBRARY})

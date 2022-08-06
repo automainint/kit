@@ -5,7 +5,7 @@
 
 struct kit_tests_list kit_tests_list = { 0 };
 
-static void report(int i, char const *file, int line, bool ok) {
+static void report(int i, char const *file, int line, _Bool ok) {
   int const n = kit_tests_list.tests[i].assertions++;
 
   kit_tests_list.tests[i].file[n]   = file;
@@ -23,7 +23,7 @@ static long long sec_to_ms(long long sec) {
 
 enum code_value { white, yellow, red, green };
 
-static void color_code(bool term_color, int c) {
+static void color_code(_Bool term_color, int c) {
   if (term_color) {
     if (c == white)
       printf("\x1b[37m");
@@ -37,15 +37,15 @@ static void color_code(bool term_color, int c) {
 }
 
 int kit_run_tests(int argc, char **argv) {
-  int  fail_test_count       = 0;
-  int  fail_assertion_count  = 0;
-  int  total_assertion_count = 0;
-  int  status                = 0;
-  bool term_color            = true;
+  int   fail_test_count       = 0;
+  int   fail_assertion_count  = 0;
+  int   total_assertion_count = 0;
+  int   status                = 0;
+  _Bool term_color            = 1;
 
   for (int i = 0; i < argc; i++)
     if (strcmp("--no-term-color", argv[i]) == 0)
-      term_color = false;
+      term_color = 0;
 
   for (int i = 0; i < kit_tests_list.size; i++) {
     color_code(term_color, yellow);
@@ -63,17 +63,17 @@ int kit_run_tests(int argc, char **argv) {
 
     printf("\r");
 
-    bool test_status = true;
+    _Bool test_status = 1;
 
     for (int j = 0; j < kit_tests_list.tests[i].assertions; j++)
-      if (kit_tests_list.tests[i].status[j] == false) {
+      if (kit_tests_list.tests[i].status[j] == 0) {
         fail_assertion_count++;
-        test_status = false;
+        test_status = 0;
       }
 
     total_assertion_count += kit_tests_list.tests[i].assertions;
 
-    if (test_status == false) {
+    if (test_status == 0) {
       color_code(term_color, red);
       printf("[ RUN    ] %s\n", kit_tests_list.tests[i].test_name);
       printf("[ FAILED ] %s - %d ms\n",
