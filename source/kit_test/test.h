@@ -24,8 +24,7 @@ extern "C" {
 #  define KIT_TEST_STRING_SIZE 0x100
 #endif
 
-typedef void (*kit_test_report)(int, char const *file, int line,
-                                _Bool);
+typedef void (*kit_test_report)(int, char const *file, int line, int);
 typedef void (*kit_test_function)(int, kit_test_report);
 
 struct kit_test_case {
@@ -34,7 +33,7 @@ struct kit_test_case {
   int               assertions;
   char const       *file[KIT_TEST_ASSERTIONS_LIMIT];
   int               line[KIT_TEST_ASSERTIONS_LIMIT];
-  _Bool             status[KIT_TEST_ASSERTIONS_LIMIT];
+  int               status[KIT_TEST_ASSERTIONS_LIMIT];
 };
 
 struct kit_tests_list {

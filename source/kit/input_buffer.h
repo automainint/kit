@@ -9,7 +9,7 @@ extern "C" {
 #endif
 
 struct kit_ib_handle {
-  _Bool     error;
+  int       error;
   ptrdiff_t offset;
   void     *internal;
   DA(data, char);

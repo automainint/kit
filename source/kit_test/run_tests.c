@@ -5,7 +5,7 @@
 
 struct kit_tests_list kit_tests_list = { 0 };
 
-static void report(int i, char const *file, int line, _Bool ok) {
+static void report(int i, char const *file, int line, int ok) {
   int const n = kit_tests_list.tests[i].assertions++;
 
   kit_tests_list.tests[i].file[n]   = file;
@@ -23,7 +23,7 @@ static long long sec_to_ms(long long sec) {
 
 enum code_value { white, yellow, red, green };
 
-static void color_code(_Bool term_color, int c) {
+static void color_code(int term_color, int c) {
   if (term_color) {
     if (c == white)
       printf("\x1b[37m");

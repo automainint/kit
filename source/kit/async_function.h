@@ -218,7 +218,7 @@ typedef struct {
     case KIT_AF_LINE_():                                     \
       self->_index = KIT_AF_LINE_();                         \
       KIT_AF_RESUME_AND_JOIN_N((promises_), (size_));        \
-      _Bool kit_af_done_;                                    \
+      int kit_af_done_;                                      \
       KIT_AF_FINISHED_N(kit_af_done_, (promises_), (size_)); \
       if (!kit_af_done_)                                     \
         return;                                              \

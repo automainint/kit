@@ -9,7 +9,7 @@ extern "C" {
 
 typedef int (*kit_ar_compare_fn)(void const *left, void const *right);
 
-_Bool kit_ar_equal_bytes(ptrdiff_t left_element_size,
+int kit_ar_equal_bytes(ptrdiff_t left_element_size,
                          ptrdiff_t left_size, void const *left_data,
                          ptrdiff_t   right_element_size,
                          ptrdiff_t   right_size,
