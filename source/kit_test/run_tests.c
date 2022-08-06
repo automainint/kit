@@ -7,16 +7,16 @@ struct kit_tests_list kit_tests_list = { 0 };
 
 static void report(int i, char const *file, int line, int ok) {
   if (i >= KIT_TESTS_SIZE_LIMIT) {
-    printf("Kit Test error: Too many tests!");
+    printf("\nKit Test error: Too many tests!\n");
     return;
   }
 
   int const n = kit_tests_list.tests[i].assertions++;
 
   if (n >= KIT_TEST_ASSERTIONS_LIMIT) {
-    printf(
-        "Kit Test error: Too many test assertions for test \"%s\"!",
-        kit_tests_list.tests[i].test_name);
+    printf("\nKit Test error: Too many test assertions for test "
+           "\"%s\"!\n",
+           kit_tests_list.tests[i].test_name);
     return;
   }
 
