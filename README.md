@@ -1,3 +1,5 @@
 # kit
-- Async function
 - Unit-testing
+- Async function
+- Dynamic array
+- Input buffer
