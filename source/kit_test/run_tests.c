@@ -6,18 +6,10 @@
 struct kit_tests_list kit_tests_list = { 0 };
 
 static void report(int i, char const *file, int line, int ok) {
-  if (i >= KIT_TESTS_SIZE_LIMIT) {
-    printf("\nKit Test error: Too many tests!");
-    return;
-  }
-
   int const n = kit_tests_list.tests[i].assertions++;
 
-  if (n >= KIT_TEST_ASSERTIONS_LIMIT) {
-    printf("\nKit Test error: Too many test assertions!");
-    kit_tests_list.tests[i].status[KIT_TEST_ASSERTIONS_LIMIT - 1] = 0;
+  if (n >= KIT_TEST_ASSERTIONS_LIMIT)
     return;
-  }
 
   kit_tests_list.tests[i].file[n]   = file;
   kit_tests_list.tests[i].line[n]   = line;
@@ -48,11 +40,11 @@ static void color_code(int term_color, int c) {
 }
 
 int kit_run_tests(int argc, char **argv) {
-  int   fail_test_count       = 0;
-  int   fail_assertion_count  = 0;
-  int   total_assertion_count = 0;
-  int   status                = 0;
-  _Bool term_color            = 1;
+  int fail_test_count       = 0;
+  int fail_assertion_count  = 0;
+  int total_assertion_count = 0;
+  int status                = 0;
+  int term_color            = 1;
 
   for (int i = 0; i < argc; i++)
     if (strcmp("--no-term-color", argv[i]) == 0)
@@ -74,13 +66,17 @@ int kit_run_tests(int argc, char **argv) {
 
     printf("\r");
 
-    _Bool test_status = 1;
+    int test_status = 1;
 
     for (int j = 0; j < kit_tests_list.tests[i].assertions; j++)
       if (kit_tests_list.tests[i].status[j] == 0) {
         fail_assertion_count++;
         test_status = 0;
       }
+
+    if (kit_tests_list.tests[i].assertions >=
+        KIT_TEST_ASSERTIONS_LIMIT)
+      test_status = 0;
 
     total_assertion_count += kit_tests_list.tests[i].assertions;
 
@@ -109,14 +105,27 @@ int kit_run_tests(int argc, char **argv) {
          total_assertion_count);
 
   if (status != 0) {
-    for (int i = 0; i < kit_tests_list.size; i++)
-      for (int j = 0; j < kit_tests_list.tests[i].assertions; j++)
-        if (!kit_tests_list.tests[i].status[j])
-          printf("Assertion on line %d in \"%s\" failed\n",
-                 kit_tests_list.tests[i].line[j],
-                 kit_tests_list.tests[i].file[j]);
+    for (int i = 0; i < kit_tests_list.size; i++) {
+      if (kit_tests_list.tests[i].assertions >=
+          KIT_TEST_ASSERTIONS_LIMIT)
+        printf("Too many assertions for \"%s\" in \"%s\"!\n",
+               kit_tests_list.tests[i].test_name,
+               kit_tests_list.tests[i]
+                   .file[KIT_TEST_ASSERTIONS_LIMIT - 1]);
+      else
+        for (int j = 0; j < kit_tests_list.tests[i].assertions; j++)
+          if (!kit_tests_list.tests[i].status[j])
+            printf("Assertion on line %d in \"%s\" failed\n",
+                   kit_tests_list.tests[i].line[j],
+                   kit_tests_list.tests[i].file[j]);
+    }
 
     printf("\n");
+  }
+
+  if (kit_tests_list.size == KIT_TESTS_SIZE_LIMIT) {
+    printf("Too many tests!");
+    status = 1;
   }
 
   return status;
