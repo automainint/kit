@@ -43,33 +43,40 @@ struct kit_tests_list {
 
 extern struct kit_tests_list kit_tests_list;
 
-#ifdef _MSC_VER
-#  ifdef __cplusplus
-#    define KIT_EXTERN_C_ extern "C"
-#  else
-#    define KIT_EXTERN_C_
-#  endif
-
-#  pragma section(".CRT$XCU", read)
-#  define KIT_TEST_ON_START_2_(f, p)                         \
-    KIT_EXTERN_C_ static void f(void);                       \
-    __declspec(allocate(".CRT$XCU")) void (*f##_)(void) = f; \
-    __pragma(comment(linker, "/include:" p #f "_"))          \
-        KIT_EXTERN_C_ static void                            \
-        f(void)
-#  ifdef _WIN64
-#    define KIT_TEST_ON_START_(f) KIT_TEST_ON_START_2_(f, "")
-#  else
-#    define KIT_TEST_ON_START_(f) KIT_TEST_ON_START_2_(f, "_")
-#  endif
-#else
-#  define KIT_TEST_ON_START_(f)                       \
-    static void f(void) __attribute__((constructor)); \
-    static void f(void)
-#endif
-
 #define KIT_TEST_CONCAT4_(a, b, c, d) a##b##c##d
 #define KIT_TEST_CONCAT3_(a, b, c) KIT_TEST_CONCAT4_(a, b, _, c)
+
+#ifdef __cplusplus
+#  define KIT_TEST_ON_START_(f)                              \
+    static void f(void);                                     \
+    static int  KIT_TEST_CONCAT3_(_kit_test_init_, __LINE__, \
+                                  f) = (f(), 0);             \
+    static void f(void)
+#else
+#  ifdef _MSC_VER
+#    ifdef __cplusplus
+#      define KIT_EXTERN_C_ extern "C"
+#    else
+#      define KIT_EXTERN_C_
+#    endif
+
+#    pragma section(".CRT$XCU", read)
+#    define KIT_TEST_ON_START_2_(f, p)                               \
+      static void f(void);                                           \
+      __declspec(allocate(".CRT$XCU")) void (*f##_)(void) = f;       \
+      __pragma(comment(linker, "/include:" p #f "_")) static void f( \
+          void)
+#    ifdef _WIN64
+#      define KIT_TEST_ON_START_(f) KIT_TEST_ON_START_2_(f, "")
+#    else
+#      define KIT_TEST_ON_START_(f) KIT_TEST_ON_START_2_(f, "_")
+#    endif
+#  else
+#    define KIT_TEST_ON_START_(f)                       \
+      static void f(void) __attribute__((constructor)); \
+      static void f(void)
+#  endif
+#endif
 
 #define KIT_TEST(name)                                               \
   static void KIT_TEST_CONCAT3_(                                     \
