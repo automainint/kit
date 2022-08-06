@@ -51,11 +51,12 @@ extern struct kit_tests_list kit_tests_list;
 #  endif
 
 #  pragma section(".CRT$XCU", read)
-#  define KIT_TEST_ON_START_2_(f, p)                               \
-    KIT_EXTERN_C_ static void f(void);                             \
-    __declspec(allocate(".CRT$XCU")) void (*f##_)(void) = f;       \
-    __pragma(comment(linker, "/include:" p #f "_")) static void f( \
-        void)
+#  define KIT_TEST_ON_START_2_(f, p)                         \
+    KIT_EXTERN_C_ static void f(void);                       \
+    __declspec(allocate(".CRT$XCU")) void (*f##_)(void) = f; \
+    __pragma(comment(linker, "/include:" p #f "_"))          \
+        KIT_EXTERN_C_ static void                            \
+        f(void)
 #  ifdef _WIN64
 #    define KIT_TEST_ON_START_(f) KIT_TEST_ON_START_2_(f, "")
 #  else
