@@ -1,6 +1,6 @@
 #include "../../kit/async_function.h"
 
-#define KIT_TEST_FILE async_function_test
+#define KIT_TEST_FILE async_function
 #include "../../kit_test/test.h"
 
 CORO(int, test_foo) {

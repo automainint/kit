@@ -10,7 +10,7 @@ extern "C" {
 #include <string.h>
 
 #ifndef KIT_TEST_FILE
-#  define kit_test
+#  define KIT_TEST_FILE kit_test
 #endif
 
 #ifndef KIT_TESTS_SIZE_LIMIT

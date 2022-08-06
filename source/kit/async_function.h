@@ -1,15 +1,15 @@
-#ifndef AF_AF_H
-#define AF_AF_H
+#ifndef KIT_ASYNC_FUNCTION_H
+#define KIT_ASYNC_FUNCTION_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 enum af_request {
-  af_request_resume,
-  af_request_join,
-  af_request_resume_and_join,
-  af_request_execute
+  af_request_execute         = 0,
+  af_request_resume          = 1,
+  af_request_join            = 2,
+  af_request_resume_and_join = 3
 };
 
 typedef struct {

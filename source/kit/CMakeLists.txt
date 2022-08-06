@@ -1,6 +1,13 @@
 target_sources(
   ${KIT_LIBRARY}
     PRIVATE
-      async_function.c
+      input_buffer.c input_stream.c string_ref.c
+      async_function.c allocator.c array_ref.c dynamic_array.c
     PUBLIC
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/async_function.h>)
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/allocator.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/string_ref.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/dynamic_array.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/async_function.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/input_stream.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/input_buffer.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/array_ref.h>)
