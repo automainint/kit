@@ -8,22 +8,34 @@
 extern "C" {
 #endif
 
-typedef ptrdiff_t (*is_read_fn)(void *state, out_str destination);
+typedef ptrdiff_t (*kit_is_read_fn)(void       *state,
+                                    kit_out_str destination);
 
-struct is_handle {
-  void      *state;
-  is_read_fn read;
+struct kit_is_handle {
+  void          *state;
+  kit_is_read_fn read;
 };
 
-struct is_handle is_wrap_string(cstr                 string,
-                                struct kit_allocator alloc);
+struct kit_is_handle kit_is_wrap_string(kit_cstr             string,
+                                        struct kit_allocator alloc);
 
-void is_destroy(struct is_handle in);
+void kit_is_destroy(struct kit_is_handle in);
 
-#define IS_WRAP_STRING(string) \
-  is_wrap_string((string), kit_alloc_default())
+#define KIT_IS_WRAP_STRING(string) \
+  kit_is_wrap_string((string), kit_alloc_default())
 
-#define IS_READ(in, destination) (in).read((in).state, (destination))
+#define KIT_IS_READ(in, destination) \
+  (in).read((in).state, (destination))
+
+#ifndef KIT_DISABLE_SHORT_NAMES
+#  define is_read_fn kit_is_read_fn
+#  define is_handle kit_is_handle
+#  define is_wrap_string kit_is_wrap_string
+#  define is_destroy kit_is_destroy
+
+#  define IS_WRAP_STRING KIT_IS_WRAP_STRING
+#  define IS_READ KIT_IS_READ
+#endif
 
 #ifdef __cplusplus
 }

@@ -4,19 +4,20 @@
 
 enum input_stream_type { input_stream_cstr };
 
-struct is_state_basic {
+struct kit_is_state_basic {
   ptrdiff_t            type;
   struct kit_allocator alloc;
 };
 
-struct is_state_cstr {
+struct kit_is_state_cstr {
   ptrdiff_t            type;
   struct kit_allocator alloc;
-  cstr                 string;
+  kit_cstr             string;
 };
 
 static _Bool check_type(void *state, ptrdiff_t type) {
-  struct is_state_basic *basic = (struct is_state_basic *) state;
+  struct kit_is_state_basic *basic = (struct kit_is_state_basic *)
+      state;
   return basic != NULL && basic->type == type;
 }
 
@@ -26,10 +27,10 @@ static ptrdiff_t min(ptrdiff_t a, ptrdiff_t b) {
   return b;
 }
 
-static ptrdiff_t read_cstr(void *state, out_str destination) {
+static ptrdiff_t read_cstr(void *state, kit_out_str destination) {
   if (!check_type(state, input_stream_cstr))
     return 0;
-  struct is_state_cstr *cstr = (struct is_state_cstr *) state;
+  struct kit_is_state_cstr *cstr = (struct kit_is_state_cstr *) state;
   ptrdiff_t size = min(destination.size, cstr->string.size);
   memcpy(destination.values, cstr->string.values, size);
   cstr->string.values += size;
@@ -37,13 +38,13 @@ static ptrdiff_t read_cstr(void *state, out_str destination) {
   return size;
 }
 
-struct is_handle is_wrap_string(cstr                 string,
-                                struct kit_allocator alloc) {
-  struct is_handle in;
+struct kit_is_handle kit_is_wrap_string(kit_cstr             string,
+                                        struct kit_allocator alloc) {
+  struct kit_is_handle in;
   memset(&in, 0, sizeof in);
-  struct is_state_cstr *state =
-      (struct is_state_cstr *) alloc.allocate(
-          alloc.state, sizeof(struct is_state_cstr));
+  struct kit_is_state_cstr *state =
+      (struct kit_is_state_cstr *) alloc.allocate(
+          alloc.state, sizeof(struct kit_is_state_cstr));
   if (state != NULL) {
     memset(state, 0, sizeof *state);
     state->type   = input_stream_cstr;
@@ -55,8 +56,9 @@ struct is_handle is_wrap_string(cstr                 string,
   return in;
 }
 
-void is_destroy(struct is_handle in) {
-  struct is_state_basic *basic = (struct is_state_basic *) in.state;
+void kit_is_destroy(struct kit_is_handle in) {
+  struct kit_is_state_basic *basic = (struct kit_is_state_basic *)
+                                         in.state;
   if (basic != NULL)
     basic->alloc.deallocate(basic->alloc.state, in.state);
 }

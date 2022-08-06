@@ -2,9 +2,9 @@
 
 #include <string.h>
 
-void da_init(struct da_void *array, ptrdiff_t element_size,
-             ptrdiff_t size, struct kit_allocator alloc) {
-  memset(array, 0, sizeof(struct da_void));
+void kit_da_init(struct kit_da_void *array, ptrdiff_t element_size,
+                 ptrdiff_t size, struct kit_allocator alloc) {
+  memset(array, 0, sizeof(struct kit_da_void));
 
   if (size > 0)
     array->values = alloc.allocate(alloc.state, element_size * size);
@@ -26,8 +26,8 @@ static ptrdiff_t eval_capacity(ptrdiff_t current_cap,
   return cap;
 }
 
-void da_resize(struct da_void *array, ptrdiff_t element_size,
-               ptrdiff_t size) {
+void kit_da_resize(struct kit_da_void *array, ptrdiff_t element_size,
+                   ptrdiff_t size) {
   if (size <= array->capacity) {
     array->size = size;
   } else {

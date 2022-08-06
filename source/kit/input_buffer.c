@@ -4,12 +4,12 @@
 
 struct internal_buffer {
   ptrdiff_t            ref_count;
-  struct is_handle     upstream;
+  struct kit_is_handle upstream;
   struct kit_allocator alloc;
   DA(data, char);
 };
 
-static struct internal_buffer *buf_init(struct is_handle     upstream,
+static struct internal_buffer *buf_init(struct kit_is_handle upstream,
                                         struct kit_allocator alloc) {
   struct internal_buffer *buf;
   buf = alloc.allocate(alloc.state, sizeof *buf);
@@ -45,9 +45,9 @@ static void buf_adjust(void *p, ptrdiff_t size) {
   ptrdiff_t               offset = buf->data.size;
   if (offset < size) {
     DA_RESIZE(buf->data, size);
-    out_str   destination = { .size   = size - offset,
-                              .values = buf->data.values + offset };
-    ptrdiff_t n           = IS_READ(buf->upstream, destination);
+    kit_out_str destination = { .size   = size - offset,
+                                .values = buf->data.values + offset };
+    ptrdiff_t   n           = KIT_IS_READ(buf->upstream, destination);
     DA_RESIZE(buf->data, offset + n);
   }
 }
@@ -59,16 +59,16 @@ static ptrdiff_t min(ptrdiff_t a, ptrdiff_t b) {
 }
 
 static ptrdiff_t buf_read(void *p, ptrdiff_t offset,
-                          out_str destination) {
+                          kit_out_str destination) {
   struct internal_buffer *buf = (struct internal_buffer *) p;
   ptrdiff_t n = min(destination.size, buf->data.size - offset);
   memcpy(destination.values, buf->data.values + offset, n);
   return n;
 }
 
-struct ib_handle ib_wrap(struct is_handle     upstream,
-                         struct kit_allocator alloc) {
-  struct ib_handle buf;
+struct kit_ib_handle kit_ib_wrap(struct kit_is_handle upstream,
+                                 struct kit_allocator alloc) {
+  struct kit_ib_handle buf;
   memset(&buf, 0, sizeof buf);
   buf.error = 0;
   DA_INIT(buf.data, 0, alloc);
@@ -78,8 +78,9 @@ struct ib_handle ib_wrap(struct is_handle     upstream,
   return buf;
 }
 
-struct ib_handle ib_read(struct ib_handle buf, ptrdiff_t size) {
-  struct ib_handle next;
+struct kit_ib_handle kit_ib_read(struct kit_ib_handle buf,
+                                 ptrdiff_t            size) {
+  struct kit_ib_handle next;
   memset(&next, 0, sizeof next);
   if (buf.error) {
     next.error = 1;
@@ -89,9 +90,9 @@ struct ib_handle ib_read(struct ib_handle buf, ptrdiff_t size) {
     DA_INIT(next.data, size, buf_alloc(buf.internal));
     if (next.data.size != size)
       next.error = 1;
-    out_str   destination = { .size   = next.data.size,
-                              .values = next.data.values };
-    ptrdiff_t n   = buf_read(buf.internal, buf.offset, destination);
+    kit_out_str destination = { .size   = next.data.size,
+                                .values = next.data.values };
+    ptrdiff_t   n = buf_read(buf.internal, buf.offset, destination);
     next.offset   = buf.offset + n;
     next.internal = buf.internal;
     DA_RESIZE(next.data, n);
@@ -101,7 +102,7 @@ struct ib_handle ib_read(struct ib_handle buf, ptrdiff_t size) {
   return next;
 }
 
-void ib_destroy(struct ib_handle buf) {
+void kit_ib_destroy(struct kit_ib_handle buf) {
   buf_release(buf.internal);
   DA_DESTROY(buf.data);
 }
