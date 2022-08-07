@@ -31,17 +31,17 @@ int kit_ar_compare(ptrdiff_t left_element_size, ptrdiff_t left_size,
     type_ const *values;           \
   } name_
 
-#define KIT_AR_WRAP(name_, array_)                              \
+#define KIT_AR_WRAP(name_, element_type_, array_)               \
   struct {                                                      \
-    ptrdiff_t            size;                                  \
-    typeof((array_)[0]) *values;                                \
+    ptrdiff_t      size;                                        \
+    element_type_ *values;                                      \
   } name_ = { .size   = (sizeof(array_) / sizeof((array_)[0])), \
               .values = (array_) }
 
-#define KIT_AR_CONST_WRAP(name_, array_)                        \
+#define KIT_AR_CONST_WRAP(name_, element_type_, array_)         \
   struct {                                                      \
-    ptrdiff_t                  size;                            \
-    typeof((array_)[0]) const *values;                          \
+    ptrdiff_t            size;                                  \
+    element_type_ const *values;                                \
   } name_ = { .size   = (sizeof(array_) / sizeof((array_)[0])), \
               .values = (array_) }
 

@@ -5,7 +5,7 @@
 
 TEST("array ref const wrap") {
   int foo[] = { 1, 2, 3 };
-  AR_CONST_WRAP(ref, foo);
+  AR_CONST_WRAP(ref, int, foo);
 
   REQUIRE(ref.size == 3);
   REQUIRE(ref.values[0] == 1);
@@ -15,7 +15,7 @@ TEST("array ref const wrap") {
 
 TEST("array ref wrap") {
   int foo[] = { 1, 2, 3 };
-  AR_WRAP(ref, foo);
+  AR_WRAP(ref, int, foo);
 
   REQUIRE(ref.size == 3);
   REQUIRE(ref.values[0] == 1);

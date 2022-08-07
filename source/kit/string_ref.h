@@ -14,7 +14,7 @@ typedef kit_string_ref_t  kit_out_str_t;
 typedef kit_string_cref_t kit_cstr_t;
 
 #define KIT_SZ(name_, static_str_)                                  \
-  KIT_AR_CONST(name_, typeof((static_str_)[0])) = {                 \
+  KIT_AR_CONST(name_, char) = {                                     \
     .size   = (sizeof(static_str_) / sizeof((static_str_)[0])) - 1, \
     .values = (static_str_)                                         \
   }
