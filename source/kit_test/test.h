@@ -79,20 +79,17 @@ extern kit_tests_list_t kit_tests_list;
 #  endif
 #endif
 
+void kit_test_register(char const *name, kit_test_run_fn fn);
+
 #define KIT_TEST(name)                                              \
   static void KIT_TEST_CONCAT3_(kit_test_run_, __LINE__,            \
                                 KIT_TEST_FILE)(int,                 \
                                                kit_test_report_fn); \
   KIT_TEST_ON_START_(                                               \
       KIT_TEST_CONCAT3_(kit_test_case_, __LINE__, KIT_TEST_FILE)) { \
-    int n = kit_tests_list.size;                                    \
-    if (n < KIT_TESTS_SIZE_LIMIT) {                                 \
-      kit_tests_list.size++;                                        \
-      kit_tests_list.tests[n].test_fn = KIT_TEST_CONCAT3_(          \
-          kit_test_run_, __LINE__, KIT_TEST_FILE);                  \
-      strcpy(kit_tests_list.tests[n].test_name, name);              \
-      kit_tests_list.tests[n].assertions = 0;                       \
-    }                                                               \
+    kit_test_register(                                              \
+        name,                                                       \
+        KIT_TEST_CONCAT3_(kit_test_run_, __LINE__, KIT_TEST_FILE)); \
   }                                                                 \
   static void KIT_TEST_CONCAT3_(kit_test_run_, __LINE__,            \
                                 KIT_TEST_FILE)(                     \
@@ -108,6 +105,7 @@ int kit_run_tests(int argc, char **argv);
 #  define TEST KIT_TEST
 #  define REQUIRE KIT_REQUIRE
 
+#  define test_register kit_test_register
 #  define run_tests kit_run_tests
 #endif
 

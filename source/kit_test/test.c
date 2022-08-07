@@ -39,8 +39,17 @@ static void color_code(int term_color, int c) {
   }
 }
 
+void kit_test_register(char const *name, kit_test_run_fn fn) {
+  int n = kit_tests_list.size++;
+  if (n < KIT_TESTS_SIZE_LIMIT) {
+    kit_tests_list.tests[n].test_fn = fn;
+    strcpy(kit_tests_list.tests[n].test_name, name);
+    kit_tests_list.tests[n].assertions = 0;
+  }
+}
+
 int kit_run_tests(int argc, char **argv) {
-  int fail_test_count       = 0;
+  int success_count         = 0;
   int fail_assertion_count  = 0;
   int total_assertion_count = 0;
   int status                = 0;
@@ -50,7 +59,8 @@ int kit_run_tests(int argc, char **argv) {
     if (strcmp("--no-term-color", argv[i]) == 0)
       term_color = 0;
 
-  for (int i = 0; i < kit_tests_list.size; i++) {
+  for (int i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
+       i++) {
     color_code(term_color, yellow);
     printf("[ RUN... ] %s ", kit_tests_list.tests[i].test_name);
     color_code(term_color, white);
@@ -74,7 +84,7 @@ int kit_run_tests(int argc, char **argv) {
         test_status = 0;
       }
 
-    if (kit_tests_list.tests[i].assertions >=
+    if (kit_tests_list.tests[i].assertions >
         KIT_TEST_ASSERTIONS_LIMIT)
       test_status = 0;
 
@@ -83,30 +93,35 @@ int kit_run_tests(int argc, char **argv) {
     if (test_status == 0) {
       color_code(term_color, red);
       printf("[ RUN    ] %s\n", kit_tests_list.tests[i].test_name);
-      printf("[ FAILED ] %s - %d ms\n",
-             kit_tests_list.tests[i].test_name, duration);
+      printf("[ FAILED ] %s", kit_tests_list.tests[i].test_name);
       color_code(term_color, white);
-      fail_test_count++;
+      if (duration > 0)
+        printf(" - %d ms", duration);
+      printf("\n");
       status = 1;
     } else {
       color_code(term_color, green);
       printf("[ RUN    ] %s\n", kit_tests_list.tests[i].test_name);
-      printf("[     OK ] %s - %d ms\n",
-             kit_tests_list.tests[i].test_name, duration);
+      printf("[     OK ] %s", kit_tests_list.tests[i].test_name);
       color_code(term_color, white);
+      if (duration > 0)
+        printf(" - %d ms", duration);
+      printf("\n");
+      success_count++;
     }
   }
 
-  printf("\n%d of %d tests passed.\n",
-         kit_tests_list.size - fail_test_count, kit_tests_list.size);
+  printf("\n%d of %d tests passed.\n", success_count,
+         kit_tests_list.size);
 
   printf("%d of %d assertions passed.\n\n",
          total_assertion_count - fail_assertion_count,
          total_assertion_count);
 
   if (status != 0) {
-    for (int i = 0; i < kit_tests_list.size; i++) {
-      if (kit_tests_list.tests[i].assertions >=
+    for (int i = 0;
+         i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT; i++) {
+      if (kit_tests_list.tests[i].assertions >
           KIT_TEST_ASSERTIONS_LIMIT)
         printf("Too many assertions for \"%s\" in \"%s\"!\n",
                kit_tests_list.tests[i].test_name,
@@ -123,8 +138,8 @@ int kit_run_tests(int argc, char **argv) {
     printf("\n");
   }
 
-  if (kit_tests_list.size == KIT_TESTS_SIZE_LIMIT) {
-    printf("Too many tests!");
+  if (kit_tests_list.size > KIT_TESTS_SIZE_LIMIT) {
+    printf("Too many tests!\n\n");
     status = 1;
   }
 

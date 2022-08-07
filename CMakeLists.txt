@@ -11,7 +11,6 @@ set(KIT_LIBRARY kit)
 set(KIT_TEST_LIBRARY kit_test)
 set(KIT_TEST_SUITE kit_test_suite)
 set(KIT_TARGETS kit-targets)
-set(KIT_UNITTESTS kit-unittests)
 
 if(NOT DEFINED CMAKE_BUILD_PARALLEL_LEVEL)
   set(CMAKE_BUILD_PARALLEL_LEVEL 4)
@@ -67,11 +66,10 @@ if(KIT_ENABLE_TESTING)
   endif()
 
   add_test(
-    NAME ${KIT_UNITTESTS}
+    NAME ${KIT_LIBRARY}_unittests
     COMMAND ${KIT_TEST_SUITE})
-
   set_tests_properties(
-    ${KIT_UNITTESTS}
+    ${KIT_LIBRARY}_unittests
     PROPERTIES
     TIMEOUT "30")
 endif()
