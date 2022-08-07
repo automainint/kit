@@ -2,7 +2,7 @@
 #include "../../kit_test/test.h"
 
 #ifdef _WIN32
-#  include <windows.h>
+__declspec(dllimport) void __stdcall Sleep(unsigned long timeout);
 static void kit_sleep(int ms) {
   Sleep(ms);
 }
