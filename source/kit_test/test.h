@@ -24,9 +24,10 @@ extern "C" {
 #  define KIT_TEST_STRING_SIZE 0x100
 #endif
 
-typedef void (*kit_test_report_fn)(int, char const *file, int line,
-                                   int ok);
-typedef void (*kit_test_run_fn)(int, kit_test_report_fn);
+typedef void (*kit_test_report_fn)(int test_index, char const *file,
+                                   int line, int ok);
+typedef void (*kit_test_run_fn)(
+    int kit_test_index_, kit_test_report_fn kit_test_report_fn_);
 
 typedef struct {
   char            test_name[KIT_TEST_STRING_SIZE];
