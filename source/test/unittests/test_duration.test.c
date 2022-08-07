@@ -2,7 +2,7 @@
 #include "../../kit_test/test.h"
 
 #ifdef _WIN32
-#  include <synchapi.h>
+#  include <windows.h>
 static void kit_sleep(int ms) {
   Sleep(ms);
 }
