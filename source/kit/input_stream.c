@@ -12,7 +12,7 @@ typedef struct {
 typedef struct {
   ptrdiff_t       type;
   kit_allocator_t alloc;
-  kit_cstr_t      string;
+  kit_str_t       string;
 } kit_is_state_cstr_t;
 
 static _Bool check_type(void *state, ptrdiff_t type) {
@@ -37,7 +37,7 @@ static ptrdiff_t read_cstr(void *state, kit_out_str_t destination) {
   return size;
 }
 
-kit_is_handle_t kit_is_wrap_string(kit_cstr_t      string,
+kit_is_handle_t kit_is_wrap_string(kit_str_t       string,
                                    kit_allocator_t alloc) {
   kit_is_handle_t in;
   memset(&in, 0, sizeof in);

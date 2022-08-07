@@ -12,7 +12,7 @@ typedef struct {
   int       error;
   ptrdiff_t offset;
   void     *internal;
-  DA(data, char);
+  KIT_DA(data, char);
 } kit_ib_handle_t;
 
 kit_ib_handle_t kit_ib_wrap(kit_is_handle_t upstream,

@@ -7,8 +7,8 @@ TEST("input stream wrap string") {
   char foo[] = "test";
   char bar[] = "test";
 
-  cstr_t foo_ref = { .size = sizeof(foo) - 1, .values = foo };
-  cstr_t bar_ref = { .size = sizeof(bar) - 1, .values = bar };
+  str_t foo_ref = { .size = sizeof(foo) - 1, .values = foo };
+  str_t bar_ref = { .size = sizeof(bar) - 1, .values = bar };
 
   is_handle_t in = IS_WRAP_STRING(foo_ref);
 

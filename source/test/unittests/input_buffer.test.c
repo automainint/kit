@@ -4,7 +4,7 @@
 #include "../../kit_test/test.h"
 
 TEST("input buffer") {
-  cstr_t      text  = { .size = 3, .values = "foo" };
+  str_t       text  = { .size = 3, .values = "foo" };
   is_handle_t in    = IS_WRAP_STRING(text);
   ib_handle_t first = IB_WRAP(in);
 

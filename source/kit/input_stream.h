@@ -16,7 +16,7 @@ typedef struct {
   kit_is_read_fn read;
 } kit_is_handle_t;
 
-kit_is_handle_t kit_is_wrap_string(kit_cstr_t      string,
+kit_is_handle_t kit_is_wrap_string(kit_str_t       string,
                                    kit_allocator_t alloc);
 
 void kit_is_destroy(kit_is_handle_t in);
