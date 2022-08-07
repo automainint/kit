@@ -31,6 +31,20 @@ int kit_ar_compare(ptrdiff_t left_element_size, ptrdiff_t left_size,
     type_ const *values;           \
   } name_
 
+#define KIT_AR_WRAP(name_, array_)                              \
+  struct {                                                      \
+    ptrdiff_t            size;                                  \
+    typeof((array_)[0]) *values;                                \
+  } name_ = { .size   = (sizeof(array_) / sizeof((array_)[0])), \
+              .values = (array_) }
+
+#define KIT_AR_CONST_WRAP(name_, array_)                        \
+  struct {                                                      \
+    ptrdiff_t                  size;                            \
+    typeof((array_)[0]) const *values;                          \
+  } name_ = { .size   = (sizeof(array_) / sizeof((array_)[0])), \
+              .values = (array_) }
+
 #define KIT_AR_TYPE(name_, element_type_) \
   typedef struct {                        \
     ptrdiff_t      size;                  \
@@ -61,6 +75,8 @@ int kit_ar_compare(ptrdiff_t left_element_size, ptrdiff_t left_size,
 
 #  define AR KIT_AR
 #  define AR_CONST KIT_AR_CONST
+#  define AR_WRAP KIT_AR_WRAP
+#  define AR_CONST_WRAP KIT_AR_CONST_WRAP
 #  define AR_TYPE KIT_AR_TYPE
 #  define AR_TYPE_CONST KIT_AR_TYPE_CONST
 #  define AR_EQUAL KIT_AR_EQUAL

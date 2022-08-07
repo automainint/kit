@@ -3,6 +3,29 @@
 #define KIT_TEST_FILE array_ref
 #include "../../kit_test/test.h"
 
+TEST("array ref const wrap") {
+  int foo[] = { 1, 2, 3 };
+  AR_CONST_WRAP(ref, foo);
+
+  REQUIRE(ref.size == 3);
+  REQUIRE(ref.values[0] == 1);
+  REQUIRE(ref.values[1] == 2);
+  REQUIRE(ref.values[2] == 3);
+}
+
+TEST("array ref wrap") {
+  int foo[] = { 1, 2, 3 };
+  AR_WRAP(ref, foo);
+
+  REQUIRE(ref.size == 3);
+  REQUIRE(ref.values[0] == 1);
+  REQUIRE(ref.values[1] == 2);
+  REQUIRE(ref.values[2] == 3);
+
+  ref.values[1] = 42;
+  REQUIRE(ref.values[1] == 42);
+}
+
 TEST("array ref equal") {
   int foo[] = { 1, 2, 3, 4, 5, 6, 7 };
   int bar[] = { 3, 4, 5 };

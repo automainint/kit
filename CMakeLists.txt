@@ -20,7 +20,7 @@ endif()
 project(
   ${KIT_PROJECT}
   VERSION 0.1.1
-  DESCRIPTION "Kit"
+  DESCRIPTION "A collection of C libraries"
   LANGUAGES C)
 
 if(KIT_ENABLE_LIBRARY OR KIT_ENABLE_TESTING)
