@@ -18,9 +18,9 @@ static void deallocate(void *_, void *pointer) {
 #endif
 }
 
-struct kit_allocator kit_alloc_default() {
-  struct kit_allocator alloc = { .state      = NULL,
-                                 .allocate   = allocate,
-                                 .deallocate = deallocate };
+kit_allocator_t kit_alloc_default() {
+  kit_allocator_t alloc = { .state      = NULL,
+                            .allocate   = allocate,
+                            .deallocate = deallocate };
   return alloc;
 }

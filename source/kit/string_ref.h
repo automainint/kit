@@ -7,17 +7,17 @@
 extern "C" {
 #endif
 
-KIT_AR_TYPE(kit_string_ref, char);
-KIT_AR_TYPE_CONST(kit_string_cref, char);
+KIT_AR_TYPE(kit_string_ref_t, char);
+KIT_AR_TYPE_CONST(kit_string_cref_t, char);
 
-typedef struct kit_string_ref  kit_out_str;
-typedef struct kit_string_cref kit_cstr;
+typedef kit_string_ref_t  kit_out_str_t;
+typedef kit_string_cref_t kit_cstr_t;
 
 #ifndef KIT_DISABLE_SHORT_NAMES
-#  define string_ref kit_string_ref
-#  define string_cref kit_string_cref
-#  define out_str kit_out_str
-#  define cstr kit_cstr
+#  define string_ref_t kit_string_ref_t
+#  define string_cref_t kit_string_cref_t
+#  define out_str_t kit_out_str_t
+#  define cstr_t kit_cstr_t
 #endif
 
 #ifdef __cplusplus

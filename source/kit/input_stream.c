@@ -2,22 +2,21 @@
 
 #include <string.h>
 
-enum input_stream_type { input_stream_cstr };
+enum { input_stream_cstr };
 
-struct kit_is_state_basic {
-  ptrdiff_t            type;
-  struct kit_allocator alloc;
-};
+typedef struct {
+  ptrdiff_t       type;
+  kit_allocator_t alloc;
+} kit_is_state_basic_t;
 
-struct kit_is_state_cstr {
-  ptrdiff_t            type;
-  struct kit_allocator alloc;
-  kit_cstr             string;
-};
+typedef struct {
+  ptrdiff_t       type;
+  kit_allocator_t alloc;
+  kit_cstr_t      string;
+} kit_is_state_cstr_t;
 
 static _Bool check_type(void *state, ptrdiff_t type) {
-  struct kit_is_state_basic *basic = (struct kit_is_state_basic *)
-      state;
+  kit_is_state_basic_t *basic = (kit_is_state_basic_t *) state;
   return basic != NULL && basic->type == type;
 }
 
@@ -27,10 +26,10 @@ static ptrdiff_t min(ptrdiff_t a, ptrdiff_t b) {
   return b;
 }
 
-static ptrdiff_t read_cstr(void *state, kit_out_str destination) {
+static ptrdiff_t read_cstr(void *state, kit_out_str_t destination) {
   if (!check_type(state, input_stream_cstr))
     return 0;
-  struct kit_is_state_cstr *cstr = (struct kit_is_state_cstr *) state;
+  kit_is_state_cstr_t *cstr = (kit_is_state_cstr_t *) state;
   ptrdiff_t size = min(destination.size, cstr->string.size);
   memcpy(destination.values, cstr->string.values, size);
   cstr->string.values += size;
@@ -38,13 +37,12 @@ static ptrdiff_t read_cstr(void *state, kit_out_str destination) {
   return size;
 }
 
-struct kit_is_handle kit_is_wrap_string(kit_cstr             string,
-                                        struct kit_allocator alloc) {
-  struct kit_is_handle in;
+kit_is_handle_t kit_is_wrap_string(kit_cstr_t      string,
+                                   kit_allocator_t alloc) {
+  kit_is_handle_t in;
   memset(&in, 0, sizeof in);
-  struct kit_is_state_cstr *state =
-      (struct kit_is_state_cstr *) alloc.allocate(
-          alloc.state, sizeof(struct kit_is_state_cstr));
+  kit_is_state_cstr_t *state = (kit_is_state_cstr_t *) alloc.allocate(
+      alloc.state, sizeof(kit_is_state_cstr_t));
   if (state != NULL) {
     memset(state, 0, sizeof *state);
     state->type   = input_stream_cstr;
@@ -56,9 +54,8 @@ struct kit_is_handle kit_is_wrap_string(kit_cstr             string,
   return in;
 }
 
-void kit_is_destroy(struct kit_is_handle in) {
-  struct kit_is_state_basic *basic = (struct kit_is_state_basic *)
-                                         in.state;
+void kit_is_destroy(kit_is_handle_t in) {
+  kit_is_state_basic_t *basic = (kit_is_state_basic_t *) in.state;
   if (basic != NULL)
     basic->alloc.deallocate(basic->alloc.state, in.state);
 }

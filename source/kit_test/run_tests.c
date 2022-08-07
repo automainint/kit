@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <time.h>
 
-struct kit_tests_list kit_tests_list = { 0 };
+kit_tests_list_t kit_tests_list = { 0 };
 
 static void report(int i, char const *file, int line, int ok) {
   int const n = kit_tests_list.tests[i].assertions++;

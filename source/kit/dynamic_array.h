@@ -7,43 +7,43 @@
 extern "C" {
 #endif
 
-struct kit_da_void {
-  ptrdiff_t            capacity;
-  ptrdiff_t            size;
-  void                *values;
-  struct kit_allocator alloc;
-};
+typedef struct {
+  ptrdiff_t       capacity;
+  ptrdiff_t       size;
+  void           *values;
+  kit_allocator_t alloc;
+} kit_da_void_t;
 
-void kit_da_init(struct kit_da_void *array, ptrdiff_t element_size,
-                 ptrdiff_t size, struct kit_allocator alloc);
+void kit_da_init(kit_da_void_t *array, ptrdiff_t element_size,
+                 ptrdiff_t size, kit_allocator_t alloc);
 
-void kit_da_resize(struct kit_da_void *array, ptrdiff_t element_size,
+void kit_da_resize(kit_da_void_t *array, ptrdiff_t element_size,
                    ptrdiff_t size);
 
 /*  Declare dynamic array type.
  */
 #define KIT_DA_TYPE(name_, element_type_) \
-  struct name_ {                          \
-    ptrdiff_t            capacity;        \
-    ptrdiff_t            size;            \
-    element_type_       *values;          \
-    struct kit_allocator alloc;           \
-  }
+  typedef struct {                        \
+    ptrdiff_t       capacity;             \
+    ptrdiff_t       size;                 \
+    element_type_  *values;               \
+    kit_allocator_t alloc;                \
+  } name_
 
 /*  Declare dynamic array.
  */
 #define KIT_DA(name_, element_type_) \
   struct {                           \
-    ptrdiff_t            capacity;   \
-    ptrdiff_t            size;       \
-    element_type_       *values;     \
-    struct kit_allocator alloc;      \
+    ptrdiff_t       capacity;        \
+    ptrdiff_t       size;            \
+    element_type_  *values;          \
+    kit_allocator_t alloc;           \
   } name_
 
 /*  Initialize dynamic array.
  */
-#define KIT_DA_INIT(array_, size_, alloc_)      \
-  kit_da_init((struct kit_da_void *) &(array_), \
+#define KIT_DA_INIT(array_, size_, alloc_) \
+  kit_da_init((kit_da_void_t *) &(array_), \
               sizeof((array_).values[0]), (size_), (alloc_))
 
 /*  Declare and initialize dynamic array.
@@ -63,8 +63,8 @@ void kit_da_resize(struct kit_da_void *array, ptrdiff_t element_size,
 
 /*  Resize dynamic array.
  */
-#define KIT_DA_RESIZE(array_, size_)              \
-  kit_da_resize((struct kit_da_void *) &(array_), \
+#define KIT_DA_RESIZE(array_, size_)         \
+  kit_da_resize((kit_da_void_t *) &(array_), \
                 sizeof((array_).values[0]), size_)
 
 /*  Append a value to dynamic array.
@@ -102,7 +102,7 @@ void kit_da_resize(struct kit_da_void *array, ptrdiff_t element_size,
   }
 
 #ifndef KIT_DISABLE_SHORT_NAMES
-#  define da_void kit_da_void
+#  define da_void_t kit_da_void_t
 #  define da_init kit_da_init
 #  define da_resize kit_da_resize
 

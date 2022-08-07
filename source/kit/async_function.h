@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-enum kit_af_request {
+enum {
   kit_af_request_execute         = 0,
   kit_af_request_resume          = 1,
   kit_af_request_join            = 2,

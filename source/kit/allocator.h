@@ -10,13 +10,13 @@ extern "C" {
 typedef void *(*kit_allocate_fn)(void *state, size_t size);
 typedef void (*kit_deallocate_fn)(void *state, void *pointer);
 
-struct kit_allocator {
-  void              *state;
+typedef struct {
+  void             *state;
   kit_allocate_fn   allocate;
   kit_deallocate_fn deallocate;
-};
+} kit_allocator_t;
 
-struct kit_allocator kit_alloc_default();
+kit_allocator_t kit_alloc_default();
 
 #ifdef __cplusplus
 }

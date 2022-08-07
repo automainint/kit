@@ -8,26 +8,25 @@
 extern "C" {
 #endif
 
-struct kit_ib_handle {
+typedef struct {
   int       error;
   ptrdiff_t offset;
   void     *internal;
   DA(data, char);
-};
+} kit_ib_handle_t;
 
-struct kit_ib_handle kit_ib_wrap(struct kit_is_handle upstream,
-                                 struct kit_allocator alloc);
+kit_ib_handle_t kit_ib_wrap(kit_is_handle_t upstream,
+                            kit_allocator_t alloc);
 
-struct kit_ib_handle kit_ib_read(struct kit_ib_handle buf,
-                                 ptrdiff_t            size);
+kit_ib_handle_t kit_ib_read(kit_ib_handle_t buf, ptrdiff_t size);
 
-void kit_ib_destroy(struct kit_ib_handle buf);
+void kit_ib_destroy(kit_ib_handle_t buf);
 
 #define KIT_IB_WRAP(upstream) \
   kit_ib_wrap(upstream, kit_alloc_default())
 
 #ifndef KIT_DISABLE_SHORT_NAMES
-#  define ib_handle kit_ib_handle
+#  define ib_handle_t kit_ib_handle_t
 #  define ib_wrap kit_ib_wrap
 #  define ib_read kit_ib_read
 #  define ib_destroy kit_ib_destroy

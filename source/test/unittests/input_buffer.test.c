@@ -4,11 +4,11 @@
 #include "../../kit_test/test.h"
 
 TEST("input buffer") {
-  cstr             text  = { .size = 3, .values = "foo" };
-  struct is_handle in    = IS_WRAP_STRING(text);
-  struct ib_handle first = IB_WRAP(in);
+  cstr_t      text  = { .size = 3, .values = "foo" };
+  is_handle_t in    = IS_WRAP_STRING(text);
+  ib_handle_t first = IB_WRAP(in);
 
-  struct ib_handle second = ib_read(first, 3);
+  ib_handle_t second = ib_read(first, 3);
 
   REQUIRE(!second.error);
   REQUIRE(second.data.size == 3);

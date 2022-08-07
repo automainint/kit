@@ -10,10 +10,9 @@ extern "C" {
 typedef int (*kit_ar_compare_fn)(void const *left, void const *right);
 
 int kit_ar_equal_bytes(ptrdiff_t left_element_size,
-                         ptrdiff_t left_size, void const *left_data,
-                         ptrdiff_t   right_element_size,
-                         ptrdiff_t   right_size,
-                         void const *right_data);
+                       ptrdiff_t left_size, void const *left_data,
+                       ptrdiff_t right_element_size,
+                       ptrdiff_t right_size, void const *right_data);
 
 int kit_ar_compare(ptrdiff_t left_element_size, ptrdiff_t left_size,
                    void const *left_data,
@@ -33,16 +32,16 @@ int kit_ar_compare(ptrdiff_t left_element_size, ptrdiff_t left_size,
   } name_
 
 #define KIT_AR_TYPE(name_, element_type_) \
-  struct name_ {                          \
+  typedef struct {                        \
     ptrdiff_t      size;                  \
     element_type_ *values;                \
-  }
+  } name_
 
 #define KIT_AR_TYPE_CONST(name_, element_type_) \
-  struct name_ {                                \
+  typedef struct {                              \
     ptrdiff_t            size;                  \
     element_type_ const *values;                \
-  }
+  } name_
 
 #define KIT_AR_EQUAL(left_, right_)                              \
   kit_ar_equal_bytes(sizeof((left_).values[0]), (left_).size,    \
