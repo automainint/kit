@@ -24,7 +24,7 @@ static long long sec_to_ms(long long sec) {
   return 1000 * sec;
 }
 
-enum code_value { white, yellow, red, green };
+enum { white, yellow, red, green };
 
 static void color_code(int term_color, int c) {
   if (term_color) {
