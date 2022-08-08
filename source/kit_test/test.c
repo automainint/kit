@@ -1,6 +1,7 @@
 #include "test.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 kit_tests_list_t kit_tests_list = { 0 };
@@ -42,8 +43,8 @@ static void color_code(int term_color, int c) {
 void kit_test_register(char const *name, kit_test_run_fn fn) {
   int n = kit_tests_list.size++;
   if (n < KIT_TESTS_SIZE_LIMIT) {
-    kit_tests_list.tests[n].test_fn = fn;
-    strcpy(kit_tests_list.tests[n].test_name, name);
+    kit_tests_list.tests[n].test_fn    = fn;
+    kit_tests_list.tests[n].test_name  = name;
     kit_tests_list.tests[n].assertions = 0;
   }
 }

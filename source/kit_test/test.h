@@ -6,7 +6,6 @@ extern "C" {
 #endif
 
 #include <stddef.h>
-#include <string.h>
 
 #ifndef KIT_TEST_FILE
 #  define KIT_TEST_FILE kit_test
@@ -20,17 +19,13 @@ extern "C" {
 #  define KIT_TEST_ASSERTIONS_LIMIT 0x50
 #endif
 
-#ifndef KIT_TEST_STRING_SIZE
-#  define KIT_TEST_STRING_SIZE 0x100
-#endif
-
 typedef void (*kit_test_report_fn)(int test_index, char const *file,
                                    int line, int ok);
 typedef void (*kit_test_run_fn)(
     int kit_test_index_, kit_test_report_fn kit_test_report_fn_);
 
 typedef struct {
-  char            test_name[KIT_TEST_STRING_SIZE];
+  char const     *test_name;
   kit_test_run_fn test_fn;
   int             assertions;
   char const     *file[KIT_TEST_ASSERTIONS_LIMIT];
