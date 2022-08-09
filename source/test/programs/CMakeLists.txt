@@ -19,13 +19,13 @@ if(KIT_ENABLE_TESTING)
     PROPERTIES
     TIMEOUT "30")
 
-  add_executable(cpp cpp.cpp)
-  target_link_libraries(cpp ${KIT_TEST_LIBRARY})
+  add_executable(cpp_example cpp_example.cpp)
+  target_link_libraries(cpp_example ${KIT_TEST_LIBRARY})
   add_test(
-    NAME cpp_test
-    COMMAND cpp)
+    NAME cpp_example_test
+    COMMAND cpp_example)
   set_tests_properties(
-    cpp_test
+    cpp_example_test
     PROPERTIES
     TIMEOUT "30")
 endif()
