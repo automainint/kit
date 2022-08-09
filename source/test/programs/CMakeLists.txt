@@ -20,7 +20,6 @@ if(KIT_ENABLE_TESTING)
     TIMEOUT "30")
 
   add_executable(cpp_example cpp_example.cpp)
-  target_compile_features(cpp_example PRIVATE cxx_std_20)
   target_link_libraries(cpp_example ${KIT_TEST_LIBRARY})
   add_test(
     NAME cpp_example_test

@@ -44,6 +44,7 @@ if(KIT_ENABLE_LIBRARY OR KIT_ENABLE_TESTING)
     ${KIT_TEST_LIBRARY} INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source>)
   target_compile_features(${KIT_TEST_LIBRARY} PUBLIC c_std_11)
+  target_compile_features(${KIT_TEST_LIBRARY} PUBLIC cxx_std_11)
 endif()
 
 enable_testing()
