@@ -144,5 +144,14 @@ int kit_run_tests(int argc, char **argv) {
     status = 1;
   }
 
+  if (status == 0) {
+    color_code(term_color, green);
+    printf("OK\n");
+  } else {
+    color_code(term_color, red);
+    printf("FAILED\n");
+  }
+
+  color_code(term_color, white);
   return status;
 }
