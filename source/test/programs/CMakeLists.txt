@@ -18,4 +18,14 @@ if(KIT_ENABLE_TESTING)
     too_many_assertions_test
     PROPERTIES
     TIMEOUT "30")
+
+  add_executable(cpp cpp.cpp)
+  target_link_libraries(cpp ${KIT_TEST_LIBRARY})
+  add_test(
+    NAME cpp_test
+    COMMAND cpp)
+  set_tests_properties(
+    cpp_test
+    PROPERTIES
+    TIMEOUT "30")
 endif()

@@ -20,7 +20,7 @@ project(
   ${KIT_PROJECT}
   VERSION 0.1.1
   DESCRIPTION "A collection of C libraries"
-  LANGUAGES C)
+  LANGUAGES C CXX)
 
 if(KIT_ENABLE_LIBRARY OR KIT_ENABLE_TESTING)
   add_library(${KIT_LIBRARY} STATIC)
