@@ -25,7 +25,9 @@ void kit_atomic_store_explicit(volatile KIT_ATOMIC_VAR *var,
 
 KIT_ATOMIC_VAR kit_atomic_load_explicit(volatile KIT_ATOMIC_VAR *var,
                                         int memory_order) {
-  return *var;
+  if (memory_order == memory_order_relaxed)
+    return *var;
+  return InterlockedExchangeAdd_(var, 0);
 }
 
 KIT_ATOMIC_VAR kit_atomic_fetch_add_explicit(
