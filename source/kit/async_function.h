@@ -84,35 +84,35 @@ typedef struct {
   KIT_CORO(kit_af_void, name_, __VA_ARGS__)
 
 #define KIT_AF_YIELD(...)                \
-  {                                      \
+  do {                                   \
     self->_index       = KIT_AF_LINE_(); \
     self->return_value = __VA_ARGS__;    \
     return;                              \
     case KIT_AF_LINE_():;                \
-  }
+  } while (0)
 
 #define KIT_AF_YIELD_VOID          \
-  {                                \
+  do {                             \
     self->_index = KIT_AF_LINE_(); \
     return;                        \
     case KIT_AF_LINE_():;          \
-  }
+  } while (0)
 
 #define KIT_AF_RETURN(...)            \
-  {                                   \
+  do {                                \
     self->_index       = -1;          \
     self->return_value = __VA_ARGS__; \
     return;                           \
-  }
+  } while (0)
 
 #define KIT_AF_RETURN_VOID \
-  {                        \
+  do {                     \
     self->_index = -1;     \
     return;                \
-  }
+  } while (0)
 
 #define KIT_AF_AWAIT(promise_)                                     \
-  {                                                                \
+  do {                                                             \
     case KIT_AF_LINE_():                                           \
       if ((promise_)._index != -1) {                               \
         self->_index = KIT_AF_LINE_();                             \
@@ -121,10 +121,10 @@ typedef struct {
       }                                                            \
       if ((promise_)._index != -1)                                 \
         return;                                                    \
-  }
+  } while (0)
 
 #define KIT_AF_YIELD_AWAIT(promise_)                               \
-  {                                                                \
+  do {                                                             \
     case KIT_AF_LINE_():                                           \
       if ((promise_)._index != -1) {                               \
         self->_index = KIT_AF_LINE_();                             \
@@ -133,7 +133,7 @@ typedef struct {
         self->return_value = (promise_).return_value;              \
         return;                                                    \
       }                                                            \
-  }
+  } while (0)
 
 #define KIT_AF_TYPE(coro_) struct coro_##_coro_state_
 
@@ -146,34 +146,38 @@ typedef struct {
   promise_ = { KIT_AF_INITIAL(coro_), __VA_ARGS__ }
 
 #define KIT_AF_INIT(promise_, coro_, ...)            \
-  {                                                  \
+  do {                                               \
     KIT_AF_CREATE(kit_af_temp_, coro_, __VA_ARGS__); \
     (promise_) = kit_af_temp_;                       \
-  }
+  } while (0)
 
 #define KIT_AF_EXECUTION_CONTEXT(promise_, ...)               \
-  {                                                           \
+  do {                                                        \
     kit_af_execution_context kit_af_temp_ = { ._internal = 0, \
                                               __VA_ARGS__ };  \
     (promise_)._context                   = kit_af_temp_;     \
-  }
+  } while (0)
 
 #define KIT_AF_RESUME(promise_) \
   (promise_)._state_machine(&(promise_), kit_af_request_resume)
 
-#define KIT_AF_RESUME_N(promises_, size_)              \
-  for (int kit_af_index_ = 0; kit_af_index_ < (size_); \
-       kit_af_index_++)                                \
-  KIT_AF_RESUME((promises_)[kit_af_index_])
+#define KIT_AF_RESUME_N(promises_, size_)                \
+  do {                                                   \
+    for (int kit_af_index_ = 0; kit_af_index_ < (size_); \
+         kit_af_index_++)                                \
+      KIT_AF_RESUME((promises_)[kit_af_index_]);         \
+  } while (0)
 
 #define KIT_AF_JOIN(promise_)                                   \
   ((promise_)._state_machine(&(promise_), kit_af_request_join), \
    (promise_).return_value)
 
-#define KIT_AF_JOIN_N(promises_, size_)                \
-  for (int kit_af_index_ = 0; kit_af_index_ < (size_); \
-       kit_af_index_++)                                \
-  KIT_AF_JOIN((promises_)[kit_af_index_])
+#define KIT_AF_JOIN_N(promises_, size_)                  \
+  do {                                                   \
+    for (int kit_af_index_ = 0; kit_af_index_ < (size_); \
+         kit_af_index_++)                                \
+      KIT_AF_JOIN((promises_)[kit_af_index_]);           \
+  } while (0)
 
 #define KIT_AF_RESUME_AND_JOIN(promise_)                      \
   ((promise_)._state_machine(&(promise_),                     \
@@ -181,8 +185,10 @@ typedef struct {
    (promise_).return_value)
 
 #define KIT_AF_RESUME_AND_JOIN_N(promises_, size_) \
-  KIT_AF_RESUME_N((promises_), (size_));           \
-  KIT_AF_JOIN_N((promises_), (size_))
+  do {                                             \
+    KIT_AF_RESUME_N((promises_), (size_));         \
+    KIT_AF_JOIN_N((promises_), (size_));           \
+  } while (0)
 
 #define KIT_AF_RESUME_ALL(promises_) \
   KIT_AF_RESUME_N((promises_),       \
@@ -199,7 +205,7 @@ typedef struct {
 #define KIT_AF_FINISHED(promise_) ((promise_)._index == -1)
 
 #define KIT_AF_FINISHED_N(return_, promises_, size_)      \
-  {                                                       \
+  do {                                                    \
     (return_) = 1;                                        \
     for (int kit_af_index_ = 0; kit_af_index_ < (size_);  \
          kit_af_index_++)                                 \
@@ -207,14 +213,14 @@ typedef struct {
         (return_) = 0;                                    \
         break;                                            \
       }                                                   \
-  }
+  } while (0)
 
 #define KIT_AF_FINISHED_ALL(return_, promises_, size_) \
   KIT_AF_FINISHED_N((return_), (promises_),            \
                     sizeof(promises_) / sizeof((promises_)[0]))
 
 #define KIT_AF_AWAIT_N(promises_, size_)                     \
-  {                                                          \
+  do {                                                       \
     case KIT_AF_LINE_():                                     \
       self->_index = KIT_AF_LINE_();                         \
       KIT_AF_RESUME_AND_JOIN_N((promises_), (size_));        \
@@ -222,7 +228,7 @@ typedef struct {
       KIT_AF_FINISHED_N(kit_af_done_, (promises_), (size_)); \
       if (!kit_af_done_)                                     \
         return;                                              \
-  }
+  } while (0)
 
 #define KIT_AF_AWAIT_ALL(promises_) \
   KIT_AF_AWAIT_N((promises_),       \

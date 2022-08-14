@@ -1,7 +1,7 @@
 #include "../../kit/lower_bound.h"
 #include "../../kit/array_ref.h"
 
-#define KIT_TEST_FILE lower_bound
+#define TEST_FILE lower_bound
 #include "../../kit_test/test.h"
 
 static int kit_less_int(int left, int right) {
@@ -16,7 +16,7 @@ TEST("lower bound empty") {
   AR(ref, int) = { .size = 0, .values = NULL };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 42, kit_less_int);
+  LOWER_BOUND(index, ref, 42, kit_less_int);
   REQUIRE(index == 0);
 }
 
@@ -25,7 +25,7 @@ TEST("lower bound single left") {
   AR(ref, int)   = { .size = 1, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 42, kit_less_int);
+  LOWER_BOUND(index, ref, 42, kit_less_int);
   REQUIRE(index == 0);
 }
 
@@ -34,7 +34,7 @@ TEST("lower bound single right") {
   AR(ref, int)   = { .size = 1, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 43, kit_less_int);
+  LOWER_BOUND(index, ref, 43, kit_less_int);
   REQUIRE(index == 1);
 }
 
@@ -43,7 +43,7 @@ TEST("lower bound first of four") {
   AR(ref, int)   = { .size = 4, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 1, kit_less_int);
+  LOWER_BOUND(index, ref, 1, kit_less_int);
   REQUIRE(index == 0);
 }
 
@@ -52,7 +52,7 @@ TEST("lower bound second of four") {
   AR(ref, int)   = { .size = 4, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 2, kit_less_int);
+  LOWER_BOUND(index, ref, 2, kit_less_int);
   REQUIRE(index == 1);
 }
 
@@ -61,7 +61,7 @@ TEST("lower bound third of four") {
   AR(ref, int)   = { .size = 4, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 3, kit_less_int);
+  LOWER_BOUND(index, ref, 3, kit_less_int);
   REQUIRE(index == 2);
 }
 
@@ -70,7 +70,7 @@ TEST("lower bound forth of four") {
   AR(ref, int)   = { .size = 4, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 4, kit_less_int);
+  LOWER_BOUND(index, ref, 4, kit_less_int);
   REQUIRE(index == 3);
 }
 
@@ -79,7 +79,7 @@ TEST("lower bound fifth of four") {
   AR(ref, int)   = { .size = 4, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 5, kit_less_int);
+  LOWER_BOUND(index, ref, 5, kit_less_int);
   REQUIRE(index == 4);
 }
 
@@ -88,7 +88,7 @@ TEST("lower bound first of five") {
   AR(ref, int)   = { .size = 5, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 1, kit_less_int);
+  LOWER_BOUND(index, ref, 1, kit_less_int);
   REQUIRE(index == 0);
 }
 
@@ -97,7 +97,7 @@ TEST("lower bound second of five") {
   AR(ref, int)   = { .size = 5, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 2, kit_less_int);
+  LOWER_BOUND(index, ref, 2, kit_less_int);
   REQUIRE(index == 1);
 }
 
@@ -106,7 +106,7 @@ TEST("lower bound third of five") {
   AR(ref, int)   = { .size = 5, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 3, kit_less_int);
+  LOWER_BOUND(index, ref, 3, kit_less_int);
   REQUIRE(index == 2);
 }
 
@@ -115,7 +115,7 @@ TEST("lower bound forth of five") {
   AR(ref, int)   = { .size = 5, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 4, kit_less_int);
+  LOWER_BOUND(index, ref, 4, kit_less_int);
   REQUIRE(index == 3);
 }
 
@@ -124,7 +124,7 @@ TEST("lower bound fifth of five") {
   AR(ref, int)   = { .size = 5, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 5, kit_less_int);
+  LOWER_BOUND(index, ref, 5, kit_less_int);
   REQUIRE(index == 4);
 }
 
@@ -133,7 +133,7 @@ TEST("lower bound sixth of five") {
   AR(ref, int)   = { .size = 5, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND(index, ref, 6, kit_less_int);
+  LOWER_BOUND(index, ref, 6, kit_less_int);
   REQUIRE(index == 5);
 }
 
@@ -143,7 +143,7 @@ TEST("lower bound ref first of four") {
   AR(ref, int)    = { .size = 4, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
+  LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
   REQUIRE(index == 0);
 }
 
@@ -153,7 +153,7 @@ TEST("lower bound ref second of four") {
   AR(ref, int)    = { .size = 4, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
+  LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
   REQUIRE(index == 1);
 }
 
@@ -163,7 +163,7 @@ TEST("lower bound ref fifth of five") {
   AR(ref, int)    = { .size = 5, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
+  LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
   REQUIRE(index == 4);
 }
 
@@ -173,6 +173,6 @@ TEST("lower bound ref sixth of five") {
   AR(ref, int)    = { .size = 5, .values = v };
 
   ptrdiff_t index;
-  KIT_LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
+  LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
   REQUIRE(index == 5);
 }
