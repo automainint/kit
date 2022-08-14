@@ -23,7 +23,7 @@ enum {
 #  ifdef _WIN64
 #    define KIT_ATOMIC_VAR uint64_t
 #  else
-#    define KIT_ATOMIC_VAR volatile uint32_t
+#    define KIT_ATOMIC_VAR uint32_t
 #  endif
 #  define KIT_ATOMIC(type_) volatile KIT_ATOMIC_VAR
 
