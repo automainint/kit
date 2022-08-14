@@ -3,14 +3,14 @@
 #ifdef _MSC_VER
 #  include "atomic.h"
 
-#  include <windows.h>
 #  include <stdlib.h>
+#  include <windows.h>
 
 typedef struct {
-  HANDLE             thread;
-  kit_thread_routine routine;
-  void              *user_data;
-  void              *return_value;
+  HANDLE              thread;
+  kit_thread_routine_ routine;
+  void               *user_data;
+  void               *return_value;
 } thread_data;
 
 DWORD __stdcall run_thread_(void *p) {
@@ -18,8 +18,8 @@ DWORD __stdcall run_thread_(void *p) {
   data->return_value = data->routine(data->user_data);
 }
 
-int pthread_create(pthread_t *new_thread, void    *attrs,
-                   void *(*routine)(void *), void *user_data) {
+int pthread_create(pthread_t *new_thread, void *attrs,
+                   kit_thread_routine_ routine, void *user_data) {
   thread_data *data = (thread_data *) malloc(sizeof(thread_data));
   if (data == NULL)
     return -1;
