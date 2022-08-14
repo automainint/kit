@@ -1,6 +1,6 @@
 #include "atomic.h"
 
-#ifdef _MSC_VEC
+#ifdef _MSC_VER
 #  include <intrin.h>
 
 #  ifdef _WIN64
