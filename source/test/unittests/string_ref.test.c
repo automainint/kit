@@ -15,3 +15,8 @@ TEST("static string wrap") {
   REQUIRE(ref.values[5] == 'a');
   REQUIRE(ref.values[6] == 'r');
 }
+
+TEST("string literal") {
+  SZ(foo, "foo");
+  str_t bar = foo;
+}
