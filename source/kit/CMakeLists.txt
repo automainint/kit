@@ -2,13 +2,11 @@ target_sources(
   ${KIT_LIBRARY}
     PRIVATE
       atomic.c input_buffer.c input_stream.c lower_bound.c
-      thread.c string_ref.c async_function.c allocator.c array_ref.c
-      dynamic_array.c
+      string_ref.c async_function.c allocator.c array_ref.c dynamic_array.c
     PUBLIC
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/atomic.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/allocator.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/string_ref.h>
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/thread.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/dynamic_array.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/async_function.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/input_stream.h>
