@@ -3,7 +3,7 @@
 #ifdef _MSC_VER
 #  include "atomic.h"
 
-#  include <process.h>
+#  include <windows.h>
 #  include <stdlib.h>
 
 typedef struct {
