@@ -50,10 +50,12 @@ endif()
 enable_testing()
 
 if(KIT_ENABLE_TESTING)
+  find_package(Threads REQUIRED)
+
   add_executable(${KIT_TEST_SUITE})
   add_executable(${KIT_PROJECT}::${KIT_TEST_SUITE} ALIAS ${KIT_TEST_SUITE})
   target_compile_features(${KIT_TEST_SUITE} PRIVATE c_std_11)
-  target_link_libraries(${KIT_TEST_SUITE} PRIVATE ${KIT_LIBRARY} ${KIT_TEST_LIBRARY})
+  target_link_libraries(${KIT_TEST_SUITE} PRIVATE ${KIT_LIBRARY} ${KIT_TEST_LIBRARY} Threads::Threads)
 
   if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(
