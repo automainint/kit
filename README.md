@@ -4,3 +4,4 @@
 - Lower bound
 - Dynamic array
 - Input buffer
+- Random number generation
