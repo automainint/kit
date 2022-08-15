@@ -86,7 +86,7 @@ TEST("coroutine init") {
 
 TEST("coroutine init explicit") {
   AF_TYPE(test_foo) promise;
-  AF_INIT_EXPLICIT(promise, AF_NAME(test_foo));
+  AF_INIT_EXPLICIT(promise, sizeof promise, AF_NAME(test_foo));
   REQUIRE(!AF_FINISHED(promise));
 }
 

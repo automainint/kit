@@ -1,6 +1,8 @@
 #ifndef KIT_ASYNC_FUNCTION_H
 #define KIT_ASYNC_FUNCTION_H
 
+#include <string.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -156,12 +158,10 @@ typedef struct {
     (promise_) = kit_af_temp_;                       \
   } while (0)
 
-#define KIT_AF_INIT_EXPLICIT(promise_, coro_func_) \
-  do {                                             \
-    (promise_)._index           = 0;               \
-    (promise_)._state_machine   = (coro_func_);    \
-    (promise_)._context.state   = NULL;            \
-    (promise_)._context.execute = NULL;            \
+#define KIT_AF_INIT_EXPLICIT(promise_, size_, coro_func_) \
+  do {                                                    \
+    memset(&(promise_), 0, size_);                        \
+    (promise_)._state_machine = (coro_func_);             \
   } while (0)
 
 #define KIT_AF_EXECUTION_CONTEXT(promise_, ...)               \
