@@ -46,8 +46,10 @@ typedef struct {
     __VA_ARGS__                             \
   }
 
+#define KIT_AF_NAME(name_) name_##_coro_
+
 #define KIT_AF_DECL(name_) \
-  void name_##_coro_(void *self_void_, int request_)
+  void KIT_AF_NAME(name_)(void *self_void_, int request_)
 
 #define KIT_CORO_IMPL(name_)                                      \
   KIT_AF_DECL(name_) {                                            \
@@ -140,8 +142,8 @@ typedef struct {
 
 #define KIT_AF_TYPE(coro_) struct coro_##_coro_state_
 
-#define KIT_AF_INITIAL(coro_)                   \
-  ._index = 0, ._state_machine = coro_##_coro_, \
+#define KIT_AF_INITIAL(coro_)                        \
+  ._index = 0, ._state_machine = KIT_AF_NAME(coro_), \
   ._context = { .state = NULL, .execute = NULL }
 
 #define KIT_AF_CREATE(promise_, coro_, ...) \
@@ -152,6 +154,14 @@ typedef struct {
   do {                                               \
     KIT_AF_CREATE(kit_af_temp_, coro_, __VA_ARGS__); \
     (promise_) = kit_af_temp_;                       \
+  } while (0)
+
+#define KIT_AF_INIT_EXPLICIT(promise_, coro_func_) \
+  do {                                             \
+    (promise_)._index           = 0;               \
+    (promise_)._state_machine   = (coro_func_);    \
+    (promise_)._context.state   = NULL;            \
+    (promise_)._context.execute = NULL;            \
   } while (0)
 
 #define KIT_AF_EXECUTION_CONTEXT(promise_, ...)               \
@@ -260,6 +270,7 @@ typedef struct {
 #  define AF_STATE_DATA KIT_AF_STATE_DATA
 #  define AF_INTERNAL KIT_AF_INTERNAL
 #  define AF_STATE KIT_AF_STATE
+#  define AF_NAME KIT_AF_NAME
 #  define AF_DECL KIT_AF_DECL
 #  define CORO_IMPL KIT_CORO_IMPL
 #  define CORO_END KIT_CORO_END
@@ -277,6 +288,7 @@ typedef struct {
 #  define AF_INITIAL KIT_AF_INITIAL
 #  define AF_CREATE KIT_AF_CREATE
 #  define AF_INIT KIT_AF_INIT
+#  define AF_INIT_EXPLICIT KIT_AF_INIT_EXPLICIT
 #  define AF_EXECUTION_CONTEXT KIT_AF_EXECUTION_CONTEXT
 #  define AF_RESUME KIT_AF_RESUME
 #  define AF_RESUME_N KIT_AF_RESUME_N
