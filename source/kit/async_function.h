@@ -237,9 +237,9 @@ typedef struct {
   KIT_AF_AWAIT_N((promises_),       \
                  sizeof(promises_) / sizeof((promises_)[0]))
 
-#define KIT_AF_EXECUTE(coro_state_) \
-  KIT_AF_INTERNAL(coro_state_)      \
-      ._state_machine(coro, kit_af_request_execute)
+#define KIT_AF_EXECUTE(promise_)                       \
+  KIT_AF_INTERNAL(promise_)._state_machine((promise_), \
+                                           kit_af_request_execute)
 
 #ifndef KIT_DISABLE_SHORT_NAMES
 #  ifndef KIT_DISABLE_AF_SELF_SHORTCUT
