@@ -26,21 +26,24 @@ typedef struct {
   kit_af_execute execute;
 } kit_af_execution_context;
 
+#define KIT_AF_STATE_DATA                    \
+  struct {                                   \
+    int                      _index;         \
+    kit_af_state_machine     _state_machine; \
+    kit_af_execution_context _context;       \
+  }
+
 typedef struct {
-  int                      _index;
-  kit_af_state_machine     _state_machine;
-  kit_af_execution_context _context;
+  KIT_AF_STATE_DATA;
 } kit_af_type_void;
 
 #define KIT_AF_INTERNAL(coro_) (*((kit_af_type_void *) (coro_)))
 
-#define KIT_AF_STATE(ret_type_, name_, ...)  \
-  struct name_##_coro_state_ {               \
-    int                      _index;         \
-    kit_af_state_machine     _state_machine; \
-    kit_af_execution_context _context;       \
-    ret_type_                return_value;   \
-    __VA_ARGS__                              \
+#define KIT_AF_STATE(ret_type_, name_, ...) \
+  struct name_##_coro_state_ {              \
+    KIT_AF_STATE_DATA;                      \
+    ret_type_ return_value;                 \
+    __VA_ARGS__                             \
   }
 
 #define KIT_AF_DECL(name_) \
@@ -254,6 +257,7 @@ typedef struct {
 #  define af_execution_context kit_af_execution_context
 #  define af_type_void kit_af_type_void
 
+#  define AF_STATE_DATA KIT_AF_STATE_DATA
 #  define AF_INTERNAL KIT_AF_INTERNAL
 #  define AF_STATE KIT_AF_STATE
 #  define AF_DECL KIT_AF_DECL
