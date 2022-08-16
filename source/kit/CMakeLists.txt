@@ -15,3 +15,4 @@ target_sources(
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/lower_bound.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/array_ref.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/mersenne_twister_64.h>)
+add_subdirectory(c11)
