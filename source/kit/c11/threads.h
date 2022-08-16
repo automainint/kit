@@ -40,6 +40,10 @@
 #include <limits.h>
 #include <stdlib.h>
 
+#ifdef _MSC_VER
+#  define _Noreturn __declspec(noreturn)
+#endif
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
 #  include <io.h>      /* close */
 #  include <process.h> /* _exit */
@@ -176,7 +180,7 @@ int    thrd_equal(thrd_t, thrd_t);
 #if defined(__cplusplus)
 [[ noreturn ]]
 #else
-//_Noreturn
+_Noreturn
 #endif
 void thrd_exit(int);
 int   thrd_join(thrd_t, int *);
