@@ -172,7 +172,7 @@ int    thrd_equal(thrd_t, thrd_t);
 #if defined(__cplusplus)
 [[ noreturn ]]
 #else
-_Noreturn
+//_Noreturn
 #endif
 void thrd_exit(int);
 int   thrd_join(thrd_t, int *);
