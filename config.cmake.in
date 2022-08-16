@@ -1,6 +1,8 @@
 @PACKAGE_INIT@
 
-include(CMakeFindDependencyMacro)
-find_dependency(Threads)
+if(NOT @KIT_DISABLE_SYSTEM_THREADS@)
+  include(CMakeFindDependencyMacro)
+  find_dependency(Threads)
+endif()
 
 include("${CMAKE_CURRENT_LIST_DIR}/@KIT_TARGETS@.cmake")

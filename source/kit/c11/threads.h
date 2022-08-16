@@ -75,7 +75,11 @@
  * C++11 and above already have thread_local keyword
  */
 #  ifndef thread_local
-#    define thread_local _Thread_local
+#    if _MSC_VER
+#      define thread_local __declspec(thread)
+#    else
+#      define thread_local _Thread_local
+#    endif
 #  endif
 #endif
 
