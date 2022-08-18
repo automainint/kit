@@ -41,7 +41,7 @@
 
 #    include "threads.h"
 
-#    include "threads_win32.h"
+#    include "threads.win32.h"
 
 #    ifndef WIN32_LEAN_AND_MEAN
 #      define WIN32_LEAN_AND_MEAN 1
