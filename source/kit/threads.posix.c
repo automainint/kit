@@ -43,6 +43,8 @@
 #    include "allocator.h"
 #    include "threads.h"
 
+#    include <stdio.h>
+
 /*
 Configuration macro:
 
@@ -241,8 +243,10 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
   if (stack_size > 0) {
     if (pthread_attr_init(&attr) != 0)
       return thrd_nomem;
-    if (pthread_attr_setstacksize(&attr, (size_t) stack_size) != 0)
+    if (pthread_attr_setstacksize(&attr, (size_t) stack_size) != 0) {
+      printf("%% pthread_attr_setstacksize failed\n");
       return thrd_wrong_stack_size;
+    }
     attr_p = &attr;
   }
   kit_allocator_t alloc = kit_alloc_default();
@@ -257,6 +261,7 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
   pack->arg   = arg;
   pack->alloc = alloc;
   if (pthread_create(thr, attr_p, impl_thrd_routine, pack) != 0) {
+    printf("%% pthread_create failed\n");
     alloc.deallocate(alloc.state, pack);
     if (attr_p)
       pthread_attr_destroy(attr_p);
