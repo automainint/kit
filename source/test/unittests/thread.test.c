@@ -3,7 +3,7 @@
 #define KIT_TEST_FILE thread
 #include "../../kit_test/test.h"
 
-static int test_nothing(void *) { }
+static int test_nothing(void *_) { }
 
 static int test_run(void *data) {
   int *n = (int *) data;
