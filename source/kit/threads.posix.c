@@ -231,24 +231,45 @@ int mtx_unlock(mtx_t *mtx) {
 
 /*------------------- 7.25.5 Thread functions -------------------*/
 // 7.25.5.1
-int thrd_create(thrd_t *thr, thrd_start_t func, void *arg) {
+int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
+                           ptrdiff_t const stack_size) {
   impl_thrd_param_t *pack;
   assert(thr != NULL);
+  assert(stack_size == 0 || stack_size >= PTHREAD_STACK_MIN);
+  pthread_attr_t  attr;
+  pthread_attr_t *attr_p = NULL;
+  if (stack_size > 0) {
+    if (pthread_attr_init(&attr) != 0)
+      return thrd_nomem;
+    if (pthread_attr_setstacksize(&attr, (size_t) stack_size) != 0)
+      return thrd_wrong_stack_size;
+    attr_p = &attr;
+  }
   kit_allocator_t alloc = kit_alloc_default();
   pack                  = (impl_thrd_param_t *) alloc.allocate(
       alloc.state, sizeof(impl_thrd_param_t));
-  if (!pack)
+  if (!pack) {
+    if (attr_p)
+      pthread_attr_destroy(attr_p);
     return thrd_nomem;
+  }
   pack->func  = func;
   pack->arg   = arg;
   pack->alloc = alloc;
-  if (pthread_create(thr, NULL, impl_thrd_routine, pack) != 0) {
+  if (pthread_create(thr, attr_p, impl_thrd_routine, pack) != 0) {
     alloc.deallocate(alloc.state, pack);
+    if (attr_p)
+      pthread_attr_destroy(attr_p);
     return thrd_error;
   }
+  if (attr_p)
+    pthread_attr_destroy(attr_p);
   return thrd_success;
 }
 
+int thrd_create(thrd_t *thr, thrd_start_t func, void *arg) {
+  return thrd_create_with_stack(thr, func, arg, 0);
+}
 // 7.25.5.2
 thrd_t thrd_current(void) {
   return pthread_self();

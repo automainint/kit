@@ -39,6 +39,7 @@
 
 #  include <errno.h>
 #  include <limits.h>
+#  include <stddef.h>
 #  include <stdlib.h>
 
 #  ifdef _MSC_VER
@@ -150,7 +151,8 @@ enum {
   thrd_timedout,    // timed out
   thrd_error,       // failed
   thrd_busy,        // resource busy
-  thrd_nomem        // out of memory
+  thrd_nomem,       // out of memory,
+  thrd_wrong_stack_size
 };
 
 /*-------------------------- functions --------------------------*/
@@ -171,6 +173,8 @@ int    mtx_timedlock(mtx_t *__restrict mtx_,
 int    mtx_trylock(mtx_t *mtx_);
 int    mtx_unlock(mtx_t *mtx_);
 int    thrd_create(thrd_t *, thrd_start_t, void *);
+int    thrd_create_with_stack(thrd_t *, thrd_start_t, void *,
+                              ptrdiff_t stack_size);
 thrd_t thrd_current(void);
 int    thrd_detach(thrd_t);
 int    thrd_equal(thrd_t, thrd_t);

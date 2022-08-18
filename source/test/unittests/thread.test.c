@@ -37,6 +37,13 @@ TEST("thread run") {
   REQUIRE(result == 42);
 }
 
+TEST("thread stack size") {
+  thrd_t foo;
+  REQUIRE(thrd_create_with_stack(&foo, test_nothing, NULL, 200000) ==
+          thrd_success);
+  REQUIRE(thrd_join(foo, NULL) == thrd_success);
+}
+
 TEST("thread equal") {
   thrd_t foo, bar;
   REQUIRE(thrd_create(&foo, test_nothing, NULL) == thrd_success);
@@ -44,6 +51,8 @@ TEST("thread equal") {
   REQUIRE(thrd_equal(foo, foo));
   REQUIRE(!thrd_equal(foo, bar));
   REQUIRE(!thrd_equal(foo, thrd_current()));
+  REQUIRE(thrd_join(foo, NULL) == thrd_success);
+  REQUIRE(thrd_join(bar, NULL) == thrd_success);
 }
 
 TEST("thread exit") {

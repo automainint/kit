@@ -322,10 +322,12 @@ void __threads_win32_tls_callback(void) {
 
 /*------------------- 7.25.5 Thread functions -------------------*/
 // 7.25.5.1
-int thrd_create(thrd_t *thr, thrd_start_t func, void *arg) {
+int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
+                           ptrdiff_t const stack_size) {
   impl_thrd_param_t *pack;
   uintptr_t          handle;
   assert(thr != NULL);
+  assert(stack_size >= 0 && stack_size < 0x100000000);
   kit_allocator_t alloc = kit_alloc_default();
   pack                  = (impl_thrd_param_t *) alloc.allocate(
       alloc.state, (sizeof(impl_thrd_param_t)));
@@ -334,8 +336,9 @@ int thrd_create(thrd_t *thr, thrd_start_t func, void *arg) {
   pack->func  = func;
   pack->arg   = arg;
   pack->alloc = alloc;
-  handle      = _beginthreadex(NULL, 0, impl_thrd_routine, pack,
-                               CREATE_SUSPENDED, NULL);
+  handle      = _beginthreadex(NULL, (unsigned) stack_size,
+                               impl_thrd_routine, pack, CREATE_SUSPENDED,
+                               NULL);
   if (handle == 0) {
     alloc.deallocate(alloc.state, pack);
     if (errno == EAGAIN || errno == EACCES)
@@ -346,6 +349,10 @@ int thrd_create(thrd_t *thr, thrd_start_t func, void *arg) {
   pack->thrd  = *thr;
   ResumeThread((HANDLE) handle);
   return thrd_success;
+}
+
+int thrd_create(thrd_t *thr, thrd_start_t func, void *arg) {
+  return thrd_create_with_stack(thr, func, arg);
 }
 
 // 7.25.5.2
