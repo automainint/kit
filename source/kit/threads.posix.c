@@ -244,10 +244,9 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
   if (require_stack_size > 0) {
     ptrdiff_t const page_size  = (ptrdiff_t) sysconf(_SC_PAGESIZE);
     ptrdiff_t const delta      = require_stack_size % page_size;
-    ptrdiff_t const stack_size = delta == 0
-                                     ? require_stack_size
-                                     : require_stack_size +
-                                           require_stack_size - delta;
+    ptrdiff_t const stack_size = delta == 0 ? require_stack_size
+                                            : require_stack_size +
+                                                  page_size - delta;
     if (pthread_attr_init(&attr) != 0)
       return thrd_nomem;
     if (pthread_attr_setstacksize(&attr, (size_t) stack_size) != 0) {
