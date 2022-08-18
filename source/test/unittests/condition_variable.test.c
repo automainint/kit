@@ -7,6 +7,8 @@
 
 typedef struct {
   mtx_t m;
+  int   in;
+  int   out;
   cnd_t send;
   cnd_t receive;
   int   value;
@@ -17,13 +19,17 @@ static int test_run(void *p) {
 
   mtx_lock(&data->m);
   data->value = 20;
+  data->out   = 1;
   mtx_unlock(&data->m);
 
   cnd_broadcast(&data->send);
 
   mtx_lock(&data->m);
-  cnd_wait(&data->receive, &data->m);
+  if (data->in == 0)
+    cnd_wait(&data->receive, &data->m);
+  data->in    = 0;
   data->value = 22;
+  data->out   = 1;
   mtx_unlock(&data->m);
 
   cnd_broadcast(&data->send);
@@ -32,34 +38,47 @@ static int test_run(void *p) {
 }
 
 TEST("condition variable") {
-  /*
-  test_data_t data;
-  REQUIRE(mtx_init(&data.m, mtx_plain) == thrd_success);
-  REQUIRE(cnd_init(&data.send) == thrd_success);
-  REQUIRE(cnd_init(&data.receive) == thrd_success);
-  data.value = 0;
+  int ok = 1;
 
-  thrd_t t;
-  REQUIRE(thrd_create(&t, test_run, &data) == thrd_success);
+  for (int i = 0; i < 10; i++) {
+    test_data_t data;
 
-  REQUIRE(mtx_lock(&data.m) == thrd_success);
-  REQUIRE(cnd_wait(&data.send, &data.m) == thrd_success);
-  int x = data.value;
-  REQUIRE(mtx_unlock(&data.m) == thrd_success);
+    data.in    = 0;
+    data.out   = 0;
+    data.value = 0;
 
-  REQUIRE(cnd_broadcast(&data.receive) == thrd_success);
+    ok = ok && (mtx_init(&data.m, mtx_plain) == thrd_success);
+    ok = ok && (cnd_init(&data.send) == thrd_success);
+    ok = ok && (cnd_init(&data.receive) == thrd_success);
 
-  REQUIRE(mtx_lock(&data.m) == thrd_success);
-  REQUIRE(cnd_wait(&data.send, &data.m) == thrd_success);
-  x += data.value;
-  REQUIRE(mtx_unlock(&data.m) == thrd_success);
+    thrd_t t;
+    ok = ok && (thrd_create(&t, test_run, &data) == thrd_success);
 
-  REQUIRE(thrd_join(t, NULL) == thrd_success);
+    ok = ok && (mtx_lock(&data.m) == thrd_success);
+    if (data.out == 0)
+      ok = ok && (cnd_wait(&data.send, &data.m) == thrd_success);
+    data.out = 0;
+    int x    = data.value;
+    data.in  = 1;
+    ok       = ok && (mtx_unlock(&data.m) == thrd_success);
 
-  mtx_destroy(&data.m);
-  cnd_destroy(&data.send);
-  cnd_destroy(&data.receive);
+    ok = ok && (cnd_broadcast(&data.receive) == thrd_success);
 
-  REQUIRE(x == 42);
-   */
+    ok = ok && (mtx_lock(&data.m) == thrd_success);
+    if (data.out == 0)
+      ok = ok && (cnd_wait(&data.send, &data.m) == thrd_success);
+    data.out = 0;
+    x += data.value;
+    ok = ok && (mtx_unlock(&data.m) == thrd_success);
+
+    ok = ok && (thrd_join(t, NULL) == thrd_success);
+
+    mtx_destroy(&data.m);
+    cnd_destroy(&data.send);
+    cnd_destroy(&data.receive);
+
+    ok = ok && (x == 42);
+  }
+
+  REQUIRE(ok);
 }
