@@ -39,6 +39,7 @@
 #    include <stdbool.h>
 #    include <stdlib.h>
 
+#    include "allocator.h"
 #    include "threads.h"
 
 #    include "threads.win32.h"
@@ -93,11 +94,12 @@ Implementation limits:
   - Emulated `mtx_timelock()' with mtx_trylock() + *busy loop*
 */
 
-struct impl_thrd_param {
-  thrd_start_t func;
-  void        *arg;
-  thrd_t       thrd;
-};
+typedef struct {
+  thrd_start_t    func;
+  void           *arg;
+  thrd_t          thrd;
+  kit_allocator_t alloc;
+} impl_thrd_param_t;
 
 struct thrd_state {
   thrd_t thrd;
@@ -107,13 +109,13 @@ struct thrd_state {
 static thread_local struct thrd_state impl_current_thread = { 0 };
 
 static unsigned __stdcall impl_thrd_routine(void *p) {
-  struct impl_thrd_param *pack_p = (struct impl_thrd_param *) p;
-  struct impl_thrd_param  pack;
-  int                     code;
+  impl_thrd_param_t *pack_p = (impl_thrd_param_t *) p;
+  impl_thrd_param_t  pack;
+  int                code;
   impl_current_thread.thrd              = pack_p->thrd;
   impl_current_thread.handle_need_close = false;
-  memcpy(&pack, pack_p, sizeof(struct impl_thrd_param));
-  free(p);
+  memcpy(&pack, pack_p, sizeof(impl_thrd_param_t));
+  pack.alloc.deallocate(pack.alloc.state, p);
   code = pack.func(pack.arg);
   return (unsigned) code;
 }
@@ -321,19 +323,21 @@ void __threads_win32_tls_callback(void) {
 /*------------------- 7.25.5 Thread functions -------------------*/
 // 7.25.5.1
 int thrd_create(thrd_t *thr, thrd_start_t func, void *arg) {
-  struct impl_thrd_param *pack;
-  uintptr_t               handle;
+  impl_thrd_param_t *pack;
+  uintptr_t          handle;
   assert(thr != NULL);
-  pack = (struct impl_thrd_param *) malloc(
-      sizeof(struct impl_thrd_param));
+  kit_allocator_t alloc = kit_alloc_default();
+  pack                  = (impl_thrd_param_t *) alloc.allocate(
+      alloc.state, (sizeof(impl_thrd_param_t)));
   if (!pack)
     return thrd_nomem;
-  pack->func = func;
-  pack->arg  = arg;
-  handle     = _beginthreadex(NULL, 0, impl_thrd_routine, pack,
-                              CREATE_SUSPENDED, NULL);
+  pack->func  = func;
+  pack->arg   = arg;
+  pack->alloc = alloc;
+  handle      = _beginthreadex(NULL, 0, impl_thrd_routine, pack,
+                               CREATE_SUSPENDED, NULL);
   if (handle == 0) {
-    free(pack);
+    alloc.deallocate(alloc.state, pack);
     if (errno == EAGAIN || errno == EACCES)
       return thrd_nomem;
     return thrd_error;

@@ -40,6 +40,7 @@
 #    include <stdlib.h>
 #    include <unistd.h>
 
+#    include "allocator.h"
 #    include "threads.h"
 
 /*
@@ -61,14 +62,15 @@ Implementation limits:
   - Conditionally emulation for "mutex with timeout"
     (see EMULATED_THREADS_USE_NATIVE_TIMEDLOCK macro)
 */
-struct impl_thrd_param {
-  thrd_start_t func;
-  void        *arg;
-};
+typedef struct {
+  thrd_start_t    func;
+  void           *arg;
+  kit_allocator_t alloc;
+} impl_thrd_param_t;
 
 static void *impl_thrd_routine(void *p) {
-  struct impl_thrd_param pack = *((struct impl_thrd_param *) p);
-  free(p);
+  impl_thrd_param_t pack = *((impl_thrd_param_t *) p);
+  pack.alloc.deallocate(pack.alloc.state, p);
   return (void *) (intptr_t) pack.func(pack.arg);
 }
 
@@ -230,16 +232,18 @@ int mtx_unlock(mtx_t *mtx) {
 /*------------------- 7.25.5 Thread functions -------------------*/
 // 7.25.5.1
 int thrd_create(thrd_t *thr, thrd_start_t func, void *arg) {
-  struct impl_thrd_param *pack;
+  impl_thrd_param_t *pack;
   assert(thr != NULL);
-  pack = (struct impl_thrd_param *) malloc(
-      sizeof(struct impl_thrd_param));
+  kit_allocator_t alloc = kit_alloc_default();
+  pack                  = (impl_thrd_param_t *) alloc.allocate(
+      alloc.state, sizeof(impl_thrd_param_t));
   if (!pack)
     return thrd_nomem;
-  pack->func = func;
-  pack->arg  = arg;
+  pack->func  = func;
+  pack->arg   = arg;
+  pack->alloc = alloc;
   if (pthread_create(thr, NULL, impl_thrd_routine, pack) != 0) {
-    free(pack);
+    alloc.deallocate(alloc.state, pack);
     return thrd_error;
   }
   return thrd_success;
