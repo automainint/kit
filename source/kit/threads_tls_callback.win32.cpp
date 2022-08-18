@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include "threads_win32.h"
+#ifndef KIT_DISABLE_SYSTEM_THREADS
+#  if defined(_WIN32) && !defined(__CYGWIN__)
 
-#ifdef KIT_HAVE_WINDOWS
+#    include "threads.win32.h"
 
 struct tls_callback {
   tls_callback() { }
@@ -13,6 +14,8 @@ struct tls_callback {
     __threads_win32_tls_callback();
   }
 };
+
 static thread_local tls_callback tls_callback_instance;
 
+#  endif
 #endif

@@ -81,4 +81,4 @@ int timespec_get(struct timespec *ts, int base) {
 }
 #  endif
 
-#endif /* KIT_HAVE_TIMESPEC_GET */
+#endif

@@ -1,6 +1,6 @@
 #include "mersenne_twister_64.h"
 
-#include <time.h>
+#include "time.h"
 
 void kit_mt64_init(kit_mt64_state_t *state, uint64_t seed) {
   state->mt[0] = seed;

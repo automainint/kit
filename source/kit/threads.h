@@ -31,71 +31,72 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef KIT_C11_THREADS_H_INCLUDED_
-#define KIT_C11_THREADS_H_INCLUDED_
+#ifndef KIT_THREADS_H
+#define KIT_THREADS_H
 
-#include "time.h"
+#ifndef KIT_DISABLE_SYSTEM_THREADS
+#  include "time.h"
 
-#include <errno.h>
-#include <limits.h>
-#include <stdlib.h>
+#  include <errno.h>
+#  include <limits.h>
+#  include <stdlib.h>
 
-#ifdef _MSC_VER
-#  define _Noreturn __declspec(noreturn)
-#endif
+#  ifdef _MSC_VER
+#    define _Noreturn __declspec(noreturn)
+#  endif
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#  include <io.h>      /* close */
-#  include <process.h> /* _exit */
-#elif defined(KIT_HAVE_PTHREAD)
-#  include <pthread.h>
-#  include <unistd.h> /* close, _exit */
-#else
-#  error Not supported on this platform.
-#endif
+#  if defined(_WIN32) && !defined(__CYGWIN__)
+#    include <io.h>      /* close */
+#    include <process.h> /* _exit */
+#  elif defined(KIT_HAVE_PTHREAD)
+#    include <pthread.h>
+#    include <unistd.h> /* close, _exit */
+#  else
+#    error Not supported on this platform.
+#  endif
 
 /*---------------------------- macros ---------------------------*/
 
-#ifndef _Thread_local
-#  if defined(__cplusplus)
+#  ifndef _Thread_local
+#    if defined(__cplusplus)
 /* C++11 doesn't need `_Thread_local` keyword or macro */
-#  elif !defined(__STDC_NO_THREADS__)
+#    elif !defined(__STDC_NO_THREADS__)
 /* threads are optional in C11, _Thread_local present in this
  * condition */
-#  elif defined(_MSC_VER)
-#    define _Thread_local __declspec(thread)
-#  elif defined(__GNUC__)
-#    define _Thread_local __thread
-#  else
+#    elif defined(_MSC_VER)
+#      define _Thread_local __declspec(thread)
+#    elif defined(__GNUC__)
+#      define _Thread_local __thread
+#    else
 /* Leave _Thread_local undefined so that use of _Thread_local would
  * not promote to a non-thread-local global variable
  */
+#    endif
 #  endif
-#endif
 
-#if !defined(__cplusplus)
+#  if !defined(__cplusplus)
 /*
  * C11 thread_local() macro
  * C++11 and above already have thread_local keyword
  */
-#  ifndef thread_local
-#    if _MSC_VER
-#      define thread_local __declspec(thread)
-#    else
-#      define thread_local _Thread_local
+#    ifndef thread_local
+#      if _MSC_VER
+#        define thread_local __declspec(thread)
+#      else
+#        define thread_local _Thread_local
+#      endif
 #    endif
 #  endif
-#endif
 
-#ifdef __cplusplus
+#  ifdef __cplusplus
 extern "C" {
-#endif
+#  endif
 
 /*---------------------------- types ----------------------------*/
 typedef void (*tss_dtor_t)(void *);
 typedef int (*thrd_start_t)(void *);
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#  if defined(_WIN32) && !defined(__CYGWIN__)
 typedef struct {
   void *Ptr;
 } cnd_t;
@@ -117,29 +118,29 @@ typedef struct {
   volatile uintptr_t status;
 } once_flag;
 // FIXME: temporary non-standard hack to ease transition
-#  define KIT_MTX_INITIALIZER_NP_ \
-    { (void *) -1, -1, 0, 0, 0, 0 }
-#  define ONCE_FLAG_INIT \
-    { 0 }
-#  define TSS_DTOR_ITERATIONS 1
-#elif defined(KIT_HAVE_PTHREAD)
+#    define KIT_MTX_INITIALIZER_NP_ \
+      { (void *) -1, -1, 0, 0, 0, 0 }
+#    define ONCE_FLAG_INIT \
+      { 0 }
+#    define TSS_DTOR_ITERATIONS 1
+#  elif defined(KIT_HAVE_PTHREAD)
 typedef pthread_cond_t  cnd_t;
 typedef pthread_t       thrd_t;
 typedef pthread_key_t   tss_t;
 typedef pthread_mutex_t mtx_t;
 typedef pthread_once_t  once_flag;
 // FIXME: temporary non-standard hack to ease transition
-#  define KIT_MTX_INITIALIZER_NP_ PTHREAD_MUTEX_INITIALIZER
-#  define ONCE_FLAG_INIT PTHREAD_ONCE_INIT
-#  ifdef PTHREAD_DESTRUCTOR_ITERATIONS
-#    define TSS_DTOR_ITERATIONS PTHREAD_DESTRUCTOR_ITERATIONS
+#    define KIT_MTX_INITIALIZER_NP_ PTHREAD_MUTEX_INITIALIZER
+#    define ONCE_FLAG_INIT PTHREAD_ONCE_INIT
+#    ifdef PTHREAD_DESTRUCTOR_ITERATIONS
+#      define TSS_DTOR_ITERATIONS PTHREAD_DESTRUCTOR_ITERATIONS
+#    else
+#      define TSS_DTOR_ITERATIONS \
+        1 // assume TSS dtor MAY be called at least once.
+#    endif
 #  else
-#    define TSS_DTOR_ITERATIONS \
-      1 // assume TSS dtor MAY be called at least once.
+#    error Not supported on this platform.
 #  endif
-#else
-#  error Not supported on this platform.
-#endif
 
 /*-------------------- enumeration constants --------------------*/
 enum {
@@ -177,11 +178,11 @@ int    thrd_create(thrd_t *, thrd_start_t, void *);
 thrd_t thrd_current(void);
 int    thrd_detach(thrd_t);
 int    thrd_equal(thrd_t, thrd_t);
-#if defined(__cplusplus)
+#  if defined(__cplusplus)
 [[ noreturn ]]
-#else
+#  else
 _Noreturn
-#endif
+#  endif
 void thrd_exit(int);
 int   thrd_join(thrd_t, int *);
 int   thrd_sleep(const struct timespec *, struct timespec *);
@@ -191,8 +192,10 @@ void  tss_delete(tss_t);
 void *tss_get(tss_t);
 int   tss_set(tss_t, void *);
 
-#ifdef __cplusplus
+#  ifdef __cplusplus
 }
-#endif
+#  endif
 
-#endif /* KIT_C11_THREADS_H_INCLUDED_ */
+#endif /* KIT_DISABLE_SYSTEM_THREADS */
+
+#endif /* KIT_THREADS_H */

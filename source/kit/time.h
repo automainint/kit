@@ -5,8 +5,8 @@
  * C11 <time.h> emulation library
  */
 
-#ifndef KIT_C11_TIME_H_INCLUDED_
-#define KIT_C11_TIME_H_INCLUDED_
+#ifndef KIT_TIME_H
+#define KIT_TIME_H
 
 #include <time.h>
 
@@ -59,4 +59,4 @@ int timespec_get(struct timespec *ts, int base);
 }
 #endif
 
-#endif /* KIT_C11_TIME_H_INCLUDED_ */
+#endif /* KIT_TIME_H */

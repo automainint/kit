@@ -29,17 +29,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#ifndef KIT_HAVE_WINDOWS
+#ifndef KIT_DISABLE_SYSTEM_THREADS
+#  ifdef KIT_HAVE_PTHREAD
 
-#  include <assert.h>
-#  include <errno.h>
-#  include <limits.h>
-#  include <sched.h>
-#  include <stdint.h> /* for intptr_t */
-#  include <stdlib.h>
-#  include <unistd.h>
+#    include <assert.h>
+#    include <errno.h>
+#    include <limits.h>
+#    include <sched.h>
+#    include <stdint.h> /* for intptr_t */
+#    include <stdlib.h>
+#    include <unistd.h>
 
-#  include "../threads.h"
+#    include "threads.h"
 
 /*
 Configuration macro:
@@ -48,10 +49,10 @@ Configuration macro:
     Use pthread_mutex_timedlock() for `mtx_timedlock()'
     Otherwise use mtx_trylock() + *busy loop* emulation.
 */
-#  if !defined(__CYGWIN__) && !defined(__APPLE__) && \
-      !defined(__NetBSD__)
-#    define EMULATED_THREADS_USE_NATIVE_TIMEDLOCK
-#  endif
+#    if !defined(__CYGWIN__) && !defined(__APPLE__) && \
+        !defined(__NetBSD__)
+#      define EMULATED_THREADS_USE_NATIVE_TIMEDLOCK
+#    endif
 
 /*---------------------------- types ----------------------------*/
 
@@ -149,7 +150,7 @@ void mtx_destroy(mtx_t *mtx) {
  * Thus the linker will be happy and things don't clash when building
  * with -O1 or greater.
  */
-#  if defined(HAVE_FUNC_ATTRIBUTE_WEAK) && !defined(__CYGWIN__)
+#    if defined(HAVE_FUNC_ATTRIBUTE_WEAK) && !defined(__CYGWIN__)
 __attribute__((weak)) int pthread_mutexattr_init(
     pthread_mutexattr_t *attr);
 
@@ -158,7 +159,7 @@ __attribute__((weak)) int pthread_mutexattr_settype(
 
 __attribute__((weak)) int pthread_mutexattr_destroy(
     pthread_mutexattr_t *attr);
-#  endif
+#    endif
 
 // 7.25.4.2
 int mtx_init(mtx_t *mtx, int type) {
@@ -193,13 +194,13 @@ int mtx_timedlock(mtx_t *mtx, const struct timespec *ts) {
   assert(ts != NULL);
 
   {
-#  ifdef EMULATED_THREADS_USE_NATIVE_TIMEDLOCK
+#    ifdef EMULATED_THREADS_USE_NATIVE_TIMEDLOCK
     int rt;
     rt = pthread_mutex_timedlock(mtx, ts);
     if (rt == 0)
       return thrd_success;
     return (rt == ETIMEDOUT) ? thrd_timedout : thrd_error;
-#  else
+#    else
     time_t expire = time(NULL);
     expire += ts->tv_sec;
     while (mtx_trylock(mtx) != thrd_success) {
@@ -210,7 +211,7 @@ int mtx_timedlock(mtx_t *mtx, const struct timespec *ts) {
       thrd_yield();
     }
     return thrd_success;
-#  endif
+#    endif
   }
 }
 
@@ -310,4 +311,5 @@ int tss_set(tss_t key, void *val) {
                                               : thrd_error;
 }
 
+#  endif
 #endif

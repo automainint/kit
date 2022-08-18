@@ -29,23 +29,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#ifdef KIT_HAVE_WINDOWS
+#ifndef KIT_DISABLE_SYSTEM_THREADS
+#  if defined(_WIN32) && !defined(__CYGWIN__)
 
-#  include <assert.h>
-#  include <errno.h>
-#  include <limits.h>
-#  include <process.h> // MSVCRT
-#  include <stdbool.h>
-#  include <stdlib.h>
+#    include <assert.h>
+#    include <errno.h>
+#    include <limits.h>
+#    include <process.h> // MSVCRT
+#    include <stdbool.h>
+#    include <stdlib.h>
 
-#  include "../threads.h"
+#    include "threads.h"
 
-#  include "threads_win32.h"
+#    include "threads_win32.h"
 
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN 1
-#  endif
-#  include <windows.h>
+#    ifndef WIN32_LEAN_AND_MEAN
+#      define WIN32_LEAN_AND_MEAN 1
+#    endif
+#    include <windows.h>
 
 /*
 Configuration macro:
@@ -59,20 +60,20 @@ Configuration macro:
     Max registerable TSS dtor number.
 */
 
-#  if _WIN32_WINNT >= 0x0600
+#    if _WIN32_WINNT >= 0x0600
 // Prefer native WindowsAPI on newer environment.
-#    if !defined(__MINGW32__)
-#      define EMULATED_THREADS_USE_NATIVE_CALL_ONCE
+#      if !defined(__MINGW32__)
+#        define EMULATED_THREADS_USE_NATIVE_CALL_ONCE
+#      endif
 #    endif
-#  endif
-#  define EMULATED_THREADS_TSS_DTOR_SLOTNUM \
-    64 // see TLS_MINIMUM_AVAILABLE
+#    define EMULATED_THREADS_TSS_DTOR_SLOTNUM \
+      64 // see TLS_MINIMUM_AVAILABLE
 
 // check configuration
-#  if defined(EMULATED_THREADS_USE_NATIVE_CALL_ONCE) && \
-      (_WIN32_WINNT < 0x0600)
-#    error EMULATED_THREADS_USE_NATIVE_CALL_ONCE requires _WIN32_WINNT>=0x0600
-#  endif
+#    if defined(EMULATED_THREADS_USE_NATIVE_CALL_ONCE) && \
+        (_WIN32_WINNT < 0x0600)
+#      error EMULATED_THREADS_USE_NATIVE_CALL_ONCE requires _WIN32_WINNT>=0x0600
+#    endif
 
 static_assert(sizeof(cnd_t) == sizeof(CONDITION_VARIABLE),
               "The size of cnd_t must equal to CONDITION_VARIABLE");
@@ -131,7 +132,7 @@ static DWORD impl_abs2relmsec(const struct timespec *abs_time) {
   return rel_ms;
 }
 
-#  ifdef EMULATED_THREADS_USE_NATIVE_CALL_ONCE
+#    ifdef EMULATED_THREADS_USE_NATIVE_CALL_ONCE
 struct impl_call_once_param {
   void (*func)(void);
 };
@@ -145,7 +146,7 @@ static BOOL CALLBACK impl_call_once_callback(PINIT_ONCE InitOnce,
   ((void) Context); // suppress warning
   return TRUE;
 }
-#  endif // ifdef EMULATED_THREADS_USE_NATIVE_CALL_ONCE
+#    endif // ifdef EMULATED_THREADS_USE_NATIVE_CALL_ONCE
 
 static struct impl_tss_dtor_entry {
   tss_t      key;
@@ -180,14 +181,14 @@ static void impl_tss_dtor_invoke(void) {
 // 7.25.2.1
 void call_once(once_flag *flag, void (*func)(void)) {
   assert(flag && func);
-#  ifdef EMULATED_THREADS_USE_NATIVE_CALL_ONCE
+#    ifdef EMULATED_THREADS_USE_NATIVE_CALL_ONCE
   {
     struct impl_call_once_param param;
     param.func = func;
     InitOnceExecuteOnce((PINIT_ONCE) flag, impl_call_once_callback,
                         (PVOID) &param, NULL);
   }
-#  else
+#    else
   if (InterlockedCompareExchangePointer(
           (PVOID volatile *) &flag->status, (PVOID) 1, (PVOID) 0) ==
       0) {
@@ -200,7 +201,7 @@ void call_once(once_flag *flag, void (*func)(void)) {
       thrd_yield();
     }
   }
-#  endif
+#    endif
 }
 
 /*------------- 7.25.3 Condition variable functions -------------*/
@@ -457,4 +458,5 @@ int tss_set(tss_t key, void *val) {
   return TlsSetValue(key, val) ? thrd_success : thrd_error;
 }
 
-#endif
+#  endif
+#endif /* KIT_DISABLE_SYSTEM_THREADS */
