@@ -234,17 +234,23 @@ int mtx_unlock(mtx_t *mtx) {
 /*------------------- 7.25.5 Thread functions -------------------*/
 // 7.25.5.1
 int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
-                           ptrdiff_t const stack_size) {
+                           ptrdiff_t const require_stack_size) {
   impl_thrd_param_t *pack;
   assert(thr != NULL);
-  assert(stack_size == 0 || stack_size >= PTHREAD_STACK_MIN);
+  assert(require_stack_size == 0 ||
+         require_stack_size >= PTHREAD_STACK_MIN);
   pthread_attr_t  attr;
   pthread_attr_t *attr_p = NULL;
-  if (stack_size > 0) {
+  if (require_stack_size > 0) {
+    ptrdiff_t const page_size  = (ptrdiff_t) sysconf(_SC_PAGESIZE);
+    ptrdiff_t const delta      = require_stack_size % page_size;
+    ptrdiff_t const stack_size = delta == 0
+                                     ? require_stack_size
+                                     : require_stack_size +
+                                           require_stack_size - delta;
     if (pthread_attr_init(&attr) != 0)
       return thrd_nomem;
     if (pthread_attr_setstacksize(&attr, (size_t) stack_size) != 0) {
-      printf("%% pthread_attr_setstacksize failed\n");
       return thrd_wrong_stack_size;
     }
     attr_p = &attr;
@@ -261,7 +267,6 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
   pack->arg   = arg;
   pack->alloc = alloc;
   if (pthread_create(thr, attr_p, impl_thrd_routine, pack) != 0) {
-    printf("%% pthread_create failed\n");
     alloc.deallocate(alloc.state, pack);
     if (attr_p)
       pthread_attr_destroy(attr_p);
