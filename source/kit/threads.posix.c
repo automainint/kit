@@ -251,6 +251,9 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
     if (pthread_attr_init(&attr) != 0)
       return thrd_nomem;
     if (pthread_attr_setstacksize(&attr, (size_t) stack_size) != 0) {
+      printf("pthread_attr_setstacksize failed.\n");
+      printf("  page size   %d\n", (int) page_size);
+      printf("  stack size  %d\n", (int) stack_size);
       return thrd_wrong_stack_size;
     }
     attr_p = &attr;
