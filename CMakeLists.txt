@@ -143,7 +143,7 @@ if(KIT_ENABLE_TESTING)
 
   add_test(
     NAME ${KIT_LIBRARY}_unittests
-    COMMAND ${KIT_TEST_SUITE})
+    COMMAND ${KIT_TEST_SUITE} --no-carriage-return)
   set_tests_properties(
     ${KIT_LIBRARY}_unittests
     PROPERTIES

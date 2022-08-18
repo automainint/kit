@@ -3,7 +3,7 @@ if(KIT_ENABLE_TESTING)
   target_link_libraries(too_many_tests ${KIT_TEST_LIBRARY})
   add_test(
     NAME too_many_tests_test
-    COMMAND too_many_tests)
+    COMMAND too_many_tests --quiet)
   set_tests_properties(
     too_many_tests_test
     PROPERTIES
@@ -13,7 +13,7 @@ if(KIT_ENABLE_TESTING)
   target_link_libraries(too_many_assertions ${KIT_TEST_LIBRARY})
   add_test(
     NAME too_many_assertions_test
-    COMMAND too_many_assertions)
+    COMMAND too_many_assertions --quiet)
   set_tests_properties(
     too_many_assertions_test
     PROPERTIES
@@ -23,7 +23,7 @@ if(KIT_ENABLE_TESTING)
   target_link_libraries(cpp_example ${KIT_TEST_LIBRARY})
   add_test(
     NAME cpp_example_test
-    COMMAND cpp_example)
+    COMMAND cpp_example --quiet)
   set_tests_properties(
     cpp_example_test
     PROPERTIES

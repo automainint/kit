@@ -32,8 +32,6 @@ static int test_run(void *p) {
 }
 
 TEST("condition variable") {
-  printf("\n\n%% condition variable\n\n");
-  
   test_data_t data;
   REQUIRE(mtx_init(&data.m, mtx_plain) == thrd_success);
   REQUIRE(cnd_init(&data.send) == thrd_success);

@@ -39,7 +39,7 @@ TEST("thread run") {
 
 TEST("thread stack size") {
   thrd_t foo;
-  REQUIRE(thrd_create_with_stack(&foo, test_nothing, NULL, 200000) ==
+  REQUIRE(thrd_create_with_stack(&foo, test_nothing, NULL, 30000) ==
           thrd_success);
   REQUIRE(thrd_join(foo, NULL) == thrd_success);
 }
