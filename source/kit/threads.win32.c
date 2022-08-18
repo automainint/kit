@@ -352,7 +352,7 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
 }
 
 int thrd_create(thrd_t *thr, thrd_start_t func, void *arg) {
-  return thrd_create_with_stack(thr, func, arg);
+  return thrd_create_with_stack(thr, func, arg, 0);
 }
 
 // 7.25.5.2
