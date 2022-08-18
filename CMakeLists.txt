@@ -101,14 +101,6 @@ if(KIT_HAVE_TIMESPEC_GET)
   target_compile_definitions(${KIT_LIBRARY} PUBLIC KIT_HAVE_TIMESPEC_GET)
 endif()
 
-if(KIT_HAVE_PTHREAD)
-  target_compile_definitions(${KIT_LIBRARY} PUBLIC KIT_HAVE_PTHREAD)
-endif()
-
-if(KIT_HAVE_WINDOWS)
-  target_compile_definitions(${KIT_LIBRARY} PUBLIC KIT_HAVE_WINDOWS)
-endif()
-
 if(KIT_DISABLE_SYSTEM_MALLOC)
   target_compile_definitions(${KIT_LIBRARY} PUBLIC KIT_DISABLE_SYSTEM_MALLOC)
 endif()

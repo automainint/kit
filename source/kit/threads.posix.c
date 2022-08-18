@@ -30,7 +30,7 @@
  * DEALINGS IN THE SOFTWARE.
  */
 #ifndef KIT_DISABLE_SYSTEM_THREADS
-#  ifdef KIT_HAVE_PTHREAD
+#  if !defined(_WIN32) || defined(__CYGWIN__)
 
 #    include <assert.h>
 #    include <errno.h>

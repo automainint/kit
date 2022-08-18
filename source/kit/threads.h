@@ -48,11 +48,9 @@
 #  if defined(_WIN32) && !defined(__CYGWIN__)
 #    include <io.h>      /* close */
 #    include <process.h> /* _exit */
-#  elif defined(KIT_HAVE_PTHREAD)
+#  else
 #    include <pthread.h>
 #    include <unistd.h> /* close, _exit */
-#  else
-#    error Not supported on this platform.
 #  endif
 
 /*---------------------------- macros ---------------------------*/
@@ -123,7 +121,7 @@ typedef struct {
 #    define ONCE_FLAG_INIT \
       { 0 }
 #    define TSS_DTOR_ITERATIONS 1
-#  elif defined(KIT_HAVE_PTHREAD)
+#  else
 typedef pthread_cond_t  cnd_t;
 typedef pthread_t       thrd_t;
 typedef pthread_key_t   tss_t;
@@ -138,8 +136,6 @@ typedef pthread_once_t  once_flag;
 #      define TSS_DTOR_ITERATIONS \
         1 // assume TSS dtor MAY be called at least once.
 #    endif
-#  else
-#    error Not supported on this platform.
 #  endif
 
 /*-------------------- enumeration constants --------------------*/
