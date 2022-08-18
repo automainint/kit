@@ -147,7 +147,7 @@ if(KIT_ENABLE_TESTING)
   set_tests_properties(
     ${KIT_LIBRARY}_unittests
     PROPERTIES
-    TIMEOUT "45")
+    TIMEOUT "120")
 endif()
 
 add_subdirectory(source)
