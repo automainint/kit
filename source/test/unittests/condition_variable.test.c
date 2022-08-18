@@ -16,17 +16,17 @@ static int test_run(void *p) {
   test_data_t *data = (test_data_t *) p;
 
   mtx_lock(&data->m);
-
   data->value = 20;
   mtx_unlock(&data->m);
+
   cnd_broadcast(&data->send);
 
+  mtx_lock(&data->m);
   cnd_wait(&data->receive, &data->m);
-
   data->value = 22;
-  cnd_broadcast(&data->send);
-
   mtx_unlock(&data->m);
+
+  cnd_broadcast(&data->send);
 
   return 0;
 }
@@ -40,18 +40,19 @@ TEST("condition variable") {
 
   thrd_t t;
   REQUIRE(thrd_create(&t, test_run, &data) == thrd_success);
-
+  
   REQUIRE(mtx_lock(&data.m) == thrd_success);
-
   REQUIRE(cnd_wait(&data.send, &data.m) == thrd_success);
   int x = data.value;
+  REQUIRE(mtx_unlock(&data.m) == thrd_success);
 
   REQUIRE(cnd_broadcast(&data.receive) == thrd_success);
 
+  REQUIRE(mtx_lock(&data.m) == thrd_success);
   REQUIRE(cnd_wait(&data.send, &data.m) == thrd_success);
   x += data.value;
-
   REQUIRE(mtx_unlock(&data.m) == thrd_success);
+
   REQUIRE(thrd_join(t, NULL) == thrd_success);
 
   mtx_destroy(&data.m);
