@@ -29,7 +29,7 @@ if(KIT_ENABLE_TESTING)
   #  PROPERTIES
   #  TIMEOUT "15")
 
-  add_executable(signals signals.c)
+  add_executable(signals signals.cpp)
   target_link_libraries(signals ${KIT_TEST_LIBRARY})
   add_test(
     NAME signals_test

@@ -1,7 +1,7 @@
 #include "../../kit_test/test.h"
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
 
 TEST("abort") {
   printf("** ABORT\n\n");
@@ -10,7 +10,7 @@ TEST("abort") {
 
 TEST("invalid access") {
   printf("** INVALID ACCESS\n\n");
-  *(volatile int *) NULL = 42;
+  *(volatile int *) nullptr = 42;
 }
 
 int main(int argc, char **argv) {
