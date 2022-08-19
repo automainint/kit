@@ -28,4 +28,14 @@ if(KIT_ENABLE_TESTING)
     cpp_example_test
     PROPERTIES
     TIMEOUT "30")
+
+  add_executable(signals signals.c)
+  target_link_libraries(signals ${KIT_TEST_LIBRARY})
+  add_test(
+    NAME signals_test
+    COMMAND signals)
+  set_tests_properties(
+    signals_test
+    PROPERTIES
+    TIMEOUT "30")
 endif()
