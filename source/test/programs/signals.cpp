@@ -2,6 +2,12 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <stdexcept>
+
+TEST("c++ exception") {
+  printf("** C++ EXCEPTION\n\n");
+  throw std::exception {};
+}
 
 TEST("abort") {
   printf("** ABORT\n\n");
