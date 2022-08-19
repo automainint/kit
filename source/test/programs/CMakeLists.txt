@@ -29,13 +29,15 @@ if(KIT_ENABLE_TESTING)
     PROPERTIES
     TIMEOUT "15")
 
-  add_executable(signals signals.cpp)
-  target_link_libraries(signals ${KIT_TEST_LIBRARY})
-  add_test(
-    NAME signals_test
-    COMMAND signals --no-carriage-return)
-  set_tests_properties(
-    signals_test
-    PROPERTIES
-    TIMEOUT "15")
+  if(NOT MSVC)
+    add_executable(signals signals.cpp)
+    target_link_libraries(signals ${KIT_TEST_LIBRARY})
+    add_test(
+      NAME signals_test
+      COMMAND signals --no-carriage-return)
+    set_tests_properties(
+      signals_test
+      PROPERTIES
+      TIMEOUT "15")
+  endif()
 endif()
