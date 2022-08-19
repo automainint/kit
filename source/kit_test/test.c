@@ -7,6 +7,8 @@
 #include <setjmp.h>
 #include <signal.h>
 
+#include <stdlib.h>
+
 kit_tests_list_t kit_tests_list = { 0 };
 
 static void report(int i, int line, int ok) {
@@ -67,6 +69,8 @@ static char const *const signames[] = {
 };
 
 static void handle_signal(int signum) {
+  printf("SIGNAL: %d\n\n", signum);
+  exit(42);
   longjmp(kit_test_restore_execution, signum);
 }
 

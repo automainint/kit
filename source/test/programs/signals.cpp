@@ -6,7 +6,6 @@
 
 TEST("c++ exception") {
   printf("** C++ EXCEPTION\n\n");
-  exit(42);
   throw std::exception {};
 }
 
