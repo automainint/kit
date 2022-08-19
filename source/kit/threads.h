@@ -184,13 +184,9 @@ int    thrd_equal(thrd_t, thrd_t);
 _Noreturn
 #  endif
 void thrd_exit(int);
-int   thrd_join(thrd_t, int *);
-int   thrd_sleep(const struct timespec *, struct timespec *);
-void  thrd_yield(void);
-int   tss_create(tss_t *, tss_dtor_t);
-void  tss_delete(tss_t);
-void *tss_get(tss_t);
-int   tss_set(tss_t, void *);
+int  thrd_join(thrd_t, int *);
+int  thrd_sleep(const struct timespec *, struct timespec *);
+void thrd_yield(void);
 
 #  ifdef __cplusplus
 }

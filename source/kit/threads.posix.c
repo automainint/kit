@@ -318,29 +318,5 @@ void thrd_yield(void) {
   sched_yield();
 }
 
-/*----------- 7.25.6 Thread-specific storage functions -----------*/
-// 7.25.6.1
-int tss_create(tss_t *key, tss_dtor_t dtor) {
-  assert(key != NULL);
-  return (pthread_key_create(key, dtor) == 0) ? thrd_success
-                                              : thrd_error;
-}
-
-// 7.25.6.2
-void tss_delete(tss_t key) {
-  pthread_key_delete(key);
-}
-
-// 7.25.6.3
-void *tss_get(tss_t key) {
-  return pthread_getspecific(key);
-}
-
-// 7.25.6.4
-int tss_set(tss_t key, void *val) {
-  return (pthread_setspecific(key, val) == 0) ? thrd_success
-                                              : thrd_error;
-}
-
 #  endif
 #endif

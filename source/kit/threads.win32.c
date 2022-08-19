@@ -311,15 +311,6 @@ int mtx_unlock(mtx_t *mtx) {
   return thrd_success;
 }
 
-void __threads_win32_tls_callback(void) {
-  struct thrd_state *state = &impl_current_thread;
-  impl_tss_dtor_invoke();
-  if (state->handle_need_close) {
-    state->handle_need_close = false;
-    CloseHandle(state->thrd.handle);
-  }
-}
-
 /*------------------- 7.25.5 Thread functions -------------------*/
 // 7.25.5.1
 int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
@@ -438,35 +429,6 @@ int thrd_sleep(const struct timespec *time_point,
 // 7.25.5.8
 void thrd_yield(void) {
   SwitchToThread();
-}
-
-/*----------- 7.25.6 Thread-specific storage functions -----------*/
-// 7.25.6.1
-int tss_create(tss_t *key, tss_dtor_t dtor) {
-  assert(key != NULL);
-  *key = TlsAlloc();
-  if (dtor) {
-    if (impl_tss_dtor_register(*key, dtor)) {
-      TlsFree(*key);
-      return thrd_error;
-    }
-  }
-  return (*key != 0xFFFFFFFF) ? thrd_success : thrd_error;
-}
-
-// 7.25.6.2
-void tss_delete(tss_t key) {
-  TlsFree(key);
-}
-
-// 7.25.6.3
-void *tss_get(tss_t key) {
-  return TlsGetValue(key);
-}
-
-// 7.25.6.4
-int tss_set(tss_t key, void *val) {
-  return TlsSetValue(key, val) ? thrd_success : thrd_error;
 }
 
 #  endif

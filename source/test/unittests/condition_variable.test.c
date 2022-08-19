@@ -3,8 +3,6 @@
 #define KIT_TEST_FILE condition_variable
 #include "../../kit_test/test.h"
 
-#include <stdio.h>
-
 typedef struct {
   mtx_t m;
   int   in;
