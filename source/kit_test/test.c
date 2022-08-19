@@ -85,13 +85,17 @@ static void setup_signals() {
 }
 
 static int run_test(volatile int i) {
+  printf(" %% TEST %d\n\n", i);
+  printf(" %% SETJPM\n\n");
   int signum = setjmp(kit_test_restore_execution);
-  
+
+  printf(" %% SIGNUM=%d\n\n", signum);
   if (signum != 0) {
     kit_tests_list.tests[i].signal = signum;
     return 0;
   }
 
+  printf(" %% RUN TEST\n\n");
   kit_tests_list.tests[i].test_fn(i, report);
   return 1;
 }

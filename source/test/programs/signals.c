@@ -1,17 +1,16 @@
 #include "../../kit_test/test.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 TEST("abort") {
-#if !defined(_WIN32) || defined(__CYGWIN__)
+  printf("** ABORT\n\n");
   abort();
-#endif
 }
 
 TEST("invalid access") {
-#if !defined(_WIN32) || defined(__CYGWIN__)
+  printf("** INVALID ACCESS\n\n");
   *(volatile int *) NULL = 42;
-#endif
 }
 
 int main(int argc, char **argv) {
