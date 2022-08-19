@@ -7,8 +7,6 @@
 #include <setjmp.h>
 #include <signal.h>
 
-#include <stdlib.h>
-
 kit_tests_list_t kit_tests_list = { 0 };
 
 static void report(int i, int line, int ok) {

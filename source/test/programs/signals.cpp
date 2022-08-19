@@ -6,7 +6,7 @@
 /*  FIXME
  *  MSVC tests fail in GitHub Actions.
  */
-#ifndef _MSVC
+#ifndef _MSC_VER
 TEST("c++ exception") {
   throw std::exception {};
 }
@@ -21,7 +21,7 @@ TEST("invalid access") {
 #endif
 
 int main(int argc, char **argv) {
-#ifndef _MSVC
+#ifndef _MSC_VER
   if (run_tests(argc, argv) != 1)
     return 1;
 #endif
