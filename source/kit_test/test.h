@@ -19,18 +19,18 @@ extern "C" {
 #  define KIT_TEST_ASSERTIONS_LIMIT 0x50
 #endif
 
-typedef void (*kit_test_report_fn)(int test_index, char const *file,
-                                   int line, int ok);
+typedef void (*kit_test_report_fn)(int test_index, int line, int ok);
 typedef void (*kit_test_run_fn)(
     int kit_test_index_, kit_test_report_fn kit_test_report_fn_);
 
 typedef struct {
   char const     *test_name;
+  char const     *test_file;
   kit_test_run_fn test_fn;
   int             assertions;
-  char const     *file[KIT_TEST_ASSERTIONS_LIMIT];
   int             line[KIT_TEST_ASSERTIONS_LIMIT];
   int             status[KIT_TEST_ASSERTIONS_LIMIT];
+  int             signal;
 } kit_test_case_t;
 
 typedef struct {
@@ -75,7 +75,8 @@ extern kit_tests_list_t kit_tests_list;
 #  endif
 #endif
 
-void kit_test_register(char const *name, kit_test_run_fn fn);
+void kit_test_register(char const *name, char const *file,
+                       kit_test_run_fn fn);
 
 #define KIT_TEST(name)                                              \
   static void KIT_TEST_CONCAT3_(kit_test_run_, __LINE__,            \
@@ -84,16 +85,15 @@ void kit_test_register(char const *name, kit_test_run_fn fn);
   KIT_TEST_ON_START_(                                               \
       KIT_TEST_CONCAT3_(kit_test_case_, __LINE__, KIT_TEST_FILE)) { \
     kit_test_register(                                              \
-        name,                                                       \
+        name, __FILE__,                                             \
         KIT_TEST_CONCAT3_(kit_test_run_, __LINE__, KIT_TEST_FILE)); \
   }                                                                 \
   static void KIT_TEST_CONCAT3_(kit_test_run_, __LINE__,            \
                                 KIT_TEST_FILE)(                     \
       int kit_test_index_, kit_test_report_fn kit_test_report_fn_)
 
-#define KIT_REQUIRE(...)                                   \
-  kit_test_report_fn_(kit_test_index_, __FILE__, __LINE__, \
-                      (__VA_ARGS__))
+#define KIT_REQUIRE(...) \
+  kit_test_report_fn_(kit_test_index_, __LINE__, (__VA_ARGS__))
 
 int kit_run_tests(int argc, char **argv);
 
