@@ -42,8 +42,6 @@
 #    include "allocator.h"
 #    include "threads.h"
 
-#    include "threads.win32.h"
-
 #    ifndef WIN32_LEAN_AND_MEAN
 #      define WIN32_LEAN_AND_MEAN 1
 #    endif
