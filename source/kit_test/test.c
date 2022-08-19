@@ -101,6 +101,7 @@ static int run_test(volatile int i) {
 }
 
 int kit_run_tests(int argc, char **argv) {
+  printf(" %% setup_signals\n\n");
   setup_signals();
 
   int success_count         = 0;
@@ -111,6 +112,7 @@ int kit_run_tests(int argc, char **argv) {
   int term_color            = 1;
   int carriage_return       = 1;
 
+  printf(" %% parse cmd args\n\n");
   for (int i = 0; i < argc; i++)
     if (strcmp("--no-term-color", argv[i]) == 0)
       term_color = 0;
@@ -122,6 +124,7 @@ int kit_run_tests(int argc, char **argv) {
   if (quiet)
     term_color = 0;
 
+  printf(" %% testing loop\n\n");
   for (int i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
        i++) {
     color_code(term_color, yellow);
