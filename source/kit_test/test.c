@@ -69,8 +69,6 @@ static char const *const signames[] = {
 };
 
 static void handle_signal(int signum) {
-  printf("SIGNAL: %d\n\n", signum);
-  exit(42);
   longjmp(kit_test_restore_execution, signum);
 }
 
@@ -193,7 +191,8 @@ int kit_run_tests(int argc, char **argv) {
       if (kit_tests_list.tests[i].signal != 0) {
         int signum = kit_tests_list.tests[i].signal;
         if (signum >= 0 &&
-            signum < sizeof signames / sizeof *signames)
+            signum < sizeof signames / sizeof *signames &&
+            signames[signum] != NULL)
           quiet ||
               printf("Signal \"%s\" (%d) for \"%s\" in \"%s\"!\n",
                      signames[signum], signum,
