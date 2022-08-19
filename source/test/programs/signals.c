@@ -3,11 +3,15 @@
 #include <stdlib.h>
 
 TEST("abort") {
-  //abort();
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  abort();
+#endif
 }
 
 TEST("invalid access") {
-  //*(volatile int *) NULL = 42;
+#if !defined(_WIN32) || defined(__CYGWIN__)
+  *(volatile int *) NULL = 42;
+#endif
 }
 
 int main(int argc, char **argv) {
