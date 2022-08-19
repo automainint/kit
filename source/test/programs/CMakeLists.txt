@@ -7,7 +7,7 @@ if(KIT_ENABLE_TESTING)
   set_tests_properties(
     too_many_tests_test
     PROPERTIES
-    TIMEOUT "30")
+    TIMEOUT "15")
 
   add_executable(too_many_assertions too_many_assertions.c)
   target_link_libraries(too_many_assertions ${KIT_TEST_LIBRARY})
@@ -17,7 +17,7 @@ if(KIT_ENABLE_TESTING)
   set_tests_properties(
     too_many_assertions_test
     PROPERTIES
-    TIMEOUT "30")
+    TIMEOUT "15")
 
   add_executable(cpp_example cpp_example.cpp)
   target_link_libraries(cpp_example ${KIT_TEST_LIBRARY})
@@ -27,15 +27,15 @@ if(KIT_ENABLE_TESTING)
   set_tests_properties(
     cpp_example_test
     PROPERTIES
-    TIMEOUT "30")
+    TIMEOUT "15")
 
   add_executable(signals signals.c)
   target_link_libraries(signals ${KIT_TEST_LIBRARY})
   add_test(
     NAME signals_test
-    COMMAND signals)
+    COMMAND signals --no-carriage-return)
   set_tests_properties(
     signals_test
     PROPERTIES
-    TIMEOUT "30")
+    TIMEOUT "15")
 endif()
