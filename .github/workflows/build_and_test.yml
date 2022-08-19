@@ -16,7 +16,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ windows-2019 ]
+        os: [ ubuntu-latest, macos-latest, windows-2019 ]
 
     runs-on: ${{ matrix.os }}
 
@@ -81,3 +81,40 @@ jobs:
           flags: ${{ runner.os }}
           name: ${{ runner.os }} build
           fail_ci_if_error: false
+
+  integration:
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-latest, windows-2019 ]
+        name: [ fetch_content, find_package ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up CMake 3.18
+        uses: jwlawson/actions-setup-cmake@v1.8
+        with:
+          cmake-version: 3.18
+
+      - name: Build
+        if: runner.os != 'Windows'
+        run: |
+          cmake -D CMAKE_BUILD_TYPE=$BUILD_TYPE -B build -S .
+          cmake --build build --config $BUILD_TYPE
+        working-directory: ./source/test/integration/${{ matrix.name }}
+
+      - name: Build with Visual Studio
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          cmake -B build -S .
+          cmake --build build --config $BUILD_TYPE
+        working-directory: ./source/test/integration/${{ matrix.name }}
+
+      - name: Run
+        shell: bash
+        run: |
+          ctest -V -C $BUILD_TYPE
+        working-directory: ./source/test/integration/${{ matrix.name }}/build

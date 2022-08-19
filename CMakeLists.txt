@@ -141,13 +141,13 @@ if(KIT_ENABLE_TESTING)
       --coverage)
   endif()
 
-  #add_test(
-  #  NAME ${KIT_LIBRARY}_unittests
-  #  COMMAND ${KIT_TEST_SUITE} --no-carriage-return)
-  #set_tests_properties(
-  #  ${KIT_LIBRARY}_unittests
-  #  PROPERTIES
-  #  TIMEOUT "120")
+  add_test(
+    NAME ${KIT_LIBRARY}_unittests
+    COMMAND ${KIT_TEST_SUITE} --no-carriage-return)
+  set_tests_properties(
+    ${KIT_LIBRARY}_unittests
+    PROPERTIES
+    TIMEOUT "120")
 endif()
 
 add_subdirectory(source)
