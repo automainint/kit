@@ -126,6 +126,7 @@ int kit_run_tests(int argc, char **argv) {
     if (!carriage_return)
       quiet || printf("\n");
     color_code(term_color, white);
+    quiet || fflush(stdout);
 
     struct timespec begin, end;
     timespec_get(&begin, TIME_UTC);
