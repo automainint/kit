@@ -79,4 +79,4 @@ jobs:
           files: ./build/coverage.xml
           flags: ${{ runner.os }}
           name: ${{ runner.os }} build
-          fail_ci_if_error: false
+          fail_ci_if_error: true
