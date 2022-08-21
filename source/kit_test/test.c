@@ -51,10 +51,11 @@ void kit_test_register(char const *name, char const *file,
 
 static jmp_buf kit_test_restore_execution;
 
-static int const signums[] = { SIGILL, SIGABRT, SIGFPE, SIGSEGV,
-                               SIGTERM };
+static int const signums[] = { SIGINT, SIGILL,  SIGABRT,
+                               SIGFPE, SIGSEGV, SIGTERM };
 
 static char const *const signames[] = {
+  [SIGINT]  = "Interactive attention signal",
   [SIGILL]  = "Illegal instruction",
   [SIGABRT] = "Abnormal termination",
   [SIGFPE]  = "Erroneous arithmetic operation",
