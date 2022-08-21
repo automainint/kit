@@ -29,17 +29,13 @@ static long long sec_to_ms(long long sec) {
 
 enum { white, yellow, red, green };
 
-static void color_code(int term_color, int c) {
-  if (term_color) {
-    if (c == white)
-      printf("\x1b[37m");
-    if (c == yellow)
-      printf("\x1b[33m");
-    if (c == red)
-      printf("\x1b[31m");
-    if (c == green)
-      printf("\x1b[32m");
-  }
+char const *const color_codes[] = { [white]  = "\x1b[37m",
+                                    [yellow] = "\x1b[33m",
+                                    [red]    = "\x1b[31m",
+                                    [green]  = "\x1b[32m" };
+
+static int print_color(int c) {
+  return printf("%s", color_codes[c]);
 }
 
 void kit_test_register(char const *name, char const *file,
@@ -104,28 +100,28 @@ int kit_run_tests(int argc, char **argv) {
   int total_assertion_count = 0;
   int status                = 0;
   int quiet                 = 0;
-  int term_color            = 1;
+  int no_color              = 0;
   int carriage_return       = 1;
 
   for (int i = 0; i < argc; i++)
     if (strcmp("--no-term-color", argv[i]) == 0)
-      term_color = 0;
+      no_color = 1;
     else if (strcmp("--no-carriage-return", argv[i]) == 0)
       carriage_return = 0;
     else if (strcmp("--quiet", argv[i]) == 0)
       quiet = 1;
 
   if (quiet)
-    term_color = 0;
+    no_color = 1;
 
   for (int i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
        i++) {
-    color_code(term_color, yellow);
+    no_color || print_color(yellow);
     quiet ||
         printf("[ RUN... ] %s ", kit_tests_list.tests[i].test_name);
     if (!carriage_return)
       quiet || printf("\n");
-    color_code(term_color, white);
+    no_color || print_color(white);
     quiet || fflush(stdout);
 
     struct timespec begin, end;
@@ -153,23 +149,23 @@ int kit_run_tests(int argc, char **argv) {
     total_assertion_count += kit_tests_list.tests[i].assertions;
 
     if (test_status == 0) {
-      color_code(term_color, red);
+      no_color || print_color(red);
       quiet || printf("[ RUN    ] %s\n",
                       kit_tests_list.tests[i].test_name);
       quiet ||
           printf("[ FAILED ] %s", kit_tests_list.tests[i].test_name);
-      color_code(term_color, white);
+      no_color || print_color(white);
       if (duration > 0)
         quiet || printf(" - %d ms", duration);
       quiet || printf("\n");
       status = 1;
     } else {
-      color_code(term_color, green);
+      no_color || print_color(green);
       quiet || printf("[ RUN    ] %s\n",
                       kit_tests_list.tests[i].test_name);
       quiet ||
           printf("[     OK ] %s", kit_tests_list.tests[i].test_name);
-      color_code(term_color, white);
+      no_color || print_color(white);
       if (duration > 0)
         quiet || printf(" - %d ms", duration);
       quiet || printf("\n");
@@ -225,13 +221,13 @@ int kit_run_tests(int argc, char **argv) {
   }
 
   if (status == 0) {
-    color_code(term_color, green);
+    no_color || print_color(green);
     quiet || printf("OK\n");
   } else {
-    color_code(term_color, red);
+    no_color || print_color(red);
     quiet || printf("FAILED\n");
   }
 
-  color_code(term_color, white);
+  no_color || print_color(white);
   return status;
 }
