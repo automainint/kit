@@ -3,7 +3,9 @@
 #define KIT_TEST_FILE thread
 #include "../../kit_test/test.h"
 
-static int test_nothing(void *_) { }
+static int test_nothing(void *_) {
+  return 0;
+}
 
 static int test_run(void *data) {
   int *n = (int *) data;
@@ -21,11 +23,13 @@ static int test_exit(void *data) {
 
 static int test_yield(void *data) {
   thrd_yield();
+  return 0;
 }
 
 static int test_sleep(void *data) {
   struct timespec t = { .tv_sec = 0, .tv_nsec = 10000000 };
   thrd_sleep(&t, NULL);
+  return 0;
 }
 
 TEST("thread run") {
