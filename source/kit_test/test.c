@@ -119,8 +119,7 @@ int kit_run_tests(int argc, char **argv) {
     no_color || print_color(yellow);
     quiet ||
         printf("[ RUN... ] %s ", kit_tests_list.tests[i].test_name);
-    if (!carriage_return)
-      quiet || printf("\n");
+    carriage_return || quiet || printf("\n");
     no_color || print_color(white);
     quiet || fflush(stdout);
 
@@ -133,8 +132,7 @@ int kit_run_tests(int argc, char **argv) {
     int duration = (int) (ns_to_ms(end.tv_nsec - begin.tv_nsec) +
                           sec_to_ms(end.tv_sec - begin.tv_sec));
 
-    if (carriage_return)
-      quiet || printf("\r");
+    !carriage_return || quiet || printf("\r");
 
     for (int j = 0; j < kit_tests_list.tests[i].assertions; j++)
       if (kit_tests_list.tests[i].status[j] == 0) {
@@ -155,8 +153,7 @@ int kit_run_tests(int argc, char **argv) {
       quiet ||
           printf("[ FAILED ] %s", kit_tests_list.tests[i].test_name);
       no_color || print_color(white);
-      if (duration > 0)
-        quiet || printf(" - %d ms", duration);
+      duration == 0 || quiet || printf(" - %d ms", duration);
       quiet || printf("\n");
       status = 1;
     } else {
@@ -166,8 +163,7 @@ int kit_run_tests(int argc, char **argv) {
       quiet ||
           printf("[     OK ] %s", kit_tests_list.tests[i].test_name);
       no_color || print_color(white);
-      if (duration > 0)
-        quiet || printf(" - %d ms", duration);
+      duration == 0 || quiet || printf(" - %d ms", duration);
       quiet || printf("\n");
       success_count++;
     }
