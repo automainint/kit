@@ -8,7 +8,7 @@
  */
 
 TEST("c++ exception") {
-  throw std::exception {};
+  throw std::exception();
 }
 
 TEST("abort") {
