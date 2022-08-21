@@ -43,18 +43,22 @@ jobs:
           cmake -B build -S .
           cmake --build build --config $BUILD_TYPE
 
-      - name: Run tests & generate coverage on Linux
+      - name: Run tests
+        if: runner.os != 'Windows'
+        working-directory: ${{ github.workspace }}/build
+        run: |
+          ctest -V -C $BUILD_TYPE
+
+      - name: Generate coverage on Linux
         if: runner.os == 'Linux'
         working-directory: ${{ github.workspace }}/build
         run: |
-          ctest -V -C $BUILD_TYPE
           gcovr -j $(nproc) --delete --root ../source/ --exclude '\.\./source/test/' --print-summary --xml-pretty --xml coverage.xml .
 
-      - name: Run tests & generate coverage on macOS
+      - name: Generate coverage on macOS
         if: runner.os == 'macOS'
         working-directory: ${{ github.workspace }}/build
         run: |
-          ctest -V -C $BUILD_TYPE
           gcovr -j 2 --delete --root ../source/ --exclude '\.\./source/test/' --print-summary --xml-pretty --xml coverage.xml .
 
       - name: Run tests & generate coverage on Windows
