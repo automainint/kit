@@ -36,6 +36,8 @@ int test_lock_for_2_sec(void *data) {
   thrd_sleep(&sec, NULL);
 
   mtx_unlock(m);
+
+  return 0;
 }
 
 TEST("mutex lock") {
