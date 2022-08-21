@@ -7,15 +7,15 @@ static int is_equal(int const x, int const y) {
   return x == y;
 }
 
-static int is_equal_ref(int const *const x, int const *const y) {
-  return *x == *y;
+static int is_equal_ref(int const *const x, int const y) {
+  return *x == y;
 }
 
 static int is_even(int const x, int const _) {
   return (x % 2) == 0;
 }
 
-static int is_even_ref(int const *const x, int const *const _) {
+static int is_even_ref(int const *const x, int const _) {
   return (*x % 2) == 0;
 }
 
@@ -43,9 +43,7 @@ TEST("move back ref val") {
     int *values;
   } ref = { .size = sizeof v / sizeof *v, .values = v };
 
-  int const two = 2;
-
-  MOVE_BACK_REF(ref.size, ref, two, is_equal_ref);
+  MOVE_BACK_REF(ref.size, ref, 2, is_equal_ref);
 
   REQUIRE(ref.size == 3);
   REQUIRE(v[0] == 1);
@@ -109,9 +107,7 @@ TEST("move back ref 1") {
     int *values;
   } ref = { .size = sizeof v / sizeof *v, .values = v };
 
-  int const nothing = 0;
-
-  MOVE_BACK_REF(ref.size, ref, nothing, is_even_ref);
+  MOVE_BACK_REF(ref.size, ref, 0, is_even_ref);
 
   REQUIRE(ref.size == 3);
   REQUIRE(v[0] == 1);
@@ -127,9 +123,7 @@ TEST("move back ref 2") {
     int *values;
   } ref = { .size = sizeof v / sizeof *v, .values = v };
 
-  int const nothing = 0;
-
-  MOVE_BACK_REF(ref.size, ref, nothing, is_even_ref);
+  MOVE_BACK_REF(ref.size, ref, 0, is_even_ref);
 
   REQUIRE(ref.size == 3);
   REQUIRE(v[0] == 5);
@@ -145,9 +139,7 @@ TEST("move back ref 3") {
     int *values;
   } ref = { .size = sizeof v / sizeof *v, .values = v };
 
-  int const nothing = 0;
-
-  MOVE_BACK_REF(ref.size, ref, nothing, is_even_ref);
+  MOVE_BACK_REF(ref.size, ref, 0, is_even_ref);
 
   REQUIRE(ref.size == 3);
   REQUIRE(v[0] == 1);

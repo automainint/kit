@@ -32,7 +32,7 @@ extern "C" {
     ptrdiff_t     end_ = (array).size;                  \
     unsigned char temp_[sizeof *(array).values];        \
     for (ptrdiff_t i_ = 0; i_ < end_;) {                \
-      if ((cond) (&(array).values[i_], &(value))) {     \
+      if ((cond) ((array).values + i_, (value))) {      \
         end_--;                                         \
         if (i_ != end_) {                               \
           memcpy(temp_, (array).values + end_,          \
