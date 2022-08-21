@@ -1,7 +1,7 @@
 #include "../../kit/lower_bound.h"
 #include "../../kit/array_ref.h"
 
-#define TEST_FILE lower_bound
+#define KIT_TEST_FILE lower_bound
 #include "../../kit_test/test.h"
 
 static int kit_less_int(int left, int right) {

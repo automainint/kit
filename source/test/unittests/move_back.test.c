@@ -1,6 +1,6 @@
 #include "../../kit/move_back.h"
 
-#define TEST_FILE move_back
+#define KIT_TEST_FILE move_back
 #include "../../kit_test/test.h"
 
 static int is_equal(int const x, int const y) {
