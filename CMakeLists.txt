@@ -19,7 +19,7 @@ project(
   ${KIT_PROJECT}
   VERSION 0.1.1
   DESCRIPTION "A collection of C libraries"
-  LANGUAGES C CXX)
+  LANGUAGES C)
 
 add_library(${KIT_LIBRARY} STATIC)
 add_library(${KIT_PROJECT}::${KIT_LIBRARY} ALIAS ${KIT_LIBRARY})
@@ -120,7 +120,6 @@ target_include_directories(
   ${KIT_TEST_LIBRARY} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source>)
 target_compile_features(${KIT_TEST_LIBRARY} PUBLIC c_std_11)
-target_compile_features(${KIT_TEST_LIBRARY} PUBLIC cxx_std_11)
 
 enable_testing()
 

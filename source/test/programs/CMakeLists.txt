@@ -1,3 +1,9 @@
+project(
+  ${KIT_PROJECT}_test_programs
+  VERSION 0.1.1
+  DESCRIPTION "Kit test programs"
+  LANGUAGES C CXX)
+
 if(KIT_ENABLE_TESTING)
   add_executable(too_many_tests too_many_tests.c)
   target_link_libraries(too_many_tests ${KIT_TEST_LIBRARY})
