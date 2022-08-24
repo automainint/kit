@@ -157,9 +157,9 @@ int kit_run_tests(int argc, char **argv) {
         quiet || printf("\n");
       file = kit_tests_list.tests[i].test_file;
       no_color || print_color(blue);
-      quiet || printf("*");
+      quiet || printf("* ");
       no_color || print_color(white);
-      quiet || printf(" %s\n", file + file_root);
+      quiet || printf("%s\n", file + file_root);
     }
 
     !carriage_return || no_color || print_color(yellow);
@@ -216,7 +216,6 @@ int kit_run_tests(int argc, char **argv) {
   no_color || print_color(white);
   quiet || printf("\n%d of %d tests passed.\n", success_count,
                   kit_tests_list.size);
-
   quiet || printf("%d of %d assertions passed.\n\n",
                   total_assertion_count - fail_assertion_count,
                   total_assertion_count);
@@ -230,35 +229,68 @@ int kit_run_tests(int argc, char **argv) {
         int signum = kit_tests_list.tests[i].signal;
         if (signum >= 0 &&
             signum < sizeof signames / sizeof *signames &&
-            signames[signum] != NULL)
-          quiet ||
-              printf("Signal \"%s\" (%d) for \"%s\" in \"%s\"!\n",
-                     signames[signum], signum,
-                     kit_tests_list.tests[i].test_name,
-                     kit_tests_list.tests[i].test_file);
-        else
-          quiet ||
-              printf("Unknown signal (%d) for \"%s\" in \"%s\"!\n",
-                     signum, kit_tests_list.tests[i].test_name,
-                     kit_tests_list.tests[i].test_file);
+            signames[signum] != NULL) {
+          no_color || print_color(light);
+          quiet || printf("Signal \"%s\" (%d) for \"",
+                          signames[signum], signum);
+          no_color || print_color(white);
+          quiet || printf("%s", kit_tests_list.tests[i].test_name);
+          no_color || print_color(light);
+          quiet || printf("\" in \"");
+          no_color || print_color(white);
+          quiet || printf("%s", kit_tests_list.tests[i].test_file +
+                                    file_root);
+          no_color || print_color(light);
+          quiet || printf("\"!.\n");
+        } else {
+          no_color || print_color(light);
+          quiet || printf("Unknown signal (%d) for \"", signum);
+          no_color || print_color(white);
+          quiet || printf("%s", kit_tests_list.tests[i].test_name);
+          no_color || print_color(light);
+          quiet || printf("\" in \"");
+          no_color || print_color(white);
+          quiet || printf("%s", kit_tests_list.tests[i].test_file +
+                                    file_root);
+          no_color || print_color(light);
+          quiet || printf("\"!.\n");
+        }
       }
       if (kit_tests_list.tests[i].assertions >
-          KIT_TEST_ASSERTIONS_LIMIT)
-        quiet || printf("Too many assertions for \"%s\" in \"%s\"!\n",
-                        kit_tests_list.tests[i].test_name,
-                        kit_tests_list.tests[i].test_file);
-      else
+          KIT_TEST_ASSERTIONS_LIMIT) {
+        no_color || print_color(light);
+        quiet || printf("Too many assertions for \"");
+        no_color || print_color(white);
+        quiet || printf("%s", kit_tests_list.tests[i].test_name);
+        no_color || print_color(light);
+        quiet || printf("\" in \"");
+        no_color || print_color(white);
+        quiet || printf("%s", kit_tests_list.tests[i].test_file +
+                                  file_root);
+        no_color || print_color(light);
+        quiet || printf("\"!.\n");
+      } else
         for (int j = 0; j < kit_tests_list.tests[i].assertions; j++)
-          if (!kit_tests_list.tests[i].status[j])
-            quiet || printf("Assertion on line %d in \"%s\" failed\n",
-                            kit_tests_list.tests[i].line[j],
-                            kit_tests_list.tests[i].test_file);
+          if (!kit_tests_list.tests[i].status[j]) {
+            no_color || print_color(light);
+            quiet || printf("Assertion on line ");
+            no_color || print_color(white);
+            quiet || printf("%d", kit_tests_list.tests[i].line[j]);
+            no_color || print_color(light);
+            quiet || printf(" in \"");
+            no_color || print_color(white);
+            quiet || printf("%s", kit_tests_list.tests[i].test_file +
+                                      file_root);
+            no_color || print_color(light);
+            quiet || printf("\" failed.\n");
+          }
     }
 
     quiet || printf("\n");
   }
 
   if (kit_tests_list.size > KIT_TESTS_SIZE_LIMIT) {
+    no_color || print_color(light);
     quiet || printf("Too many tests!\n\n");
     status = 1;
   }
