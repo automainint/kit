@@ -90,6 +90,13 @@ typedef struct {
 #define KIT_CORO_VOID(name_, ...) \
   KIT_CORO(kit_af_void, name_, __VA_ARGS__)
 
+#define KIT_STATIC_CORO(ret_type_, name_, ...) \
+  KIT_AF_STATE(ret_type_, name_, __VA_ARGS__); \
+  static KIT_CORO_IMPL(name_)
+
+#define KIT_STATIC_CORO_VOID(name_, ...) \
+  KIT_STATIC_CORO(kit_af_void, name_, __VA_ARGS__)
+
 #define KIT_AF_YIELD(...)                \
   do {                                   \
     self->_index       = KIT_AF_LINE_(); \
@@ -277,6 +284,8 @@ typedef struct {
 #  define CORO_DECL KIT_CORO_DECL
 #  define CORO KIT_CORO
 #  define CORO_DECL_VOID KIT_CORO_DECL_VOID
+#  define STATIC_CORO KIT_STATIC_CORO
+#  define STATIC_CORO_VOID KIT_STATIC_CORO_VOID
 #  define CORO_VOID KIT_CORO_VOID
 #  define AF_YIELD KIT_AF_YIELD
 #  define AF_YIELD_VOID KIT_AF_YIELD_VOID
