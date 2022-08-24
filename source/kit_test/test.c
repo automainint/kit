@@ -27,12 +27,12 @@ static long long sec_to_ms(long long sec) {
   return 1000 * sec;
 }
 
-enum { white, yellow, red, green };
+enum { white, blue, light, yellow, red, green };
 
-char const *const color_codes[] = { [white]  = "\x1b[37m",
-                                    [yellow] = "\x1b[33m",
-                                    [red]    = "\x1b[31m",
-                                    [green]  = "\x1b[32m" };
+char const *const color_codes[] = {
+  [white] = "\x1b[38m",  [blue] = "\x1b[34m", [light] = "\x1b[37m",
+  [yellow] = "\x1b[33m", [red] = "\x1b[31m",  [green] = "\x1b[32m"
+};
 
 static int print_color(int c) {
   return printf("%s", color_codes[c]);
@@ -102,6 +102,7 @@ int kit_run_tests(int argc, char **argv) {
   int status                = 0;
   int quiet                 = 0;
   int no_color              = 0;
+  int line_width            = 20;
   int carriage_return       = 1;
 
   for (int i = 0; i < argc; i++)
@@ -115,13 +116,55 @@ int kit_run_tests(int argc, char **argv) {
   if (quiet)
     no_color = 1;
 
+  char const *file      = NULL;
+  ptrdiff_t   file_root = -1;
+
   for (int i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
        i++) {
-    no_color || print_color(yellow);
-    quiet ||
-        printf("[ RUN... ] %s ", kit_tests_list.tests[i].test_name);
-    carriage_return || quiet || printf("\n");
-    no_color || print_color(white);
+    int const l = 2 + (int) strlen(kit_tests_list.tests[i].test_name);
+    if (line_width < l)
+      line_width = l;
+  }
+
+  if (kit_tests_list.size > 0) {
+    char const *const s = kit_tests_list.tests[0].test_file;
+
+    for (int j = 1;
+         j < kit_tests_list.size && j < KIT_TESTS_SIZE_LIMIT; j++) {
+      if (strcmp(s, kit_tests_list.tests[j].test_file) == 0)
+        continue;
+      int k = 0;
+      for (; s[k] != '\0' &&
+             kit_tests_list.tests[j].test_file[k] != '\0' &&
+             s[k] == kit_tests_list.tests[j].test_file[k];
+           k++) { }
+      if (file_root == -1 || file_root > k)
+        file_root = k;
+    }
+
+    if (file_root == -1) {
+      for (int i = 0; s[i] != '\0'; i++)
+        if (s[i] == '/' || s[i] == '\\')
+          file_root = i + 1;
+    }
+  }
+
+  for (int i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
+       i++) {
+    if (file == NULL ||
+        strcmp(file, kit_tests_list.tests[i].test_file) != 0) {
+      if (file != NULL)
+        quiet || printf("\n");
+      file = kit_tests_list.tests[i].test_file;
+      no_color || print_color(blue);
+      quiet || printf("*");
+      no_color || print_color(white);
+      quiet || printf(" %s\n", file + file_root);
+    }
+
+    !carriage_return || no_color || print_color(yellow);
+    carriage_return || no_color || print_color(light);
+    quiet || printf("` %s ", kit_tests_list.tests[i].test_name);
     quiet || fflush(stdout);
 
     struct timespec begin, end;
@@ -132,8 +175,6 @@ int kit_run_tests(int argc, char **argv) {
     timespec_get(&end, TIME_UTC);
     int duration = (int) (ns_to_ms(end.tv_nsec - begin.tv_nsec) +
                           sec_to_ms(end.tv_sec - begin.tv_sec));
-
-    !carriage_return || quiet || printf("\r");
 
     for (int j = 0; j < kit_tests_list.tests[i].assertions; j++)
       if (kit_tests_list.tests[i].status[j] == 0) {
@@ -147,35 +188,40 @@ int kit_run_tests(int argc, char **argv) {
 
     total_assertion_count += kit_tests_list.tests[i].assertions;
 
+    if (carriage_return) {
+      no_color || print_color(light);
+      quiet || printf("\r` %s ", kit_tests_list.tests[i].test_name);
+    }
+
+    int const l = (int) strlen(kit_tests_list.tests[i].test_name);
+    quiet || printf("%*c", line_width - l, ' ');
+
     if (test_status == 0) {
       no_color || print_color(red);
-      quiet || printf("[ RUN    ] %s\n",
-                      kit_tests_list.tests[i].test_name);
-      quiet ||
-          printf("[ FAILED ] %s", kit_tests_list.tests[i].test_name);
-      no_color || print_color(white);
-      duration == 0 || quiet || printf(" - %d ms", duration);
+      quiet || printf("FAIL");
+      no_color || print_color(light);
+      duration == 0 || quiet || printf(" %d ms", duration);
       quiet || printf("\n");
       status = 1;
     } else {
       no_color || print_color(green);
-      quiet || printf("[ RUN    ] %s\n",
-                      kit_tests_list.tests[i].test_name);
-      quiet ||
-          printf("[     OK ] %s", kit_tests_list.tests[i].test_name);
-      no_color || print_color(white);
-      duration == 0 || quiet || printf(" - %d ms", duration);
+      quiet || printf("OK");
+      no_color || print_color(light);
+      duration == 0 || quiet || printf("   %d ms", duration);
       quiet || printf("\n");
       success_count++;
     }
   }
 
+  no_color || print_color(white);
   quiet || printf("\n%d of %d tests passed.\n", success_count,
                   kit_tests_list.size);
 
   quiet || printf("%d of %d assertions passed.\n\n",
                   total_assertion_count - fail_assertion_count,
                   total_assertion_count);
+
+  no_color || print_color(light);
 
   if (status != 0) {
     for (int i = 0;
