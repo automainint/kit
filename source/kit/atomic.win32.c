@@ -1,9 +1,9 @@
 #include "atomic.h"
 
 #ifdef _MSC_VER
-static_assert(sizeof(char) == 1);
-static_assert(sizeof(short) == 2);
-static_assert(sizeof(long) == 4);
+static_assert(sizeof(char) == 1, "Wrong char size");
+static_assert(sizeof(short) == 2, "Wrong short size");
+static_assert(sizeof(long) == 4, "Wrong long size");
 
 #  include <intrin.h>
 
