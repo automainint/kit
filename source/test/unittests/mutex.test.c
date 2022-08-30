@@ -3,7 +3,7 @@
 #define KIT_TEST_FILE mutex
 #include "../../kit_test/test.h"
 
-enum { SLEEP = 200000000, TICK_COUNT = 200, THREAD_COUNT = 100 };
+enum { SLEEP = 400000000, TICK_COUNT = 200, THREAD_COUNT = 100 };
 
 typedef struct {
   mtx_t lock;
