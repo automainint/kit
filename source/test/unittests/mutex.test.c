@@ -1,9 +1,9 @@
-#include "../../kit/threads.h"
+#include "../../kit/mutex.h"
 
 #define KIT_TEST_FILE mutex
 #include "../../kit_test/test.h"
 
-enum { THREAD_COUNT = 200 };
+enum { SLEEP = 200000000, TICK_COUNT = 200, THREAD_COUNT = 100 };
 
 typedef struct {
   mtx_t lock;
@@ -12,7 +12,7 @@ typedef struct {
 
 static int test_run(void *data) {
   test_data_t *x = (test_data_t *) data;
-  for (int i = 0; i < 1000; i++) {
+  for (int i = 0; i < TICK_COUNT; i++) {
     mtx_lock(&x->lock);
 
     x->value += i;
@@ -25,18 +25,6 @@ static int test_run(void *data) {
 
     mtx_unlock(&x->lock);
   }
-  return 0;
-}
-
-int test_lock_for_2_sec(void *data) {
-  mtx_t *m = (mtx_t *) data;
-  mtx_lock(m);
-
-  struct timespec sec = { .tv_sec = 2, .tv_nsec = 0 };
-  thrd_sleep(&sec, NULL);
-
-  mtx_unlock(m);
-
   return 0;
 }
 
@@ -55,14 +43,26 @@ TEST("mutex lock") {
   REQUIRE(data.value == 42);
 }
 
+static int test_lock(void *data) {
+  mtx_t *m = (mtx_t *) data;
+  mtx_lock(m);
+
+  struct timespec sec = { .tv_sec = 0, .tv_nsec = SLEEP };
+  thrd_sleep(&sec, NULL);
+
+  mtx_unlock(m);
+
+  return 0;
+}
+
 TEST("mutex try lock") {
   mtx_t m;
   REQUIRE(mtx_init(&m, mtx_plain) == thrd_success);
 
   thrd_t t;
-  REQUIRE(thrd_create(&t, test_lock_for_2_sec, &m) == thrd_success);
+  REQUIRE(thrd_create(&t, test_lock, &m) == thrd_success);
 
-  struct timespec sec = { .tv_sec = 1, .tv_nsec = 0 };
+  struct timespec sec = { .tv_sec = 0, .tv_nsec = SLEEP / 2 };
   REQUIRE(thrd_sleep(&sec, NULL) == thrd_success);
 
   REQUIRE(mtx_trylock(&m) == thrd_busy);
