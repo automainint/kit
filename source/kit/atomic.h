@@ -78,33 +78,31 @@ uint64_t kit_atomic_fetch_add_explicit_64(uint64_t volatile *var,
                                           uint64_t           value,
                                           int memory_order);
 
-#  define atomic_store_explicit(var_, value_, memory_order_)        \
-    do {                                                            \
-      static_assert(sizeof *(var_) == 1 || sizeof *(var_) == 2 ||   \
-                        sizeof *(var_) == 4 || sizeof *(var_) == 8, \
-                    "Wrong atomic variable type");                  \
-      if (sizeof *(var_) == 1)                                      \
-        kit_atomic_store_explicit_8((uint8_t volatile *) (var_),    \
-                                    (uint8_t) (value_),             \
-                                    (memory_order_));               \
-      if (sizeof *(var_) == 2)                                      \
-        kit_atomic_store_explicit_16((uint16_t volatile *) (var_),  \
-                                     (uint16_t) (value_),           \
-                                     (memory_order_));              \
-      if (sizeof *(var_) == 4)                                      \
-        kit_atomic_store_explicit_32((uint32_t volatile *) (var_),  \
-                                     (uint32_t) (value_),           \
-                                     (memory_order_));              \
-      if (sizeof *(var_) == 8)                                      \
-        kit_atomic_store_explicit_64((uint64_t volatile *) (var_),  \
-                                     (uint64_t) (value_),           \
-                                     (memory_order_));              \
+#  define atomic_store_explicit(var_, value_, memory_order_)       \
+    do {                                                           \
+      assert(sizeof *(var_) == 1 || sizeof *(var_) == 2 ||         \
+             sizeof *(var_) == 4 || sizeof *(var_) == 8);          \
+      if (sizeof *(var_) == 1)                                     \
+        kit_atomic_store_explicit_8((uint8_t volatile *) (var_),   \
+                                    (uint8_t) (value_),            \
+                                    (memory_order_));              \
+      if (sizeof *(var_) == 2)                                     \
+        kit_atomic_store_explicit_16((uint16_t volatile *) (var_), \
+                                     (uint16_t) (value_),          \
+                                     (memory_order_));             \
+      if (sizeof *(var_) == 4)                                     \
+        kit_atomic_store_explicit_32((uint32_t volatile *) (var_), \
+                                     (uint32_t) (value_),          \
+                                     (memory_order_));             \
+      if (sizeof *(var_) == 8)                                     \
+        kit_atomic_store_explicit_64((uint64_t volatile *) (var_), \
+                                     (uint64_t) (value_),          \
+                                     (memory_order_));             \
     } while (0)
 
 #  define atomic_load_explicit(var_, memory_order_)                 \
-    (static_assert(sizeof *(var_) == 1 || sizeof *(var_) == 2 ||    \
-                       sizeof *(var_) == 4 || sizeof *(var_) == 8,  \
-                   "Wrong atomic variable type"),                   \
+    (assert(sizeof *(var_) == 1 || sizeof *(var_) == 2 ||           \
+            sizeof *(var_) == 4 || sizeof *(var_) == 8),            \
      (sizeof *(var_) == 1                                           \
           ? kit_atomic_load_explicit_8((uint8_t volatile *) (var_), \
                                        (value_), (memory_order_))   \
@@ -119,9 +117,8 @@ uint64_t kit_atomic_fetch_add_explicit_64(uint64_t volatile *var,
                                   (value_), (memory_order_))))
 
 #  define atomic_exchange_explicit(var_, value_, memory_order_)      \
-    (static_assert(sizeof *(var_) == 1 || sizeof *(var_) == 2 ||     \
-                       sizeof *(var_) == 4 || sizeof *(var_) == 8,   \
-                   "Wrong atomic variable type"),                    \
+    (assert(sizeof *(var_) == 1 || sizeof *(var_) == 2 ||            \
+            sizeof *(var_) == 4 || sizeof *(var_) == 8),             \
      (sizeof *(var_) == 1 ? kit_atomic_exchange_explicit_8(          \
                                 (uint8_t volatile *) (var_),         \
                                 (uint8_t) (value_), (memory_order_)) \
@@ -138,9 +135,8 @@ uint64_t kit_atomic_fetch_add_explicit_64(uint64_t volatile *var,
                 (memory_order_))))
 
 #  define atomic_fetch_add_explicit(var_, value_, memory_order_)     \
-    (static_assert(sizeof *(var_) == 1 || sizeof *(var_) == 2 ||     \
-                       sizeof *(var_) == 4 || sizeof *(var_) == 8,   \
-                   "Wrong atomic variable type"),                    \
+    (assert(sizeof *(var_) == 1 || sizeof *(var_) == 2 ||            \
+            sizeof *(var_) == 4 || sizeof *(var_) == 8),             \
      (sizeof *(var_) == 1 ? kit_atomic_fetch_add_explicit_8(         \
                                 (uint8_t volatile *) (var_),         \
                                 (uint8_t) (value_), (memory_order_)) \

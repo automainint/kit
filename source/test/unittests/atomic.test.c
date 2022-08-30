@@ -83,7 +83,8 @@ TEST("atomic byte concurrency") {
 
   thrd_t threads[THREAD_COUNT];
   for (ptrdiff_t i = 0; i < THREAD_COUNT; i++)
-    thrd_create(threads + i, test_8_, (i % 2) ? &foo : &bar);
+    thrd_create(threads + i, test_8_,
+                (void *) ((i % 2) ? &foo : &bar));
   for (ptrdiff_t i = 0; i < THREAD_COUNT; i++)
     thrd_join(threads[i], NULL);
 
@@ -113,7 +114,8 @@ TEST("atomic int16 concurrency") {
 
   thrd_t threads[THREAD_COUNT];
   for (ptrdiff_t i = 0; i < THREAD_COUNT; i++)
-    thrd_create(threads + i, test_16_, (i % 2) ? &foo : &bar);
+    thrd_create(threads + i, test_16_,
+                (void *) ((i % 2) ? &foo : &bar));
   for (ptrdiff_t i = 0; i < THREAD_COUNT; i++)
     thrd_join(threads[i], NULL);
 
@@ -143,7 +145,8 @@ TEST("atomic int32 concurrency") {
 
   thrd_t threads[THREAD_COUNT];
   for (ptrdiff_t i = 0; i < THREAD_COUNT; i++)
-    thrd_create(threads + i, test_32_, (i % 2) ? &foo : &bar);
+    thrd_create(threads + i, test_32_,
+                (void *) ((i % 2) ? &foo : &bar));
   for (ptrdiff_t i = 0; i < THREAD_COUNT; i++)
     thrd_join(threads[i], NULL);
 
@@ -176,7 +179,8 @@ TEST("atomic int64 concurrency") {
 
   thrd_t threads[THREAD_COUNT];
   for (ptrdiff_t i = 0; i < THREAD_COUNT; i++)
-    thrd_create(threads + i, test_64_, (i % 2) ? &foo : &bar);
+    thrd_create(threads + i, test_64_,
+                (void *) ((i % 2) ? &foo : &bar));
   for (ptrdiff_t i = 0; i < THREAD_COUNT; i++)
     thrd_join(threads[i], NULL);
 
