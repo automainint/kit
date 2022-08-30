@@ -105,16 +105,15 @@ uint64_t kit_atomic_fetch_add_explicit_64(uint64_t volatile *var,
             sizeof *(var_) == 4 || sizeof *(var_) == 8),            \
      (sizeof *(var_) == 1                                           \
           ? kit_atomic_load_explicit_8((uint8_t volatile *) (var_), \
-                                       (value_), (memory_order_))   \
-      : sizeof *(var_) == 2 ? kit_atomic_load_explicit_16(          \
-                                  (uint16_t volatile *) (var_),     \
-                                  (value_), (memory_order_))        \
-      : sizeof *(var_) == 4 ? kit_atomic_load_explicit_32(          \
-                                  (uint32_t volatile *) (var_),     \
-                                  (value_), (memory_order_))        \
-                            : kit_atomic_load_explicit_64(          \
-                                  (uint64_t volatile *) (var_),     \
-                                  (value_), (memory_order_))))
+                                       (memory_order_))             \
+      : sizeof *(var_) == 2                                         \
+          ? kit_atomic_load_explicit_16(                            \
+                (uint16_t volatile *) (var_), (memory_order_))      \
+      : sizeof *(var_) == 4                                         \
+          ? kit_atomic_load_explicit_32(                            \
+                (uint32_t volatile *) (var_), (memory_order_))      \
+          : kit_atomic_load_explicit_64(                            \
+                (uint64_t volatile *) (var_), (memory_order_))))
 
 #  define atomic_exchange_explicit(var_, value_, memory_order_)      \
     (assert(sizeof *(var_) == 1 || sizeof *(var_) == 2 ||            \
