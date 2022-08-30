@@ -3,31 +3,37 @@
 #define KIT_TEST_FILE async_function
 #include "../../kit_test/test.h"
 
-CORO(int, test_foo) {
+AF_STATE(int, test_foo);
+static AF_DECL(test_foo);
+
+CORO_IMPL(test_foo) {
   AF_RETURN(42);
 }
 CORO_END
 
-CORO(int, test_bar) {
+AF_STATE(int, test_bar);
+static AF_DECL(test_bar);
+
+CORO_IMPL(test_bar) {
   AF_YIELD_VOID;
   AF_RETURN(42);
 }
 CORO_END
 
-CORO(int, test_gen, int i; int min; int max;) {
+STATIC_CORO(int, test_gen, int i; int min; int max;) {
   for (af i = af min; af i < af max; af i++) AF_YIELD(af i);
   AF_RETURN(af max);
 }
 CORO_END
 
-CORO_VOID(test_task) {
+STATIC_CORO_VOID(test_task) {
   AF_YIELD_VOID;
   AF_YIELD_VOID;
   AF_RETURN_VOID;
 }
 CORO_END
 
-CORO_VOID(test_nest_task, AF_TYPE(test_task) promise;) {
+STATIC_CORO_VOID(test_nest_task, AF_TYPE(test_task) promise;) {
   AF_INIT(af promise, test_task);
   AF_AWAIT(af promise);
   AF_AWAIT(af promise);
@@ -35,13 +41,13 @@ CORO_VOID(test_nest_task, AF_TYPE(test_task) promise;) {
 }
 CORO_END
 
-CORO(int, test_nest_generator, AF_TYPE(test_gen) promise;) {
+STATIC_CORO(int, test_nest_generator, AF_TYPE(test_gen) promise;) {
   AF_INIT(af promise, test_gen, .min = 1, .max = 3);
   AF_YIELD_AWAIT(af promise);
 }
 CORO_END
 
-CORO(int, test_join_multiple, AF_TYPE(test_bar) promises[3];) {
+STATIC_CORO(int, test_join_multiple, AF_TYPE(test_bar) promises[3];) {
   for (int i = 0; i < 3; i++)
     AF_INIT(af promises[i], test_bar, .return_value = 0);
   AF_RESUME_AND_JOIN_ALL(af promises);
@@ -51,7 +57,8 @@ CORO(int, test_join_multiple, AF_TYPE(test_bar) promises[3];) {
 }
 CORO_END
 
-CORO(int, test_await_multiple, AF_TYPE(test_bar) promises[3];) {
+STATIC_CORO(int, test_await_multiple,
+            AF_TYPE(test_bar) promises[3];) {
   for (int i = 0; i < 3; i++)
     AF_INIT(af promises[i], test_bar, .return_value = 0);
   AF_AWAIT_ALL(af promises);
@@ -86,7 +93,7 @@ TEST("coroutine init") {
 
 TEST("coroutine init explicit") {
   AF_TYPE(test_foo) promise;
-  AF_INIT_EXPLICIT(promise, sizeof promise, AF_NAME(test_foo));
+  AF_INIT_EXPLICIT(promise, sizeof promise, test_foo);
   REQUIRE(!AF_FINISHED(promise));
 }
 

@@ -45,10 +45,10 @@ extern kit_tests_list_t kit_tests_list;
 
 #ifdef __cplusplus
 #  define KIT_TEST_ON_START_(f)                              \
-    static void f(void) noexcept;                            \
+    static void f(void);                                     \
     static int  KIT_TEST_CONCAT3_(_kit_test_init_, __LINE__, \
                                   f) = (f(), 0);             \
-    static void f(void) noexcept
+    static void f(void)
 #else
 #  ifdef _MSC_VER
 #    ifdef __cplusplus

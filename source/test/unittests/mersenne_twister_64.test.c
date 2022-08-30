@@ -1,6 +1,6 @@
 #include "../../kit/mersenne_twister_64.h"
 
-#define TEST_FILE mersenne_twister_64
+#define KIT_TEST_FILE mersenne_twister_64
 #include "../../kit_test/test.h"
 
 enum { SIZE = 1000 };
