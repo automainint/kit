@@ -42,25 +42,30 @@ static int test_8_(void *p) {
 }
 
 TEST("atomic types") {
-  ATOMIC(int8_t) byte;
+  ATOMIC(int8_t) b_1;
+  ATOMIC(int8_t) b_2;
   ATOMIC(int16_t) i16;
   ATOMIC(int32_t) i32;
   ATOMIC(int64_t) i64;
 
-  atomic_store_explicit(&byte, 42, memory_order_relaxed);
+  atomic_store_explicit(&b_1, 42, memory_order_relaxed);
+  atomic_store_explicit(&b_2, 43, memory_order_relaxed);
   atomic_store_explicit(&i16, 4242, memory_order_relaxed);
   atomic_store_explicit(&i32, 42424242, memory_order_relaxed);
   atomic_store_explicit(&i64, 4242424242424242ll,
                         memory_order_relaxed);
 
-  atomic_fetch_add_explicit(&byte, -20, memory_order_relaxed);
+  atomic_fetch_add_explicit(&b_1, -20, memory_order_relaxed);
+  atomic_fetch_add_explicit(&b_2, -20, memory_order_relaxed);
   atomic_fetch_add_explicit(&i16, -2020, memory_order_relaxed);
   atomic_fetch_add_explicit(&i32, -20202020, memory_order_relaxed);
   atomic_fetch_add_explicit(&i64, -2020202020202020ll,
                             memory_order_relaxed);
 
-  REQUIRE(atomic_exchange_explicit(&byte, 0, memory_order_relaxed) ==
+  REQUIRE(atomic_exchange_explicit(&b_1, 0, memory_order_relaxed) ==
           22);
+  REQUIRE(atomic_exchange_explicit(&b_2, 0, memory_order_relaxed) ==
+          23);
   REQUIRE(atomic_exchange_explicit(&i16, 0, memory_order_relaxed) ==
           2222);
   REQUIRE(atomic_exchange_explicit(&i32, 0, memory_order_relaxed) ==
@@ -68,7 +73,8 @@ TEST("atomic types") {
   REQUIRE(atomic_exchange_explicit(&i64, 0, memory_order_relaxed) ==
           2222222222222222ll);
 
-  REQUIRE(atomic_load_explicit(&byte, memory_order_relaxed) == 0);
+  REQUIRE(atomic_load_explicit(&b_1, memory_order_relaxed) == 0);
+  REQUIRE(atomic_load_explicit(&b_2, memory_order_relaxed) == 0);
   REQUIRE(atomic_load_explicit(&i16, memory_order_relaxed) == 0);
   REQUIRE(atomic_load_explicit(&i32, memory_order_relaxed) == 0);
   REQUIRE(atomic_load_explicit(&i64, memory_order_relaxed) == 0ll);
