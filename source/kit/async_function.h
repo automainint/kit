@@ -48,10 +48,7 @@ typedef struct {
     __VA_ARGS__                             \
   }
 
-#define KIT_AF_NAME(name_) name_##_coro_
-
-#define KIT_AF_DECL(name_) \
-  void KIT_AF_NAME(name_)(void *self_void_, int request_)
+#define KIT_AF_DECL(name_) void name_(void *self_void_, int request_)
 
 #define KIT_CORO_IMPL(name_)                                      \
   KIT_AF_DECL(name_) {                                            \
@@ -151,8 +148,8 @@ typedef struct {
 
 #define KIT_AF_TYPE(coro_) struct coro_##_coro_state_
 
-#define KIT_AF_INITIAL(coro_)                        \
-  ._index = 0, ._state_machine = KIT_AF_NAME(coro_), \
+#define KIT_AF_INITIAL(coro_)             \
+  ._index = 0, ._state_machine = (coro_), \
   ._context = { .state = NULL, .execute = NULL }
 
 #define KIT_AF_CREATE(promise_, coro_, ...) \
@@ -277,7 +274,6 @@ typedef struct {
 #  define AF_STATE_DATA KIT_AF_STATE_DATA
 #  define AF_INTERNAL KIT_AF_INTERNAL
 #  define AF_STATE KIT_AF_STATE
-#  define AF_NAME KIT_AF_NAME
 #  define AF_DECL KIT_AF_DECL
 #  define CORO_IMPL KIT_CORO_IMPL
 #  define CORO_END KIT_CORO_END
