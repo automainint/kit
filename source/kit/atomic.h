@@ -9,8 +9,11 @@ extern "C" {
 
 #ifndef _MSC_VER
 #  include <stdatomic.h>
+
 #  define KIT_ATOMIC(type_) type_ _Atomic
 #else
+#  include <assert.h>
+
 #  define KIT_ATOMIC(type_) type_ volatile
 
 enum {
