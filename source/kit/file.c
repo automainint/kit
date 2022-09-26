@@ -219,7 +219,7 @@ static void unix_prepare_path_(char *const     buf,
 kit_status_t kit_file_create_folder(kit_str_t const path) {
   PREPARE_PATH_BUF_;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  if (CreateDirectoryW(temp, NULL))
+  if (CreateDirectoryW(buf, NULL))
     return KIT_OK;
 #else
   if (mkdir(buf, 0755) == 0)
@@ -319,7 +319,7 @@ ptrdiff_t kit_file_size(kit_str_t const path) {
   PREPARE_PATH_BUF_;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   HFILE f = CreateFileW(buf, GENERIC_READ, FILE_SHARE_READ, NULL,
-                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL);
+                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (f != INVALID_HANDLE_VALUE) {
     DWORD high;
     DWORD low = GetFileSize(f, &high);
