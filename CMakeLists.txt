@@ -27,6 +27,9 @@ target_include_directories(
   ${KIT_LIBRARY} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source>)
 target_compile_features(${KIT_LIBRARY} PUBLIC c_std_11)
+if(WIN32)
+  target_link_libraries(${KIT_LIBRARY} PUBLIC Shlwapi)
+endif()
 
 include(CheckCSourceRuns)
 
