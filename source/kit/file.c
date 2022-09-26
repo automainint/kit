@@ -262,7 +262,7 @@ kit_status_t kit_file_remove(kit_str_t const path) {
 kit_status_t kit_file_remove_folder(kit_str_t const path) {
   PREPARE_PATH_BUF_;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  if (DeleteDirectoryW(buf))
+  if (RemoveDirectoryW(buf))
     return KIT_OK;
 #else
   if (rmdir(buf) == 0)
