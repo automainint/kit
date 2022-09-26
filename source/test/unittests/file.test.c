@@ -69,7 +69,7 @@ TEST("file path normalize windows delim") {
 TEST("file path join no delim") {
   SZ(foo, "foo");
   SZ(bar, "bar");
-  SZ(joined, "foo/bar");
+  SZ(joined, "foo" S_DELIM_ "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 
@@ -81,7 +81,7 @@ TEST("file path join no delim") {
 TEST("file path join delim left") {
   SZ(foo, "foo/");
   SZ(bar, "bar");
-  SZ(joined, "foo/bar");
+  SZ(joined, "foo" S_DELIM_ "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 
@@ -93,7 +93,7 @@ TEST("file path join delim left") {
 TEST("file path join delim right") {
   SZ(foo, "foo");
   SZ(bar, "/bar");
-  SZ(joined, "foo/bar");
+  SZ(joined, "foo" S_DELIM_ "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 
@@ -105,7 +105,7 @@ TEST("file path join delim right") {
 TEST("file path join delim both") {
   SZ(foo, "foo/");
   SZ(bar, "/bar");
-  SZ(joined, "foo/bar");
+  SZ(joined, "foo" S_DELIM_ "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 
