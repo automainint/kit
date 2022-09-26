@@ -10,6 +10,7 @@ enum { PATH_BUF_SIZE = 4096 };
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN 1
 #  endif
+#  include <stdint.h>
 #  include <Windows.h>
 #else
 #  include <dirent.h>
@@ -324,7 +325,7 @@ ptrdiff_t kit_file_size(kit_str_t const path) {
     DWORD high;
     DWORD low = GetFileSize(f, &high);
     CloseHandle(f);
-    return (ptrdiff_t) (((uint64_t) high << 32) | (uint64_t) low);
+    return (ptrdiff_t) ((((uint64_t) high) << 32) | (uint64_t) low);
   }
 #else
   struct stat info;
