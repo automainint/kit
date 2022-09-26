@@ -101,10 +101,13 @@ void kit_da_resize(kit_da_void_t *array, ptrdiff_t element_size,
     KIT_DA_RESIZE((array_), (array_).size - 1);                 \
   } while (0)
 
+KIT_DA_TYPE(kit_string_t, char);
+
 #ifndef KIT_DISABLE_SHORT_NAMES
 #  define da_void_t kit_da_void_t
 #  define da_init kit_da_init
 #  define da_resize kit_da_resize
+#  define string_t kit_string_t
 
 #  define DA_TYPE KIT_DA_TYPE
 #  define DA KIT_DA
