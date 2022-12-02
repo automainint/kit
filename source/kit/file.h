@@ -50,7 +50,7 @@ int kit_path_type(kit_str_t path);
 
 ptrdiff_t kit_file_size(kit_str_t path);
 
-DA_TYPE(kit_path_list_t, kit_string_t);
+typedef KIT_DA(kit_string_t) kit_path_list_t;
 
 kit_path_list_t kit_file_enum_folder(kit_str_t       path,
                                      kit_allocator_t alloc);

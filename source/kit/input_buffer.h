@@ -9,10 +9,10 @@ extern "C" {
 #endif
 
 typedef struct {
-  int       error;
-  ptrdiff_t offset;
-  void     *internal;
-  KIT_DA(data, char);
+  int          error;
+  ptrdiff_t    offset;
+  void        *internal;
+  kit_string_t data;
 } kit_ib_handle_t;
 
 kit_ib_handle_t kit_ib_wrap(kit_is_handle_t upstream,

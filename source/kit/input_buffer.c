@@ -6,7 +6,7 @@ typedef struct {
   ptrdiff_t       ref_count;
   kit_is_handle_t upstream;
   kit_allocator_t alloc;
-  DA(data, char);
+  kit_string_t    data;
 } internal_buffer_t;
 
 static internal_buffer_t *buf_init(kit_is_handle_t upstream,
