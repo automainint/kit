@@ -304,5 +304,6 @@ int kit_run_tests(int argc, char **argv) {
   }
 
   no_color || print_color(white);
+  quiet || printf("\n");
   return status;
 }

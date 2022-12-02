@@ -7,8 +7,8 @@
 extern "C" {
 #endif
 
-KIT_AR_MUT_TYPE(kit_string_mut_t, char);
-KIT_AR_TYPE(kit_string_ref_t, char);
+typedef KIT_AR_MUT(char) kit_string_mut_t;
+typedef KIT_AR(char) kit_string_ref_t;
 
 typedef kit_string_mut_t kit_out_str_t;
 typedef kit_string_ref_t kit_str_t;

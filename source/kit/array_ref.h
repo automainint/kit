@@ -2,6 +2,7 @@
 #define KIT_ARRAY_REF_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,17 +20,17 @@ int kit_ar_compare(ptrdiff_t left_element_size, ptrdiff_t left_size,
                    ptrdiff_t right_element_size, ptrdiff_t right_size,
                    void const *right_data, kit_ar_compare_fn compare);
 
-#define KIT_AR_MUT(name_, type_) \
+#define KIT_AR_MUT(type_) \
   struct {                       \
     ptrdiff_t size;              \
     type_    *values;            \
-  } name_
+  } 
 
-#define KIT_AR(name_, type_) \
+#define KIT_AR(type_) \
   struct {                   \
     ptrdiff_t    size;       \
     type_ const *values;     \
-  } name_
+  } 
 
 #define KIT_AR_MUT_WRAP(name_, element_type_, array_)           \
   struct {                                                      \
@@ -44,18 +45,6 @@ int kit_ar_compare(ptrdiff_t left_element_size, ptrdiff_t left_size,
     element_type_ const *values;                                \
   } name_ = { .size   = (sizeof(array_) / sizeof((array_)[0])), \
               .values = (array_) }
-
-#define KIT_AR_MUT_TYPE(name_, element_type_) \
-  typedef struct {                            \
-    ptrdiff_t      size;                      \
-    element_type_ *values;                    \
-  } name_
-
-#define KIT_AR_TYPE(name_, element_type_) \
-  typedef struct {                        \
-    ptrdiff_t            size;            \
-    element_type_ const *values;          \
-  } name_
 
 #define KIT_AR_EQUAL(left_, right_)                              \
   kit_ar_equal_bytes(sizeof((left_).values[0]), (left_).size,    \
@@ -77,8 +66,6 @@ int kit_ar_compare(ptrdiff_t left_element_size, ptrdiff_t left_size,
 #  define AR KIT_AR
 #  define AR_MUT_WRAP KIT_AR_MUT_WRAP
 #  define AR_WRAP KIT_AR_WRAP
-#  define AR_TYPE KIT_AR_TYPE
-#  define AR_TYPE_CONST KIT_AR_TYPE_CONST
 #  define AR_EQUAL KIT_AR_EQUAL
 #  define AR_COMPARE KIT_AR_COMPARE
 #endif

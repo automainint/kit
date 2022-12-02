@@ -1,5 +1,5 @@
-#ifndef KIT_OPTIONS_H
-#define KIT_OPTIONS_H
+#ifndef KIT_STATUS_H
+#define KIT_STATUS_H
 
 #ifdef __cplusplus
 extern "C" {

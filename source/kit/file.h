@@ -2,7 +2,7 @@
 #define KIT_FILE_H
 
 #include "dynamic_array.h"
-#include "options.h"
+#include "status.h"
 #include "string_ref.h"
 
 #ifdef __cplusplus
