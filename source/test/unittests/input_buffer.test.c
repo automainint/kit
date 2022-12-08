@@ -10,7 +10,7 @@ TEST("input buffer read once") {
 
   ib_handle_t second = ib_read(first, 3);
 
-  REQUIRE(!second.error);
+  REQUIRE(second.status == KIT_OK);
   REQUIRE(second.data.size == 3);
   REQUIRE(AR_EQUAL(text, second.data));
 

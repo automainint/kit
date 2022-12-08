@@ -3,13 +3,14 @@
 
 #include "dynamic_array.h"
 #include "input_stream.h"
+#include "status.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct {
-  int          error;
+  kit_status_t status;
   ptrdiff_t    offset;
   void        *internal;
   kit_string_t data;

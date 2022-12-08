@@ -295,7 +295,7 @@ kit_status_t kit_file_remove_recursive(kit_str_t const       path,
   return KIT_ERROR;
 }
 
-int kit_path_type(kit_str_t const path) {
+kit_path_type_t kit_path_type(kit_str_t const path) {
   PREPARE_PATH_BUF_;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   if (PathFileExistsW(buf)) {
@@ -307,9 +307,9 @@ int kit_path_type(kit_str_t const path) {
 #else
   struct stat info;
   if (stat(buf, &info) == 0) {
-    if ((info.st_mode & S_IFREG) != 0)
+    if (S_ISREG(info.st_mode))
       return KIT_PATH_FILE;
-    if ((info.st_mode & S_IFDIR) != 0)
+    if (S_ISDIR(info.st_mode))
       return KIT_PATH_FOLDER;
   }
 #endif
