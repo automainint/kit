@@ -1,7 +1,7 @@
 target_sources(
   ${KIT_LIBRARY}
     PRIVATE
-      input_buffer.c status.c threads.win32.c time.c
+      input_buffer.c bigint.c status.c threads.win32.c time.c
       atomic.win32.c threads.posix.c condition_variable.c move_back.c
       input_stream.c lower_bound.c file.c string_ref.c async_function.c
       allocator.c array_ref.c dynamic_array.c mutex.c mersenne_twister_64.c
@@ -13,6 +13,7 @@ target_sources(
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/allocator.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/string_ref.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/threads.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/bigint.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/dynamic_array.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/condition_variable.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/async_function.h>
