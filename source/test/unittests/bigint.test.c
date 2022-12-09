@@ -3,8 +3,6 @@
 #define KIT_TEST_FILE bigint
 #include "../../kit_test/test.h"
 
-#include <stdio.h>
-
 TEST("bigint hex add") {
   SZ(foo, "4242424242424242424242424242424242424242");
   SZ(bar, "1111111111111111111111111111111111111111");
