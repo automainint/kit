@@ -6,6 +6,7 @@
 - Dynamic array
 - Input buffer
 - Random number generation
+- Big integer math
 - Async function
 - Atomic
 - Condition variable

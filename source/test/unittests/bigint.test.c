@@ -21,7 +21,7 @@ TEST("bigint hex sub") {
 }
 
 TEST("bigint base58") {
-  REQUIRE(bi_equal(BASE58("31"), bi_uword(58 * 2)));
+  REQUIRE(bi_equal(BASE58("31"), bi_uint32(58 * 2)));
 }
 
 TEST("bigint base58 add") {
