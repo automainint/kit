@@ -24,9 +24,9 @@ static int is_delim(char const c) {
 
 kit_string_t kit_path_norm(kit_str_t const       path,
                            kit_allocator_t const alloc) {
-  SZ(parent, "..");
+  str_t parent = SZ("..");
 
-  kit_string_t norm;
+  string_t norm;
   DA_INIT(norm, path.size, alloc);
   assert(norm.size == path.size);
 

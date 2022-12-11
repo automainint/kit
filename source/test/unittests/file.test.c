@@ -12,8 +12,8 @@
 #endif
 
 TEST("file path normalize one") {
-  SZ(foo, "foo/bar/../baz");
-  SZ(foo_norm, "foo" S_DELIM_ "baz");
+  str_t foo      = SZ("foo/bar/../baz");
+  str_t foo_norm = SZ("foo" S_DELIM_ "baz");
 
   string_t bar = path_norm(foo, kit_alloc_default());
 
@@ -23,8 +23,8 @@ TEST("file path normalize one") {
 }
 
 TEST("file path normalize two") {
-  SZ(foo, "foo/bar/../../baz");
-  SZ(foo_norm, "baz");
+  str_t foo      = SZ("foo/bar/../../baz");
+  str_t foo_norm = SZ("baz");
 
   string_t bar = path_norm(foo, kit_alloc_default());
 
@@ -34,8 +34,8 @@ TEST("file path normalize two") {
 }
 
 TEST("file path normalize parent") {
-  SZ(foo, "../baz");
-  SZ(foo_norm, ".." S_DELIM_ "baz");
+  str_t foo      = SZ("../baz");
+  str_t foo_norm = SZ(".." S_DELIM_ "baz");
 
   string_t bar = path_norm(foo, kit_alloc_default());
 
@@ -45,8 +45,8 @@ TEST("file path normalize parent") {
 }
 
 TEST("file path normalize double parent") {
-  SZ(foo, "foo/../../baz");
-  SZ(foo_norm, ".." S_DELIM_ "baz");
+  str_t foo      = SZ("foo/../../baz");
+  str_t foo_norm = SZ(".." S_DELIM_ "baz");
 
   string_t bar = path_norm(foo, kit_alloc_default());
 
@@ -56,8 +56,8 @@ TEST("file path normalize double parent") {
 }
 
 TEST("file path normalize windows delim") {
-  SZ(foo, "foo\\bar\\..\\baz");
-  SZ(foo_norm, "foo" S_DELIM_ "baz");
+  str_t foo      = SZ("foo\\bar\\..\\baz");
+  str_t foo_norm = SZ("foo" S_DELIM_ "baz");
 
   string_t bar = path_norm(foo, kit_alloc_default());
 
@@ -67,9 +67,9 @@ TEST("file path normalize windows delim") {
 }
 
 TEST("file path join no delim") {
-  SZ(foo, "foo");
-  SZ(bar, "bar");
-  SZ(joined, "foo" S_DELIM_ "bar");
+  str_t foo    = SZ("foo");
+  str_t bar    = SZ("bar");
+  str_t joined = SZ("foo" S_DELIM_ "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 
@@ -79,9 +79,9 @@ TEST("file path join no delim") {
 }
 
 TEST("file path join delim left") {
-  SZ(foo, "foo/");
-  SZ(bar, "bar");
-  SZ(joined, "foo" S_DELIM_ "bar");
+  str_t foo    = SZ("foo/");
+  str_t bar    = SZ("bar");
+  str_t joined = SZ("foo" S_DELIM_ "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 
@@ -91,9 +91,9 @@ TEST("file path join delim left") {
 }
 
 TEST("file path join delim right") {
-  SZ(foo, "foo");
-  SZ(bar, "/bar");
-  SZ(joined, "foo" S_DELIM_ "bar");
+  str_t foo    = SZ("foo");
+  str_t bar    = SZ("/bar");
+  str_t joined = SZ("foo" S_DELIM_ "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 
@@ -103,9 +103,9 @@ TEST("file path join delim right") {
 }
 
 TEST("file path join delim both") {
-  SZ(foo, "foo/");
-  SZ(bar, "/bar");
-  SZ(joined, "foo" S_DELIM_ "bar");
+  str_t foo    = SZ("foo/");
+  str_t bar    = SZ("/bar");
+  str_t joined = SZ("foo" S_DELIM_ "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 
@@ -123,9 +123,9 @@ TEST("file path user") {
 }
 
 TEST("file path index relative") {
-  SZ(foobar, "foo/bar");
-  SZ(foo, "foo");
-  SZ(bar, "bar");
+  str_t foobar = SZ("foo/bar");
+  str_t foo    = SZ("foo");
+  str_t bar    = SZ("bar");
 
   REQUIRE(AR_EQUAL(path_index(foobar, 0), foo));
   REQUIRE(AR_EQUAL(path_index(foobar, 1), bar));
@@ -133,9 +133,9 @@ TEST("file path index relative") {
 }
 
 TEST("file path index absolute") {
-  SZ(foobar, "/foo/bar");
-  SZ(foo, "foo");
-  SZ(bar, "bar");
+  str_t foobar = SZ("/foo/bar");
+  str_t foo    = SZ("foo");
+  str_t bar    = SZ("bar");
 
   REQUIRE(AR_EQUAL(path_index(foobar, 0), foo));
   REQUIRE(AR_EQUAL(path_index(foobar, 1), bar));
@@ -143,10 +143,10 @@ TEST("file path index absolute") {
 }
 
 TEST("file path index windows disk name") {
-  SZ(foobar, "c:\\foo\\bar");
-  SZ(disk, "c:");
-  SZ(foo, "foo");
-  SZ(bar, "bar");
+  str_t foobar = SZ("c:\\foo\\bar");
+  str_t disk   = SZ("c:");
+  str_t foo    = SZ("foo");
+  str_t bar    = SZ("bar");
 
   REQUIRE(AR_EQUAL(path_index(foobar, 0), disk));
   REQUIRE(AR_EQUAL(path_index(foobar, 1), foo));
@@ -155,10 +155,10 @@ TEST("file path index windows disk name") {
 }
 
 TEST("file path take relative") {
-  SZ(foobar, "foo/bar/");
-  SZ(foo, "foo");
-  SZ(bar, "foo/bar");
-  SZ(bar_end, "foo/bar/");
+  str_t foobar  = SZ("foo/bar/");
+  str_t foo     = SZ("foo");
+  str_t bar     = SZ("foo/bar");
+  str_t bar_end = SZ("foo/bar/");
 
   REQUIRE(AR_EQUAL(path_take(foobar, 0), foo));
   REQUIRE(AR_EQUAL(path_take(foobar, 1), bar));
@@ -166,19 +166,19 @@ TEST("file path take relative") {
 }
 
 TEST("file path take absolute") {
-  SZ(foobar, "/foo/bar");
-  SZ(foo, "/foo");
-  SZ(bar, "/foo/bar");
+  str_t foobar = SZ("/foo/bar");
+  str_t foo    = SZ("/foo");
+  str_t bar    = SZ("/foo/bar");
 
   REQUIRE(AR_EQUAL(path_take(foobar, 0), foo));
   REQUIRE(AR_EQUAL(path_take(foobar, 1), bar));
 }
 
 TEST("file path take windows disk name") {
-  SZ(foobar, "c:\\foo\\bar");
-  SZ(disk, "c:");
-  SZ(foo, "c:\\foo");
-  SZ(bar, "c:\\foo\\bar");
+  str_t foobar = SZ("c:\\foo\\bar");
+  str_t disk   = SZ("c:");
+  str_t foo    = SZ("c:\\foo");
+  str_t bar    = SZ("c:\\foo\\bar");
 
   REQUIRE(AR_EQUAL(path_take(foobar, 0), disk));
   REQUIRE(AR_EQUAL(path_take(foobar, 1), foo));

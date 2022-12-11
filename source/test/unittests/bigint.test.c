@@ -1,45 +1,74 @@
+#define KIT_BIGINT_SIZE 256
 #include "../../kit/bigint.h"
 
 #define KIT_TEST_FILE bigint
 #include "../../kit_test/test.h"
 
-TEST("bigint hex add") {
-  SZ(foo, "4242424242424242424242424242424242424242");
-  SZ(bar, "1111111111111111111111111111111111111111");
-  SZ(sum, "5353535353535353535353535353535353535353");
+static_assert(sizeof(bigint_t) == 256, "KIT_BIGINT_SIZE check");
 
-  REQUIRE(bi_equal(bi_add(bi_hex(foo), bi_hex(bar)), bi_hex(sum)));
+TEST("bigint hex add") {
+  REQUIRE(bi_equal(
+      bi_add(HEX("4242424242424242424242424242424242424242"),
+             HEX("1111111111111111111111111111111111111111")),
+      HEX("5353535353535353535353535353535353535353")));
 }
 
 TEST("bigint hex sub") {
-  SZ(foo, "4242424242424242424242424242424242424242");
-  SZ(bar, "1111111111111111111111111111111111111111");
-  SZ(dif, "3131313131313131313131313131313131313131");
-
-  REQUIRE(bi_equal(bi_sub(bi_hex(foo), bi_hex(bar)), bi_hex(dif)));
+  REQUIRE(bi_equal(
+      bi_sub(HEX("4242424242424242424242424242424242424242"),
+             HEX("1111111111111111111111111111111111111111")),
+      HEX("3131313131313131313131313131313131313131")));
 }
 
 TEST("bigint base58") {
-  SZ(foo, "31");
-
-  REQUIRE(bi_equal(bi_base58(foo), bi_uword(58 * 2)));
+  REQUIRE(bi_equal(BASE58("31"), bi_uword(58 * 2)));
 }
 
 TEST("bigint base58 add") {
-  SZ(foo, "4242424242424242424242424242424242424242");
-  SZ(bar, "2222222222222222222222222222222222222222");
-  SZ(sum, "5353535353535353535353535353535353535353");
-
-  REQUIRE(bi_equal(bi_add(bi_base58(foo), bi_base58(bar)),
-                   bi_base58(sum)));
+  REQUIRE(bi_equal(
+      bi_add(BASE58("4242424242424242424242424242424242424242"),
+             BASE58("2222222222222222222222222222222222222222")),
+      BASE58("5353535353535353535353535353535353535353")));
 }
 
 TEST("bigint base58 sub") {
-  SZ(foo, "42");
-  SZ(bar, "22");
-  SZ(dif, "31");
+  REQUIRE(bi_equal(
+      bi_sub(BASE58("4242424242424242424242424242424242424242"),
+             BASE58("2222222222222222222222222222222222222222")),
+      BASE58("3131313131313131313131313131313131313131")));
+}
 
-  REQUIRE(bi_equal(bi_sub(bi_base58(foo), bi_base58(bar)),
-                   bi_base58(dif)));
+TEST("bigint base58 mul") {
+  REQUIRE(bi_equal(bi_mul(BASE58("2111111111111111111111"),
+                          BASE58("foofoofoofoofoo")),
+                   BASE58("foofoofoofoofoo111111111111111111111")));
+}
+
+TEST("bigint div") {
+  REQUIRE(
+      bi_equal(bi_div(HEX("100"), HEX("10")).quotient, HEX("10")));
+
+  REQUIRE(bi_equal(bi_div(bi_mul(BASE58("foofoofoofoofoofoo"),
+                                 BASE58("barbarbarbarbarbar")),
+                          BASE58("barbarbarbarbarbar"))
+                       .quotient,
+                   BASE58("foofoofoofoofoofoo")));
+
+  REQUIRE(bi_equal(bi_div(bi_mul(BASE58("foofoofoofoofoofoofoofoo"),
+                                 BASE58("barbarbarbarbarbar")),
+                          BASE58("barbarbarbarbarbar"))
+                       .quotient,
+                   BASE58("foofoofoofoofoofoofoofoo")));
+
+  REQUIRE(bi_equal(
+      bi_div(
+          bi_mul(BASE58("foofoofoofoofoofoofoofoofoofoofoofoofoofoofo"
+                        "ofoofoofoo"),
+                 BASE58("barbarbarbarbarbarbarbarbarbarbarbarbarbarba"
+                        "rbar")),
+          BASE58("barbarbarbarbarbarbarbarbarbarbarbarbarbarbarbar"))
+          .quotient,
+      BASE58(
+          "foofoofoofoofoofoofoofoofoofoofoofoofoofoofoofoofoofoo")));
 }
 

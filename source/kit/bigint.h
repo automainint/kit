@@ -99,8 +99,7 @@ static ptrdiff_t kit_bi_significant_bit_count(kit_bigint_t const x) {
                          : (byte & 0x08) != 0 ? 4
                          : (byte & 0x04) != 0 ? 3
                          : (byte & 0x02) != 0 ? 2
-                         : (byte & 0x01) != 0 ? 1
-                                              : 0;
+                                              : 1;
 
   return bytes * 8 + bits;
 }
@@ -250,7 +249,7 @@ static kit_bigint_t kit_bi_mul(kit_bigint_t const x,
       continue;
 
     for (ptrdiff_t j = 0; i + j < KIT_BIGINT_SIZE / 4; j++) {
-      if (y.v32[i] == 0)
+      if (y.v32[j] == 0)
         continue;
 
       uint64_t carry = ((uint64_t) x.v32[i]) * ((uint64_t) y.v32[j]);
@@ -294,7 +293,7 @@ static kit_bi_division_t kit_bi_div(kit_bigint_t const x,
   y = kit_bi_shl_uword(y, (kit_uword_t) shift);
 
   while (shift >= 0) {
-    if (kit_bi_compare(result.remainder, y) > 0) {
+    if (kit_bi_compare(result.remainder, y) >= 0) {
       result.remainder = kit_bi_sub(result.remainder, y);
       result.quotient.v8[shift / 8] |= (1u << (shift % 8));
     }
@@ -432,6 +431,21 @@ static kit_bigint_t kit_bi_base58(kit_str_t const base58) {
 #  pragma GCC diagnostic pop
 #endif
 
+#define KIT_BIN(static_str_) \
+  kit_bi_bin(kit_str(sizeof(static_str_) - 1, (static_str_)))
+
+#define KIT_DEC(static_str_) \
+  kit_bi_dec(kit_str(sizeof(static_str_) - 1, (static_str_)))
+
+#define KIT_HEX(static_str_) \
+  kit_bi_hex(kit_str(sizeof(static_str_) - 1, (static_str_)))
+
+#define KIT_BASE32(static_str_) \
+  kit_bi_base32(kit_str(sizeof(static_str_) - 1, (static_str_)))
+
+#define KIT_BASE58(static_str_) \
+  kit_bi_base58(kit_str(sizeof(static_str_) - 1, (static_str_)))
+
 #ifndef KIT_DISABLE_SHORT_NAMES
 #  define bigint_t kit_bigint_t
 #  define bi_uword kit_bi_uword
@@ -442,9 +456,15 @@ static kit_bigint_t kit_bi_base58(kit_str_t const base58) {
 #  define bi_neg kit_bi_neg
 #  define bi_sub kit_bi_sub
 #  define bi_mul kit_bi_mul
+#  define bi_div kit_bi_div
 #  define hex_digit kit_hex_digit
 #  define bi_hex kit_bi_hex
 #  define bi_base58 kit_bi_base58
+#  define BIN KIT_BIN
+#  define DEC KIT_DEC
+#  define HEX KIT_HEX
+#  define BASE32 KIT_BASE32
+#  define BASE58 KIT_BASE58
 #endif
 
 #ifdef __cplusplus
