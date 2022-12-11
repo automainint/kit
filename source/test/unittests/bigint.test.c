@@ -6,6 +6,17 @@
 
 static_assert(sizeof(bigint_t) == 256, "KIT_BIGINT_SIZE check");
 
+TEST("bigint bin hex") {
+  REQUIRE(bi_equal(HEX("10"), BIN("10000")));
+  REQUIRE(bi_equal(HEX("20"), BIN("100000")));
+  REQUIRE(bi_equal(HEX("40"), BIN("1000000")));
+  REQUIRE(bi_equal(HEX("80"), BIN("10000000")));
+  REQUIRE(bi_equal(HEX("310"), BIN("1100010000")));
+  REQUIRE(bi_equal(HEX("420"), BIN("10000100000")));
+  REQUIRE(bi_equal(HEX("540"), BIN("10101000000")));
+  REQUIRE(bi_equal(HEX("780"), BIN("11110000000")));
+}
+
 TEST("bigint hex add") {
   REQUIRE(bi_equal(
       bi_add(HEX("4242424242424242424242424242424242424242"),

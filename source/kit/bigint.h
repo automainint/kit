@@ -380,7 +380,7 @@ static kit_bigint_t kit_bi_hex(kit_str_t const hex) {
   for (ptrdiff_t i = 0; i < hex.size && i / 2 < KIT_BIGINT_SIZE;
        i++) {
     uint8_t const digit = kit_hex_digit(hex.values[hex.size - i - 1]);
-    z.v[i / 8] |= digit << (8 * (i % 8));
+    z.v[i / 8] |= digit << (4 * (i % 8));
   }
 
   return z;
