@@ -6,7 +6,7 @@ typedef struct {
   ptrdiff_t       ref_count;
   kit_is_handle_t upstream;
   kit_allocator_t alloc;
-  DA(data, char);
+  kit_string_t    data;
 } internal_buffer_t;
 
 static internal_buffer_t *buf_init(kit_is_handle_t upstream,
@@ -71,25 +71,25 @@ kit_ib_handle_t kit_ib_wrap(kit_is_handle_t upstream,
                             kit_allocator_t alloc) {
   kit_ib_handle_t buf;
   memset(&buf, 0, sizeof buf);
-  buf.error = 0;
+  buf.status = KIT_OK;
   DA_INIT(buf.data, 0, alloc);
   buf.internal = buf_init(upstream, alloc);
   if (buf.internal == NULL)
-    buf.error = 1;
+    buf.status = KIT_ERROR;
   return buf;
 }
 
 kit_ib_handle_t kit_ib_read(kit_ib_handle_t buf, ptrdiff_t size) {
   kit_ib_handle_t next;
   memset(&next, 0, sizeof next);
-  if (buf.error) {
-    next.error = 1;
+  if (buf.status != KIT_OK) {
+    next.status = buf.status;
   } else {
     buf_acquire(buf.internal);
     buf_adjust(buf.internal, buf.offset + size);
     DA_INIT(next.data, size, buf_alloc(buf.internal));
     if (next.data.size != size)
-      next.error = 1;
+      next.status = KIT_ERROR;
     kit_out_str_t destination = { .size   = next.data.size,
                                   .values = next.data.values };
     ptrdiff_t     n = buf_read(buf.internal, buf.offset, destination);
@@ -97,7 +97,7 @@ kit_ib_handle_t kit_ib_read(kit_ib_handle_t buf, ptrdiff_t size) {
     next.internal   = buf.internal;
     DA_RESIZE(next.data, n);
     if (next.data.size != n)
-      next.error = 1;
+      next.status = KIT_ERROR;
   }
   return next;
 }

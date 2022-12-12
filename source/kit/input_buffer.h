@@ -3,16 +3,17 @@
 
 #include "dynamic_array.h"
 #include "input_stream.h"
+#include "status.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct {
-  int       error;
-  ptrdiff_t offset;
-  void     *internal;
-  KIT_DA(data, char);
+  kit_status_t status;
+  ptrdiff_t    offset;
+  void        *internal;
+  kit_string_t data;
 } kit_ib_handle_t;
 
 kit_ib_handle_t kit_ib_wrap(kit_is_handle_t upstream,

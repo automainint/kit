@@ -1,11 +1,11 @@
 #include "test.h"
 
+#define _GNU_SOURCE
+#include <setjmp.h>
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
-
-#include <setjmp.h>
-#include <signal.h>
 
 kit_tests_list_t kit_tests_list = { 0 };
 
@@ -105,6 +105,8 @@ int kit_run_tests(int argc, char **argv) {
   int line_width            = 20;
   int carriage_return       = 1;
 
+  char const *specific_test = NULL;
+
   for (int i = 0; i < argc; i++)
     if (strcmp("--no-term-color", argv[i]) == 0)
       no_color = 1;
@@ -112,25 +114,45 @@ int kit_run_tests(int argc, char **argv) {
       carriage_return = 0;
     else if (strcmp("--quiet", argv[i]) == 0)
       quiet = 1;
+    else if (strcmp("--match", argv[i]) == 0)
+      specific_test = argv[++i];
 
-  if (quiet)
-    no_color = 1;
+  quiet && (no_color = 1);
 
-  char const *file      = NULL;
-  ptrdiff_t   file_root = -1;
+  if (specific_test != NULL) {
+    no_color || print_color(light);
+    quiet || printf("Run tests matching ");
+    no_color || print_color(white);
+    quiet || printf("*%s*", specific_test);
+    no_color || print_color(light);
+    quiet || printf("\n\n");
+  }
+
+  char const *file        = NULL;
+  ptrdiff_t   file_root   = -1;
+  int         tests_total = 0;
 
   for (int i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
        i++) {
+    if (specific_test != NULL &&
+        strstr(kit_tests_list.tests[i].test_name, specific_test) ==
+            NULL)
+      continue;
+    tests_total++;
     int const l = 2 + (int) strlen(kit_tests_list.tests[i].test_name);
     if (line_width < l)
       line_width = l;
   }
 
-  if (kit_tests_list.size > 0) {
+  if (tests_total > 0) {
     char const *const s = kit_tests_list.tests[0].test_file;
 
     for (int j = 1;
          j < kit_tests_list.size && j < KIT_TESTS_SIZE_LIMIT; j++) {
+      if (specific_test != NULL &&
+          strstr(kit_tests_list.tests[j].test_name, specific_test) ==
+              NULL)
+        continue;
       if (strcmp(s, kit_tests_list.tests[j].test_file) == 0)
         continue;
       int k = 0;
@@ -151,6 +173,10 @@ int kit_run_tests(int argc, char **argv) {
 
   for (int i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
        i++) {
+    if (specific_test != NULL &&
+        strstr(kit_tests_list.tests[i].test_name, specific_test) ==
+            NULL)
+      continue;
     if (file == NULL ||
         strcmp(file, kit_tests_list.tests[i].test_file) != 0) {
       if (file != NULL)
@@ -215,7 +241,7 @@ int kit_run_tests(int argc, char **argv) {
 
   no_color || print_color(white);
   quiet || printf("\n%d of %d tests passed.\n", success_count,
-                  kit_tests_list.size);
+                  tests_total);
   quiet || printf("%d of %d assertions passed.\n\n",
                   total_assertion_count - fail_assertion_count,
                   total_assertion_count);
@@ -225,6 +251,10 @@ int kit_run_tests(int argc, char **argv) {
   if (status != 0) {
     for (int i = 0;
          i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT; i++) {
+      if (specific_test != NULL &&
+          strstr(kit_tests_list.tests[i].test_name, specific_test) ==
+              NULL)
+        continue;
       if (kit_tests_list.tests[i].signal != 0) {
         int signum = kit_tests_list.tests[i].signal;
         if (signum >= 0 &&
@@ -304,5 +334,6 @@ int kit_run_tests(int argc, char **argv) {
   }
 
   no_color || print_color(white);
+  quiet || printf("\n");
   return status;
 }

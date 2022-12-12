@@ -4,7 +4,7 @@
 #include "../../kit_test/test.h"
 
 TEST("static string wrap") {
-  SZ(ref, "foo bar");
+  str_t ref = SZ("foo bar");
 
   REQUIRE(ref.size == 7);
   REQUIRE(ref.values[0] == 'f');
@@ -17,6 +17,7 @@ TEST("static string wrap") {
 }
 
 TEST("string literal") {
-  SZ(foo, "foo");
+  str_t foo = SZ("foo");
   str_t bar = foo;
+  (void) bar;
 }

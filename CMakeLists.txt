@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "" FORCE)
+
+if(NOT DEFINED CMAKE_BUILD_PARALLEL_LEVEL)
+  set(CMAKE_BUILD_PARALLEL_LEVEL 4 CACHE STRING "" FORCE)
+endif()
+
 option(KIT_ENABLE_TESTING "Enable testing" ON)
 
 option(KIT_DISABLE_SYSTEM_MALLOC "Disable system memory allocator" OFF)
@@ -10,10 +16,6 @@ set(KIT_LIBRARY kit)
 set(KIT_TEST_LIBRARY kit_test)
 set(KIT_TEST_SUITE kit_test_suite)
 set(KIT_TARGETS kit-targets)
-
-if(NOT DEFINED CMAKE_BUILD_PARALLEL_LEVEL)
-  set(CMAKE_BUILD_PARALLEL_LEVEL 4)
-endif()
 
 project(
   ${KIT_PROJECT}
@@ -27,6 +29,9 @@ target_include_directories(
   ${KIT_LIBRARY} INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source>)
 target_compile_features(${KIT_LIBRARY} PUBLIC c_std_11)
+if(WIN32)
+  target_link_libraries(${KIT_LIBRARY} PUBLIC Shlwapi)
+endif()
 
 include(CheckCSourceRuns)
 

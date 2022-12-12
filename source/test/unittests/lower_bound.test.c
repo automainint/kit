@@ -13,7 +13,7 @@ static int kit_less_int_ref(int const *left, int const *right) {
 }
 
 TEST("lower bound empty") {
-  AR(ref, int) = { .size = 0, .values = NULL };
+  AR(int) ref = { .size = 0, .values = NULL };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 42, kit_less_int);
@@ -22,7 +22,7 @@ TEST("lower bound empty") {
 
 TEST("lower bound single left") {
   int const v[1] = { 42 };
-  AR(ref, int)   = { .size = 1, .values = v };
+  AR(int) ref    = { .size = 1, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 42, kit_less_int);
@@ -31,7 +31,7 @@ TEST("lower bound single left") {
 
 TEST("lower bound single right") {
   int const v[1] = { 42 };
-  AR(ref, int)   = { .size = 1, .values = v };
+  AR(int) ref    = { .size = 1, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 43, kit_less_int);
@@ -40,7 +40,7 @@ TEST("lower bound single right") {
 
 TEST("lower bound first of four") {
   int const v[4] = { 1, 2, 3, 4 };
-  AR(ref, int)   = { .size = 4, .values = v };
+  AR(int) ref    = { .size = 4, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 1, kit_less_int);
@@ -49,7 +49,7 @@ TEST("lower bound first of four") {
 
 TEST("lower bound second of four") {
   int const v[4] = { 1, 2, 3, 4 };
-  AR(ref, int)   = { .size = 4, .values = v };
+  AR(int) ref    = { .size = 4, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 2, kit_less_int);
@@ -58,7 +58,7 @@ TEST("lower bound second of four") {
 
 TEST("lower bound third of four") {
   int const v[4] = { 1, 2, 3, 4 };
-  AR(ref, int)   = { .size = 4, .values = v };
+  AR(int) ref    = { .size = 4, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 3, kit_less_int);
@@ -67,7 +67,7 @@ TEST("lower bound third of four") {
 
 TEST("lower bound forth of four") {
   int const v[4] = { 1, 2, 3, 4 };
-  AR(ref, int)   = { .size = 4, .values = v };
+  AR(int) ref    = { .size = 4, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 4, kit_less_int);
@@ -76,7 +76,7 @@ TEST("lower bound forth of four") {
 
 TEST("lower bound fifth of four") {
   int const v[4] = { 1, 2, 3, 4 };
-  AR(ref, int)   = { .size = 4, .values = v };
+  AR(int) ref    = { .size = 4, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 5, kit_less_int);
@@ -85,7 +85,7 @@ TEST("lower bound fifth of four") {
 
 TEST("lower bound first of five") {
   int const v[5] = { 1, 2, 3, 4, 5 };
-  AR(ref, int)   = { .size = 5, .values = v };
+  AR(int) ref    = { .size = 5, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 1, kit_less_int);
@@ -94,7 +94,7 @@ TEST("lower bound first of five") {
 
 TEST("lower bound second of five") {
   int const v[5] = { 1, 2, 3, 4, 5 };
-  AR(ref, int)   = { .size = 5, .values = v };
+  AR(int) ref    = { .size = 5, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 2, kit_less_int);
@@ -103,7 +103,7 @@ TEST("lower bound second of five") {
 
 TEST("lower bound third of five") {
   int const v[5] = { 1, 2, 3, 4, 5 };
-  AR(ref, int)   = { .size = 5, .values = v };
+  AR(int) ref    = { .size = 5, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 3, kit_less_int);
@@ -112,7 +112,7 @@ TEST("lower bound third of five") {
 
 TEST("lower bound forth of five") {
   int const v[5] = { 1, 2, 3, 4, 5 };
-  AR(ref, int)   = { .size = 5, .values = v };
+  AR(int) ref    = { .size = 5, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 4, kit_less_int);
@@ -121,7 +121,7 @@ TEST("lower bound forth of five") {
 
 TEST("lower bound fifth of five") {
   int const v[5] = { 1, 2, 3, 4, 5 };
-  AR(ref, int)   = { .size = 5, .values = v };
+  AR(int) ref    = { .size = 5, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 5, kit_less_int);
@@ -130,7 +130,7 @@ TEST("lower bound fifth of five") {
 
 TEST("lower bound sixth of five") {
   int const v[5] = { 1, 2, 3, 4, 5 };
-  AR(ref, int)   = { .size = 5, .values = v };
+  AR(int) ref    = { .size = 5, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND(index, ref, 6, kit_less_int);
@@ -140,7 +140,7 @@ TEST("lower bound sixth of five") {
 TEST("lower bound ref first of four") {
   int const v[4]  = { 1, 2, 3, 4 };
   int const value = 1;
-  AR(ref, int)    = { .size = 4, .values = v };
+  AR(int) ref     = { .size = 4, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
@@ -150,7 +150,7 @@ TEST("lower bound ref first of four") {
 TEST("lower bound ref second of four") {
   int const v[4]  = { 1, 2, 3, 4 };
   int const value = 2;
-  AR(ref, int)    = { .size = 4, .values = v };
+  AR(int) ref     = { .size = 4, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
@@ -160,7 +160,7 @@ TEST("lower bound ref second of four") {
 TEST("lower bound ref fifth of five") {
   int const v[5]  = { 1, 2, 3, 4, 5 };
   int const value = 5;
-  AR(ref, int)    = { .size = 5, .values = v };
+  AR(int) ref     = { .size = 5, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
@@ -170,7 +170,7 @@ TEST("lower bound ref fifth of five") {
 TEST("lower bound ref sixth of five") {
   int const v[5]  = { 1, 2, 3, 4, 5 };
   int const value = 6;
-  AR(ref, int)    = { .size = 5, .values = v };
+  AR(int) ref     = { .size = 5, .values = v };
 
   ptrdiff_t index;
   LOWER_BOUND_REF(index, ref, &value, kit_less_int_ref);
