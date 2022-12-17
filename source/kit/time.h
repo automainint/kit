@@ -38,21 +38,21 @@ struct timespec {
 /*-------------------------- functions --------------------------*/
 
 #if !defined(KIT_HAVE_TIMESPEC_GET)
-#  define KIT_HAVE_TIMESPEC_GET_NEED_DECL_
+#  define KIT_TIMESPEC_GET_NEED_DECL_
 #elif defined(__APPLE__) && defined(__cplusplus) && \
     (__cplusplus < 201703L)
 /* On macOS, the guard for declaration of timespec_get is by
  * (defined(__cplusplus) && __cplusplus >= 201703L),
  * fix the declaration for C++14 and lower here
  */
-#  define KIT_HAVE_TIMESPEC_GET_NEED_DECL_
+#  define KIT_TIMESPEC_GET_NEED_DECL_
 #endif
 
-#ifdef KIT_HAVE_TIMESPEC_GET_NEED_DECL_
+#ifdef KIT_TIMESPEC_GET_NEED_DECL_
 /*-------------------- 7.25.7 Time functions --------------------*/
 // 7.25.6.1
 int timespec_get(struct timespec *ts, int base);
-#  undef KIT_HAVE_TIMESPEC_GET_NEED_DECL_
+#  undef KIT_TIMESPEC_GET_NEED_DECL_
 #endif
 
 #ifdef __cplusplus
