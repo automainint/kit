@@ -11,7 +11,7 @@
 #    include "allocator.h"
 #    include "condition_variable.h"
 #    include "mutex.h"
-#    include "threads.h"
+#    include "thread.h"
 
 #    ifndef WIN32_LEAN_AND_MEAN
 #      define WIN32_LEAN_AND_MEAN 1
