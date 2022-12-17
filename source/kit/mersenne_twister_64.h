@@ -24,8 +24,6 @@ void kit_mt64_init(kit_mt64_state_t *state, uint64_t seed);
 
 uint64_t kit_mt64_generate(kit_mt64_state_t *state);
 
-uint64_t kit_mt64_seed();
-
 #ifndef KIT_DISABLE_SHORT_NAMES
 #  define mt64_state_t kit_mt64_state_t
 #  define mt64_init_array kit_mt64_init_array

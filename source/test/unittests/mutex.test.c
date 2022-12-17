@@ -1,4 +1,5 @@
 #include "../../kit/mutex.h"
+#include "../../kit/thread.h"
 
 #define KIT_TEST_FILE mutex
 #include "../../kit_test/test.h"

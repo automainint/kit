@@ -1,4 +1,5 @@
 #include "../../kit/condition_variable.h"
+#include "../../kit/thread.h"
 
 #define KIT_TEST_FILE condition_variable
 #include "../../kit_test/test.h"

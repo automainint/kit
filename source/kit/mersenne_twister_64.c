@@ -1,7 +1,5 @@
 #include "mersenne_twister_64.h"
 
-#include "secure_random.h"
-
 #define MM 156
 #define MATRIX_A 0xb5026f5aa96619e9ull
 #define UM 0xffffffff80000000ull
@@ -59,10 +57,4 @@ uint64_t kit_mt64_generate(kit_mt64_state_t *const state) {
   x ^= (x >> 43u);
 
   return x;
-}
-
-uint64_t kit_mt64_seed() {
-  uint64_t seed;
-  kit_secure_random(sizeof seed, &seed);
-  return seed;
 }

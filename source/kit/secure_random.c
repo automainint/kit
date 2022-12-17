@@ -1,8 +1,10 @@
 #include "secure_random.h"
 
+#include "condition_variable.h"
 #include "mersenne_twister_64.h"
 #include "mutex.h"
 #include "time.h"
+#include <assert.h>
 #include <stdio.h>
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -28,12 +30,19 @@ static uint64_t get_available_memory() {
 }
 
 #ifndef KIT_DISABLE_SYSTEM_THREADS
-static mtx_t kit_secure_random_fallback_mutex;
+static once_flag kit_secure_random_fallback_flag;
+static mtx_t     kit_secure_random_fallback_mutex;
+
+static void secure_random_fallback_init() {
+  mtx_init(&kit_secure_random_fallback_mutex, mtx_plain);
+}
 #endif
 
 static void secure_random_fallback(ptrdiff_t const size,
                                    void *const     data) {
 #ifndef KIT_DISABLE_SYSTEM_THREADS
+  call_once(&kit_secure_random_fallback_flag,
+            secure_random_fallback_init);
   mtx_lock(&kit_secure_random_fallback_mutex);
 #endif
 
@@ -79,18 +88,6 @@ static void secure_random_fallback(ptrdiff_t const size,
 
 #ifndef KIT_DISABLE_SYSTEM_THREADS
   mtx_unlock(&kit_secure_random_fallback_mutex);
-#endif
-}
-
-void kit_secure_random_init() {
-#ifndef KIT_DISABLE_SYSTEM_THREADS
-  mtx_init(&kit_secure_random_fallback_mutex, mtx_plain);
-#endif
-}
-
-void kit_secure_random_cleanup() {
-#ifndef KIT_DISABLE_SYSTEM_THREADS
-  mtx_destroy(&kit_secure_random_fallback_mutex);
 #endif
 }
 

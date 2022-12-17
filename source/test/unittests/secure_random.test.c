@@ -8,12 +8,8 @@ TEST("secure random") {
   int v[20];
   memset(v, 0, sizeof v);
 
-  secure_random_init();
-
   secure_random(40, v);
   secure_random(40, v + 10);
-
-  secure_random_cleanup();
 
   int repeats = 0;
 
