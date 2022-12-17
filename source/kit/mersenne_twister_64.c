@@ -1,13 +1,11 @@
 #include "mersenne_twister_64.h"
 
-#include "time.h"
+#include "secure_random.h"
 
-enum {
-  MM       = 156,
-  MATRIX_A = 0xb5026f5aa96619e9ull,
-  UM       = 0xffffffff80000000ull,
-  LM       = 0x7fffffffull
-};
+#define MM 156
+#define MATRIX_A 0xb5026f5aa96619e9ull
+#define UM 0xffffffff80000000ull
+#define LM 0x7fffffffull
 
 void kit_mt64_init_array(kit_mt64_state_t *const state,
                          ptrdiff_t const         size,
@@ -64,16 +62,7 @@ uint64_t kit_mt64_generate(kit_mt64_state_t *const state) {
 }
 
 uint64_t kit_mt64_seed() {
-  static uint64_t n = 0;
-
-  struct timespec t;
-  timespec_get(&t, TIME_UTC);
-
-  uint64_t seed[2] = { (n++) ^ (uint64_t) t.tv_sec,
-                       (uint64_t) t.tv_nsec };
-
-  kit_mt64_state_t s;
-  kit_mt64_init_array(&s, sizeof seed / sizeof *seed, seed);
-
-  return kit_mt64_generate(&s);
+  uint64_t seed;
+  kit_secure_random(sizeof seed, &seed);
+  return seed;
 }
