@@ -421,6 +421,7 @@ static kit_bigint_t kit_bi_deserialize(uint8_t const *const in) {
 }
 
 static uint8_t kit_bin_digit(char const hex) {
+  assert(hex == '0' || hex == '1');
   return hex == '1' ? 1 : 0;
 }
 
@@ -438,6 +439,7 @@ static kit_bigint_t kit_bi_from_bin(kit_str_t const bin) {
 }
 
 static uint8_t kit_dec_digit(char const c) {
+  assert('c' >= '0' && c <= '9');
   return c >= '0' && c <= '9' ? (uint8_t) (c - '0') : 0;
 }
 
@@ -456,12 +458,16 @@ static kit_bigint_t kit_bi_from_dec(kit_str_t const dec) {
 }
 
 static uint8_t kit_hex_digit(char const hex) {
+  assert((hex >= '0' && hex <= '9') || (hex >= 'a' && hex <= 'f') ||
+         (hex >= 'A' && hex <= 'F'));
+
   if (hex >= '0' && hex <= '9')
     return hex - '0';
   if (hex >= 'a' && hex <= 'f')
     return hex - 'a';
   if (hex >= 'A' && hex <= 'F')
     return hex - 'A';
+
   return 0;
 }
 
@@ -489,7 +495,11 @@ static const uint8_t KIT_BASE32_DIGITS[] = {
 };
 
 static uint8_t kit_base32_digit(char const c) {
-  return c >= '\0' && c < (sizeof KIT_BASE32_DIGITS)
+  assert(c >= '\0' && c < sizeof KIT_BASE32_DIGITS);
+  assert(c == '1' ||
+         KIT_BASE32_DIGITS[(size_t) (unsigned char) c] != 0);
+
+  return c >= '\0' && c < sizeof KIT_BASE32_DIGITS
              ? KIT_BASE32_DIGITS[(size_t) (unsigned char) c]
              : 0;
 }
@@ -522,7 +532,11 @@ static const uint8_t KIT_BASE58_DIGITS[] = {
 };
 
 static uint8_t kit_base58_digit(char const c) {
-  return c >= '\0' && c < (sizeof KIT_BASE58_DIGITS)
+  assert(c >= '\0' && c < sizeof KIT_BASE58_DIGITS);
+  assert(c == '1' ||
+         KIT_BASE58_DIGITS[(size_t) (unsigned char) c] != 0);
+
+  return c >= '\0' && c < sizeof KIT_BASE58_DIGITS
              ? KIT_BASE58_DIGITS[(size_t) (unsigned char) c]
              : 0;
 }
