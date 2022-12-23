@@ -56,6 +56,28 @@ TEST("bigint base58 mul") {
 }
 
 TEST("bigint div") {
+  REQUIRE(bi_equal(bi_div(bi_int32(-1), bi_int32(-1)).quotient,
+                   bi_int32(1)));
+  REQUIRE(bi_equal(bi_div(bi_int32(-1), bi_int32(-1)).remainder,
+                   bi_int32(0)));
+  REQUIRE(bi_equal(bi_div(bi_int32(-3), bi_int32(2)).quotient,
+                   bi_int32(-2)));
+  REQUIRE(bi_equal(bi_div(bi_int32(-3), bi_int32(2)).remainder,
+                   bi_int32(1)));
+  REQUIRE(bi_equal(bi_div(bi_int32(3), bi_int32(-2)).quotient,
+                   bi_int32(-1)));
+  REQUIRE(bi_equal(bi_div(bi_int32(3), bi_int32(-2)).remainder,
+                   bi_int32(1)));
+  REQUIRE(bi_equal(bi_div(bi_int32(-3), bi_int32(4)).quotient,
+                   bi_int32(-1)));
+  REQUIRE(bi_equal(bi_div(bi_int32(-3), bi_int32(4)).remainder,
+                   bi_int32(3)));
+  REQUIRE(bi_equal(bi_div(bi_int32(3), bi_int32(-4)).quotient,
+                   bi_int32(0)));
+  REQUIRE(bi_equal(bi_div(bi_int32(3), bi_int32(-4)).remainder,
+                   bi_int32(3)));
+
+
   REQUIRE(
       bi_equal(bi_div(HEX("100"), HEX("10")).quotient, HEX("10")));
 

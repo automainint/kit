@@ -50,6 +50,32 @@ static kit_bigint_t kit_bi_uint64(uint64_t const x) {
   return z;
 }
 
+static kit_bigint_t kit_bi_int32(int32_t const x) {
+  kit_bigint_t z;
+  memset(&z, x < 0 ? -1 : 0, sizeof z);
+  z.v[0] = x;
+  return z;
+}
+
+static kit_bigint_t kit_bi_int64(int64_t const x) {
+  kit_bigint_t z;
+  memset(&z, x < 0 ? -1 : 0, sizeof z);
+  z.v[0] = (uint32_t) (((uint64_t) x) & 0xffffffff);
+  z.v[1] = (uint32_t) (((uint64_t) x) >> 32);
+  return z;
+}
+
+static int kit_bi_is_zero(kit_bigint_t const x) {
+  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++)
+    if (x.v[i] != 0)
+      return 0;
+  return 1;
+}
+
+static int kit_bi_is_neg(kit_bigint_t const x) {
+  return (x.v[KIT_BIGINT_SIZE / 4 - 1] & 0x80000000) != 0;
+}
+
 static int kit_bi_equal(kit_bigint_t const x, kit_bigint_t const y) {
   return kit_ar_equal_bytes(1, KIT_BIGINT_SIZE, x.v, 1,
                             KIT_BIGINT_SIZE, y.v);
@@ -181,6 +207,36 @@ static kit_bit_t kit_bi_carry(uint32_t const x, uint32_t const y,
   return 0xffffffffu - x < y || 0xffffffffu - x - y < carry ? 1 : 0;
 }
 
+/*  Increment.
+ */
+static kit_bigint_t kit_bi_inc(kit_bigint_t const x) {
+  kit_bigint_t z;
+  kit_bit_t    carry = 1;
+
+  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
+    z.v[i] = x.v[i] + carry;
+    carry  = kit_bi_carry(x.v[i], 0, carry);
+  }
+
+  return z;
+}
+
+/*  Decrement
+ */
+static kit_bigint_t kit_bi_dec(kit_bigint_t const x) {
+  kit_bigint_t z;
+  kit_bit_t    carry = 0;
+
+  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
+    z.v[i] = x.v[i] + 0xffffffff + carry;
+    carry  = kit_bi_carry(x.v[i], 0xffffffff, carry);
+  }
+
+  return z;
+}
+
+/*  Addition.
+ */
 static kit_bigint_t kit_bi_add(kit_bigint_t const x,
                                kit_bigint_t const y) {
   kit_bigint_t z;
@@ -194,6 +250,8 @@ static kit_bigint_t kit_bi_add(kit_bigint_t const x,
   return z;
 }
 
+/*  Negation.
+ */
 static kit_bigint_t kit_bi_neg(kit_bigint_t const x) {
   kit_bigint_t y;
   kit_bit_t    carry = 1;
@@ -206,6 +264,8 @@ static kit_bigint_t kit_bi_neg(kit_bigint_t const x) {
   return y;
 }
 
+/*  Subtraction.
+ */
 static kit_bigint_t kit_bi_sub(kit_bigint_t const x,
                                kit_bigint_t const y) {
   kit_bigint_t z;
@@ -242,6 +302,8 @@ static kit_bigint_t kit_bi_mul_uint32(kit_bigint_t const x,
   return z;
 }
 
+/*  Multiplication.
+ */
 static kit_bigint_t kit_bi_mul(kit_bigint_t const x,
                                kit_bigint_t const y) {
   kit_bigint_t z;
@@ -275,8 +337,10 @@ typedef struct {
   kit_bigint_t remainder;
 } kit_bi_division_t;
 
-static kit_bi_division_t kit_bi_div(kit_bigint_t const x,
-                                    kit_bigint_t       y) {
+/*  Unsigned division.
+ */
+static kit_bi_division_t kit_bi_udiv(kit_bigint_t const x,
+                                     kit_bigint_t       y) {
   kit_bi_division_t result;
   memset(&result, 0, sizeof result);
 
@@ -308,6 +372,34 @@ static kit_bi_division_t kit_bi_div(kit_bigint_t const x,
   return result;
 }
 
+/*  Signed division.
+ *
+ *  Remainder is always a non-negative value less than absolute value
+ *  of y.
+ */
+static kit_bi_division_t kit_bi_div(kit_bigint_t const x,
+                                    kit_bigint_t const y) {
+  int const x_neg = kit_bi_is_neg(x);
+  int const y_neg = kit_bi_is_neg(y);
+
+  if (!x_neg && !y_neg)
+    return kit_bi_udiv(x, y);
+  if (x_neg && y_neg)
+    return kit_bi_udiv(kit_bi_neg(x), kit_bi_neg(y));
+
+  kit_bigint_t const x_abs = x_neg ? kit_bi_neg(x) : x;
+  kit_bigint_t const y_abs = y_neg ? kit_bi_neg(y) : y;
+
+  kit_bi_division_t z = kit_bi_udiv(x_abs, y_abs);
+
+  if (!kit_bi_is_zero(z.remainder) && !y_neg)
+    z.quotient = kit_bi_dec(kit_bi_neg(z.quotient));
+  else
+    z.quotient = kit_bi_neg(z.quotient);
+
+  return z;
+}
+
 static void kit_bi_serialize(kit_bigint_t const in,
                              uint8_t *const     out) {
   for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
@@ -332,7 +424,7 @@ static uint8_t kit_bin_digit(char const hex) {
   return hex == '1' ? 1 : 0;
 }
 
-static kit_bigint_t kit_bi_bin(kit_str_t const bin) {
+static kit_bigint_t kit_bi_from_bin(kit_str_t const bin) {
   kit_bigint_t z;
   memset(&z, 0, sizeof z);
 
@@ -349,7 +441,7 @@ static uint8_t kit_dec_digit(char const c) {
   return c >= '0' && c <= '9' ? (uint8_t) (c - '0') : 0;
 }
 
-static kit_bigint_t kit_bi_dec(kit_str_t const dec) {
+static kit_bigint_t kit_bi_from_dec(kit_str_t const dec) {
   kit_bigint_t z      = kit_bi_uint32(0);
   kit_bigint_t factor = kit_bi_uint32(1);
 
@@ -373,7 +465,7 @@ static uint8_t kit_hex_digit(char const hex) {
   return 0;
 }
 
-static kit_bigint_t kit_bi_hex(kit_str_t const hex) {
+static kit_bigint_t kit_bi_from_hex(kit_str_t const hex) {
   kit_bigint_t z;
   memset(&z, 0, sizeof z);
 
@@ -402,7 +494,7 @@ static uint8_t kit_base32_digit(char const c) {
              : 0;
 }
 
-static kit_bigint_t kit_bi_base32(kit_str_t const base32) {
+static kit_bigint_t kit_bi_from_base32(kit_str_t const base32) {
   kit_bigint_t z;
   memset(&z, 0, sizeof z);
 
@@ -435,7 +527,7 @@ static uint8_t kit_base58_digit(char const c) {
              : 0;
 }
 
-static kit_bigint_t kit_bi_base58(kit_str_t const base58) {
+static kit_bigint_t kit_bi_from_base58(kit_str_t const base58) {
   kit_bigint_t z      = kit_bi_uint32(0);
   kit_bigint_t factor = kit_bi_uint32(1);
 
@@ -455,26 +547,33 @@ static kit_bigint_t kit_bi_base58(kit_str_t const base58) {
 #endif
 
 #define KIT_BIN(static_str_) \
-  kit_bi_bin(kit_str(sizeof(static_str_) - 1, (static_str_)))
+  kit_bi_from_bin(kit_str(sizeof(static_str_) - 1, (static_str_)))
 
 #define KIT_DEC(static_str_) \
-  kit_bi_dec(kit_str(sizeof(static_str_) - 1, (static_str_)))
+  kit_bi_from_dec(kit_str(sizeof(static_str_) - 1, (static_str_)))
 
 #define KIT_HEX(static_str_) \
-  kit_bi_hex(kit_str(sizeof(static_str_) - 1, (static_str_)))
+  kit_bi_from_hex(kit_str(sizeof(static_str_) - 1, (static_str_)))
 
 #define KIT_BASE32(static_str_) \
-  kit_bi_base32(kit_str(sizeof(static_str_) - 1, (static_str_)))
+  kit_bi_from_base32(kit_str(sizeof(static_str_) - 1, (static_str_)))
 
 #define KIT_BASE58(static_str_) \
-  kit_bi_base58(kit_str(sizeof(static_str_) - 1, (static_str_)))
+  kit_bi_from_base58(kit_str(sizeof(static_str_) - 1, (static_str_)))
 
 #ifndef KIT_DISABLE_SHORT_NAMES
 #  define bigint_t kit_bigint_t
 #  define bi_uint32 kit_bi_uint32
 #  define bi_uint64 kit_bi_uint64
+#  define bi_int32 kit_bi_int32
+#  define bi_int64 kit_bi_int64
+#  define bi_is_zero kit_bi_is_zero
+#  define bi_is_neg kit_bi_is_neg
 #  define bi_equal kit_bi_equal
+#  define bi_compare kit_bi_compare
 #  define bi_carry kit_bi_carry
+#  define bi_inc kit_bi_inc
+#  define bi_dec kit_bi_dec
 #  define bi_add kit_bi_add
 #  define bi_neg kit_bi_neg
 #  define bi_sub kit_bi_sub
@@ -482,9 +581,6 @@ static kit_bigint_t kit_bi_base58(kit_str_t const base58) {
 #  define bi_div kit_bi_div
 #  define bi_serialize kit_bi_serialize
 #  define bi_deserialize kit_bi_deserialize
-#  define hex_digit kit_hex_digit
-#  define bi_hex kit_bi_hex
-#  define bi_base58 kit_bi_base58
 #  define BIN KIT_BIN
 #  define DEC KIT_DEC
 #  define HEX KIT_HEX
