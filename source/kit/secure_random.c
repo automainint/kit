@@ -60,23 +60,21 @@ static void secure_random_fallback(ptrdiff_t const size,
   kit_mt64_state_t state;
 
   if (time_sec == 0 && time_nsec == 0) {
-    uint64_t seed[4] = { n, get_available_memory(),
-                         (uint64_t) t.tv_sec, (uint64_t) t.tv_nsec };
+    uint64_t const seed[] = { n, get_available_memory(),
+                              (uint64_t) t.tv_sec,
+                              (uint64_t) t.tv_nsec };
     kit_mt64_init_array(&state, sizeof seed / sizeof *seed, seed);
   } else {
-    uint64_t seed[6] = { n,
-                         get_available_memory(),
-                         (uint64_t) t.tv_sec,
-                         (uint64_t) t.tv_nsec,
-                         (uint64_t) t.tv_sec - time_sec,
-                         (uint64_t) t.tv_nsec - time_nsec };
+    uint64_t const seed[] = { n,
+                              get_available_memory(),
+                              (uint64_t) t.tv_sec,
+                              (uint64_t) t.tv_nsec,
+                              (uint64_t) t.tv_sec - time_sec,
+                              (uint64_t) t.tv_nsec - time_nsec };
     kit_mt64_init_array(&state, sizeof seed / sizeof *seed, seed);
   }
 
-  /*  Bootstrap the generator.
-   */
-  for (ptrdiff_t i = 0; i < KIT_MT64_N; i++)
-    kit_mt64_generate(&state);
+  kit_mt64_rotate(&state);
 
   n         = kit_mt64_generate(&state);
   time_sec  = (uint64_t) t.tv_sec;
@@ -92,20 +90,27 @@ static void secure_random_fallback(ptrdiff_t const size,
 }
 
 void kit_secure_random(ptrdiff_t const size, void *const data) {
-  if (size <= 0)
+  assert(size > 0);
+  assert(data != NULL);
+
+  if (size <= 0 || data == NULL)
     return;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   secure_random_fallback(size, data);
 #else
   FILE *f = fopen("/dev/urandom", "rb");
+  assert(f != NULL);
 
   if (f == NULL) {
     secure_random_fallback(size, data);
     return;
   }
 
-  if (fread(data, 1, size, f) != size) {
+  size_t const n = fread(data, 1, size, f);
+  assert(n == size);
+
+  if (n != size) {
     secure_random_fallback(size, data);
     fclose(f);
     return;

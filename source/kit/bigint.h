@@ -341,35 +341,35 @@ typedef struct {
  */
 static kit_bi_division_t kit_bi_udiv(kit_bigint_t const x,
                                      kit_bigint_t       y) {
-  kit_bi_division_t result;
-  memset(&result, 0, sizeof result);
+  kit_bi_division_t z;
+  memset(&z, 0, sizeof z);
 
   ptrdiff_t const y_bits = kit_bi_significant_bit_count(y);
 
   if (y_bits == 0) {
-    result.undefined = 1;
-    return result;
+    z.undefined = 1;
+    return z;
   }
 
   ptrdiff_t const x_bits = kit_bi_significant_bit_count(x);
   ptrdiff_t       shift  = x_bits - y_bits;
 
-  result.remainder = x;
-  result.quotient  = kit_bi_uint32(0);
+  z.remainder = x;
+  z.quotient  = kit_bi_uint32(0);
 
   y = kit_bi_shl_uint(y, (uint32_t) shift);
 
   while (shift >= 0) {
-    if (kit_bi_compare(result.remainder, y) >= 0) {
-      result.remainder = kit_bi_sub(result.remainder, y);
-      result.quotient.v[shift / 32] |= (1u << (shift % 32));
+    if (kit_bi_compare(z.remainder, y) >= 0) {
+      z.remainder = kit_bi_sub(z.remainder, y);
+      z.quotient.v[shift / 32] |= (1u << (shift % 32));
     }
 
     y = kit_bi_shr_uint(y, 1);
     shift--;
   }
 
-  return result;
+  return z;
 }
 
 /*  Signed division.
@@ -382,13 +382,11 @@ static kit_bi_division_t kit_bi_div(kit_bigint_t const x,
   int const x_neg = kit_bi_is_neg(x);
   int const y_neg = kit_bi_is_neg(y);
 
-  if (!x_neg && !y_neg)
-    return kit_bi_udiv(x, y);
-  if (x_neg && y_neg)
-    return kit_bi_udiv(kit_bi_neg(x), kit_bi_neg(y));
-
   kit_bigint_t const x_abs = x_neg ? kit_bi_neg(x) : x;
   kit_bigint_t const y_abs = y_neg ? kit_bi_neg(y) : y;
+
+  if (x_neg == y_neg)
+    return kit_bi_udiv(x_abs, y_abs);
 
   kit_bi_division_t z = kit_bi_udiv(x_abs, y_abs);
 
@@ -402,6 +400,8 @@ static kit_bi_division_t kit_bi_div(kit_bigint_t const x,
 
 static void kit_bi_serialize(kit_bigint_t const in,
                              uint8_t *const     out) {
+  assert(out != NULL);
+
   for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
     out[i * 4]     = (uint8_t) (in.v[i] & 0xff);
     out[i * 4 + 1] = (uint8_t) ((in.v[i] >> 8) & 0xff);
@@ -411,6 +411,8 @@ static void kit_bi_serialize(kit_bigint_t const in,
 }
 
 static kit_bigint_t kit_bi_deserialize(uint8_t const *const in) {
+  assert(in != NULL);
+
   kit_bigint_t out;
   memset(&out, 0, sizeof out);
 

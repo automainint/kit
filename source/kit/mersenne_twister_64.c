@@ -23,33 +23,36 @@ void kit_mt64_init(kit_mt64_state_t *const state,
   kit_mt64_init_array(state, 1, &seed);
 }
 
-uint64_t kit_mt64_generate(kit_mt64_state_t *const state) {
+void kit_mt64_rotate(kit_mt64_state_t *const state) {
   static uint64_t const mag01[2] = { 0ull, MATRIX_A };
 
-  int      i;
   uint64_t x;
+  int      i;
 
-  if (state->index >= KIT_MT64_N) {
-    for (i = 0; i < KIT_MT64_N - MM; i++) {
-      x            = (state->mt[i] & UM) | (state->mt[i + 1] & LM);
-      state->mt[i] = state->mt[i + MM] ^ (x >> 1u) ^
-                     mag01[(int) (x & 1ull)];
-    }
-
-    for (; i < KIT_MT64_N - 1; i++) {
-      x            = (state->mt[i] & UM) | (state->mt[i + 1] & LM);
-      state->mt[i] = state->mt[i + (MM - KIT_MT64_N)] ^ (x >> 1u) ^
-                     mag01[(int) (x & 1ull)];
-    }
-
-    x = (state->mt[KIT_MT64_N - 1] & UM) | (state->mt[0] & LM);
-    state->mt[KIT_MT64_N - 1] = state->mt[MM - 1] ^ (x >> 1u) ^
-                                mag01[(int) (x & 1ull)];
-
-    state->index = 0;
+  for (i = 0; i < KIT_MT64_N - MM; i++) {
+    x            = (state->mt[i] & UM) | (state->mt[i + 1] & LM);
+    state->mt[i] = state->mt[i + MM] ^ (x >> 1u) ^
+                   mag01[(int) (x & 1ull)];
   }
 
-  x = state->mt[state->index++];
+  for (; i < KIT_MT64_N - 1; i++) {
+    x            = (state->mt[i] & UM) | (state->mt[i + 1] & LM);
+    state->mt[i] = state->mt[i + (MM - KIT_MT64_N)] ^ (x >> 1u) ^
+                   mag01[(int) (x & 1ull)];
+  }
+
+  x = (state->mt[KIT_MT64_N - 1] & UM) | (state->mt[0] & LM);
+  state->mt[KIT_MT64_N - 1] = state->mt[MM - 1] ^ (x >> 1u) ^
+                              mag01[(int) (x & 1ull)];
+
+  state->index = 0;
+}
+
+uint64_t kit_mt64_generate(kit_mt64_state_t *const state) {
+  if (state->index >= KIT_MT64_N)
+    kit_mt64_rotate(state);
+
+  uint64_t x = state->mt[state->index++];
 
   x ^= (x >> 29u) & 0x5555555555555555ull;
   x ^= (x << 17u) & 0x71d67fffeda60000ull;
