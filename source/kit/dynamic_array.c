@@ -1,9 +1,16 @@
 #include "dynamic_array.h"
 
+#include <assert.h>
 #include <string.h>
 
 void kit_da_init(kit_da_void_t *array, ptrdiff_t element_size,
                  ptrdiff_t size, kit_allocator_t alloc) {
+  assert(array != NULL);
+  assert(element_size > 0);
+  assert(size >= 0);
+  assert(alloc.allocate != NULL);
+  assert(alloc.deallocate != NULL);
+
   memset(array, 0, sizeof(kit_da_void_t));
 
   if (size > 0)
@@ -28,10 +35,17 @@ static ptrdiff_t eval_capacity(ptrdiff_t current_cap,
 
 void kit_da_resize(kit_da_void_t *array, ptrdiff_t element_size,
                    ptrdiff_t size) {
+  assert(array != NULL);
+  assert(element_size > 0);
+  assert(size >= 0);
+
   if (size <= array->capacity) {
     array->size = size;
   } else {
     ptrdiff_t capacity = eval_capacity(array->capacity, size);
+
+    assert(array->alloc.allocate != NULL);
+    assert(array->alloc.deallocate != NULL);
 
     void *bytes = array->alloc.allocate(array->alloc.state,
                                         element_size * capacity);

@@ -1,5 +1,6 @@
 #include "input_buffer.h"
 
+#include <assert.h>
 #include <string.h>
 
 typedef struct {
@@ -11,8 +12,10 @@ typedef struct {
 
 static internal_buffer_t *buf_init(kit_is_handle_t upstream,
                                    kit_allocator_t alloc) {
-  internal_buffer_t *buf;
-  buf = alloc.allocate(alloc.state, sizeof *buf);
+  assert(alloc.allocate != NULL);
+  internal_buffer_t *const buf = alloc.allocate(alloc.state,
+                                                sizeof *buf);
+
   if (buf != NULL) {
     memset(buf, 0, sizeof *buf);
     buf->ref_count = 1;
@@ -20,29 +23,42 @@ static internal_buffer_t *buf_init(kit_is_handle_t upstream,
     buf->alloc     = alloc;
     DA_INIT(buf->data, 0, alloc);
   }
+
   return buf;
 }
 
 static kit_allocator_t buf_alloc(void *p) {
+  assert(p != NULL);
+
   return ((internal_buffer_t *) p)->alloc;
 }
 
 static void buf_acquire(void *p) {
-  internal_buffer_t *buf = (internal_buffer_t *) p;
-  buf->ref_count++;
+  assert(p != NULL);
+
+  ((internal_buffer_t *) p)->ref_count++;
 }
 
 static void buf_release(void *p) {
-  internal_buffer_t *buf = (internal_buffer_t *) p;
+  assert(p != NULL);
+
+  internal_buffer_t *const buf = (internal_buffer_t *) p;
+
   if (--buf->ref_count == 0) {
     DA_DESTROY(buf->data);
+
+    assert(buf->alloc.deallocate != NULL);
     buf->alloc.deallocate(buf->alloc.state, buf);
   }
 }
 
 static void buf_adjust(void *p, ptrdiff_t size) {
-  internal_buffer_t *buf    = (internal_buffer_t *) p;
-  ptrdiff_t          offset = buf->data.size;
+  assert(p != NULL);
+  assert(size >= 0);
+
+  internal_buffer_t *const buf    = (internal_buffer_t *) p;
+  ptrdiff_t const          offset = buf->data.size;
+
   if (offset < size) {
     DA_RESIZE(buf->data, size);
     kit_out_str_t destination = {

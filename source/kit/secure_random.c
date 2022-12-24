@@ -108,15 +108,11 @@ void kit_secure_random(ptrdiff_t const size, void *const data) {
   }
 
   size_t const n = fread(data, 1, size, f);
+  fclose(f);
+
   assert(n == size);
 
-  if (n != size) {
+  if (n != size)
     secure_random_fallback(size, data);
-    fclose(f);
-    return;
-  }
-
-  fclose(f);
-  return;
 #endif
 }
