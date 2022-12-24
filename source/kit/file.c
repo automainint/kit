@@ -294,7 +294,7 @@ kit_status_t kit_file_remove_recursive(kit_str_t const       path,
     default:;
   }
 
-  return KIT_ERROR_FILE_DO_NOT_EXISTS;
+  return KIT_ERROR_FILE_DO_NOT_EXIST;
 }
 
 kit_path_type_t kit_path_type(kit_str_t const path) {
@@ -345,7 +345,7 @@ kit_file_size_result_t kit_file_size(kit_str_t const path) {
   }
 #endif
 
-  result.status = KIT_ERROR_FILE_DO_NOT_EXISTS;
+  result.status = KIT_ERROR_FILE_DO_NOT_EXIST;
   return result;
 }
 
@@ -372,8 +372,8 @@ kit_path_list_t kit_file_enum_folder(kit_str_t const       path,
     return result;
 
   do {
-    ptrdiff_t const n = list.size;
-    DA_RESIZE(list, n + 1);
+    ptrdiff_t const n = result.files.size;
+    DA_RESIZE(result.files, n + 1);
     if (result.files.size != n + 1) {
       result.status = KIT_ERROR_BAD_ALLOC;
       break;
