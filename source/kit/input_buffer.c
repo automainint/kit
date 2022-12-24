@@ -91,7 +91,7 @@ kit_ib_handle_t kit_ib_wrap(kit_is_handle_t upstream,
   DA_INIT(buf.data, 0, alloc);
   buf.internal = buf_init(upstream, alloc);
   if (buf.internal == NULL)
-    buf.status = KIT_ERROR;
+    buf.status = KIT_ERROR_BAD_ALLOC;
   return buf;
 }
 
@@ -105,7 +105,7 @@ kit_ib_handle_t kit_ib_read(kit_ib_handle_t buf, ptrdiff_t size) {
     buf_adjust(buf.internal, buf.offset + size);
     DA_INIT(next.data, size, buf_alloc(buf.internal));
     if (next.data.size != size)
-      next.status = KIT_ERROR;
+      next.status = KIT_ERROR_BAD_ALLOC;
     kit_out_str_t destination = { .size   = next.data.size,
                                   .values = next.data.values };
     ptrdiff_t     n = buf_read(buf.internal, buf.offset, destination);
@@ -113,7 +113,7 @@ kit_ib_handle_t kit_ib_read(kit_ib_handle_t buf, ptrdiff_t size) {
     next.internal   = buf.internal;
     DA_RESIZE(next.data, n);
     if (next.data.size != n)
-      next.status = KIT_ERROR;
+      next.status = KIT_ERROR_BAD_ALLOC;
   }
   return next;
 }

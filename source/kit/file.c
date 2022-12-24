@@ -24,7 +24,7 @@ static int is_delim(char const c) {
 
 kit_string_t kit_path_norm(kit_str_t const       path,
                            kit_allocator_t const alloc) {
-  str_t parent = SZ("..");
+  str_t const parent = SZ("..");
 
   string_t norm;
   DA_INIT(norm, path.size, alloc);
@@ -189,6 +189,9 @@ kit_str_t kit_path_take(kit_str_t const path, ptrdiff_t const count) {
 #if defined(_WIN32) && !defined(__CYGWIN__)
 static void win32_prepare_path_(WCHAR *const    buf,
                                 kit_str_t const path) {
+  assert(path.size == 0 || path.values != NULL);
+  assert(path.size + 5 < PATH_BUF_SIZE);
+
   memset(buf, 0, PATH_BUF_SIZE);
   buf[0] = L'\\';
   buf[1] = L'\\';
@@ -208,6 +211,9 @@ static void win32_prepare_path_(WCHAR *const    buf,
 #else
 static void unix_prepare_path_(char *const     buf,
                                kit_str_t const path) {
+  assert(path.size == 0 || path.values != NULL);
+  assert(path.size + 1 < PATH_BUF_SIZE);
+
   memset(buf, 0, PATH_BUF_SIZE);
   if (path.size > 0 && path.size + 1 < PATH_BUF_SIZE)
     memcpy(buf, path.values, path.size);
@@ -220,13 +226,11 @@ static void unix_prepare_path_(char *const     buf,
 kit_status_t kit_file_create_folder(kit_str_t const path) {
   PREPARE_PATH_BUF_;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  if (CreateDirectoryW(buf, NULL))
-    return KIT_OK;
+  return CreateDirectoryW(buf, NULL) ? KIT_OK
+                                     : KIT_ERROR_MKDIR_FAILED;
 #else
-  if (mkdir(buf, 0755) == 0)
-    return KIT_OK;
+  return mkdir(buf, 0755) == 0 ? KIT_OK : KIT_ERROR_MKDIR_FAILED;
 #endif
-  return KIT_ERROR;
 }
 
 kit_status_t kit_file_create_folder_recursive(kit_str_t const path) {
@@ -234,7 +238,7 @@ kit_status_t kit_file_create_folder_recursive(kit_str_t const path) {
     str_t const part = kit_path_take(path, i);
     int const   type = kit_path_type(part);
     if (type == KIT_PATH_FILE)
-      return KIT_ERROR;
+      return KIT_ERROR_FILE_ALREADY_EXISTS;
     if (type == KIT_PATH_NONE) {
       kit_status_t const s = kit_file_create_folder(part);
       if (s != KIT_OK)
@@ -250,25 +254,19 @@ kit_status_t kit_file_create_folder_recursive(kit_str_t const path) {
 kit_status_t kit_file_remove(kit_str_t const path) {
   PREPARE_PATH_BUF_;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  if (DeleteFileW(buf))
-    return KIT_OK;
+  return DeleteFileW(buf) ? KIT_OK : KIT_ERROR_UNLINK_FAILED;
 #else
-  if (unlink(buf) == 0)
-    return KIT_OK;
+  return unlink(buf) == 0 ? KIT_OK : KIT_ERROR_UNLINK_FAILED;
 #endif
-  return KIT_ERROR;
 }
 
 kit_status_t kit_file_remove_folder(kit_str_t const path) {
   PREPARE_PATH_BUF_;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  if (RemoveDirectoryW(buf))
-    return KIT_OK;
+  return RemoveDirectoryW(buf) ? KIT_OK : KIT_ERROR_RMDIR_FAILED;
 #else
-  if (rmdir(buf) == 0)
-    return KIT_OK;
+  return rmdir(buf) == 0 ? KIT_OK : KIT_ERROR_RMDIR_FAILED;
 #endif
-  return KIT_ERROR;
 }
 
 kit_status_t kit_file_remove_recursive(kit_str_t const       path,
@@ -280,9 +278,13 @@ kit_status_t kit_file_remove_recursive(kit_str_t const       path,
 
     case KIT_PATH_FOLDER: {
       kit_path_list_t list = kit_file_enum_folder(path, alloc);
-      for (ptrdiff_t i = 0; i < list.size; i++) {
-        str_t const s = { .size   = list.values[i].size,
-                          .values = list.values[i].values };
+      if (list.status != KIT_OK) {
+        kit_path_list_destroy(list);
+        return list.status;
+      }
+      for (ptrdiff_t i = 0; i < list.files.size; i++) {
+        str_t const s = { .size   = list.files.values[i].size,
+                          .values = list.files.values[i].values };
         kit_file_remove_recursive(s, alloc);
       }
       kit_path_list_destroy(list);
@@ -292,7 +294,7 @@ kit_status_t kit_file_remove_recursive(kit_str_t const       path,
     default:;
   }
 
-  return KIT_ERROR;
+  return KIT_ERROR_FILE_DO_NOT_EXISTS;
 }
 
 kit_path_type_t kit_path_type(kit_str_t const path) {
@@ -316,8 +318,12 @@ kit_path_type_t kit_path_type(kit_str_t const path) {
   return KIT_PATH_NONE;
 }
 
-ptrdiff_t kit_file_size(kit_str_t const path) {
+kit_file_size_result_t kit_file_size(kit_str_t const path) {
+  kit_file_size_result_t result;
+  memset(&result, 0, sizeof result);
+
   PREPARE_PATH_BUF_;
+
 #if defined(_WIN32) && !defined(__CYGWIN__)
   HFILE f = CreateFileW(buf, GENERIC_READ, FILE_SHARE_READ, NULL,
                         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -325,26 +331,36 @@ ptrdiff_t kit_file_size(kit_str_t const path) {
     DWORD high;
     DWORD low = GetFileSize(f, &high);
     CloseHandle(f);
-    return (ptrdiff_t) ((((uint64_t) high) << 32) | (uint64_t) low);
+
+    result.status = KIT_OK;
+    result.size   = (((uint64_t) high) << 32) | (uint64_t) low;
+    return result;
   }
 #else
   struct stat info;
-  if (stat(buf, &info) == 0)
-    return info.st_size;
+  if (stat(buf, &info) == 0) {
+    result.status = KIT_OK;
+    result.size   = (uint64_t) info.st_size;
+    return result;
+  }
 #endif
-  return KIT_FILE_SIZE_ERROR;
+
+  result.status = KIT_ERROR_FILE_DO_NOT_EXISTS;
+  return result;
 }
 
 kit_path_list_t kit_file_enum_folder(kit_str_t const       path,
                                      kit_allocator_t const alloc) {
   PREPARE_PATH_BUF_;
 
-  kit_path_list_t list;
-  DA_INIT(list, 0, alloc);
+  kit_path_list_t result = { .status = KIT_OK };
+  DA_INIT(result.files, 0, alloc);
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  if (path.size + 7 >= PATH_BUF_SIZE)
-    return list;
+  if (path.size + 7 >= PATH_BUF_SIZE) {
+    result.status = KIT_ERROR_PATH_TOO_LONG;
+    return result;
+  }
 
   buf[path.size + 4] = '\\';
   buf[path.size + 5] = '*';
@@ -353,24 +369,27 @@ kit_path_list_t kit_file_enum_folder(kit_str_t const       path,
   HANDLE           find = FindFirstFileW(buf, &data);
 
   if (find == INVALID_HANDLE_VALUE)
-    return list;
+    return result;
 
   do {
     ptrdiff_t const n = list.size;
     DA_RESIZE(list, n + 1);
-    if (list.size != n + 1)
+    if (result.files.size != n + 1) {
+      result.status = KIT_ERROR_BAD_ALLOC;
       break;
+    }
 
     ptrdiff_t size = 0;
     while (size < MAX_PATH && data.cFileName[size] != L'\0') size++;
-    DA_INIT(list.values[n], size, alloc);
-    if (list.values[n].size != size) {
-      DA_RESIZE(list, n);
+    DA_INIT(result.files.values[n], size, alloc);
+    if (result.files.values[n].size != size) {
+      DA_RESIZE(result.files, n);
+      result.status = KIT_ERROR_BAD_ALLOC;
       break;
     }
 
     for (ptrdiff_t i = 0; i < size; i++)
-      list.values[n].values[i] = data.cFileName[i];
+      result.files.values[n].values[i] = data.cFileName[i];
   } while (FindNextFileW(find, &data) != 0);
 
   FindClose(find);
@@ -378,7 +397,7 @@ kit_path_list_t kit_file_enum_folder(kit_str_t const       path,
   DIR *directory = opendir(buf);
 
   if (directory == NULL)
-    return list;
+    return result;
 
   for (;;) {
     struct dirent *entry = readdir(directory);
@@ -389,30 +408,33 @@ kit_path_list_t kit_file_enum_folder(kit_str_t const       path,
     if (entry->d_name[0] == '.')
       continue;
 
-    ptrdiff_t const n = list.size;
-    DA_RESIZE(list, n + 1);
-    if (list.size != n + 1)
+    ptrdiff_t const n = result.files.size;
+    DA_RESIZE(result.files, n + 1);
+    if (result.files.size != n + 1) {
+      result.status = KIT_ERROR_BAD_ALLOC;
       break;
+    }
 
     ptrdiff_t const size = (ptrdiff_t) strlen(entry->d_name);
-    DA_INIT(list.values[n], size, alloc);
-    if (list.values[n].size != size) {
-      DA_RESIZE(list, n);
+    DA_INIT(result.files.values[n], size, alloc);
+    if (result.files.values[n].size != size) {
+      DA_RESIZE(result.files, n);
+      result.status = KIT_ERROR_BAD_ALLOC;
       break;
     }
 
     if (size > 0)
-      memcpy(list.values[n].values, entry->d_name, size);
+      memcpy(result.files.values[n].values, entry->d_name, size);
   }
 
   closedir(directory);
 #endif
 
-  return list;
+  return result;
 }
 
 void kit_path_list_destroy(kit_path_list_t list) {
-  for (ptrdiff_t i = 0; i < list.size; i++)
-    DA_DESTROY(list.values[i]);
-  DA_DESTROY(list);
+  for (ptrdiff_t i = 0; i < list.files.size; i++)
+    DA_DESTROY(list.files.values[i]);
+  DA_DESTROY(list.files);
 }
