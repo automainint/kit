@@ -1,5 +1,5 @@
 #include "../../kit/atomic.h"
-#include "../../kit/threads.h"
+#include "../../kit/thread.h"
 
 #define KIT_TEST_FILE atomic
 #include "../../kit_test/test.h"

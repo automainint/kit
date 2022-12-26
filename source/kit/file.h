@@ -49,9 +49,17 @@ kit_status_t kit_file_remove_recursive(kit_str_t       path,
 
 kit_path_type_t kit_path_type(kit_str_t path);
 
-ptrdiff_t kit_file_size(kit_str_t path);
+typedef struct {
+  kit_status_t status;
+  uint64_t     size;
+} kit_file_size_result_t;
 
-typedef KIT_DA(kit_string_t) kit_path_list_t;
+kit_file_size_result_t kit_file_size(kit_str_t path);
+
+typedef struct {
+  kit_status_t status;
+  KIT_DA(kit_string_t) files;
+} kit_path_list_t;
 
 kit_path_list_t kit_file_enum_folder(kit_str_t       path,
                                      kit_allocator_t alloc);
@@ -71,6 +79,7 @@ void kit_path_list_destroy(kit_path_list_t list);
 #  define file_remove_folder kit_file_remove_folder
 #  define file_remove_recursive kit_file_remove_recursive
 #  define path_type kit_path_type
+#  define file_size_result_t kit_file_size_result_t
 #  define file_size kit_file_size
 #  define path_type_t kit_path_type_t
 #  define path_list_t kit_path_list_t

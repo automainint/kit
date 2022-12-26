@@ -1,4 +1,4 @@
-#include "../../kit/threads.h"
+#include "../../kit/thread.h"
 
 #define KIT_TEST_FILE thread
 #include "../../kit_test/test.h"

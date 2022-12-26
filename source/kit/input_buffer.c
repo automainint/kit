@@ -1,5 +1,6 @@
 #include "input_buffer.h"
 
+#include <assert.h>
 #include <string.h>
 
 typedef struct {
@@ -11,8 +12,10 @@ typedef struct {
 
 static internal_buffer_t *buf_init(kit_is_handle_t upstream,
                                    kit_allocator_t alloc) {
-  internal_buffer_t *buf;
-  buf = alloc.allocate(alloc.state, sizeof *buf);
+  assert(alloc.allocate != NULL);
+  internal_buffer_t *const buf = alloc.allocate(alloc.state,
+                                                sizeof *buf);
+
   if (buf != NULL) {
     memset(buf, 0, sizeof *buf);
     buf->ref_count = 1;
@@ -20,29 +23,42 @@ static internal_buffer_t *buf_init(kit_is_handle_t upstream,
     buf->alloc     = alloc;
     DA_INIT(buf->data, 0, alloc);
   }
+
   return buf;
 }
 
 static kit_allocator_t buf_alloc(void *p) {
+  assert(p != NULL);
+
   return ((internal_buffer_t *) p)->alloc;
 }
 
 static void buf_acquire(void *p) {
-  internal_buffer_t *buf = (internal_buffer_t *) p;
-  buf->ref_count++;
+  assert(p != NULL);
+
+  ((internal_buffer_t *) p)->ref_count++;
 }
 
 static void buf_release(void *p) {
-  internal_buffer_t *buf = (internal_buffer_t *) p;
+  assert(p != NULL);
+
+  internal_buffer_t *const buf = (internal_buffer_t *) p;
+
   if (--buf->ref_count == 0) {
     DA_DESTROY(buf->data);
+
+    assert(buf->alloc.deallocate != NULL);
     buf->alloc.deallocate(buf->alloc.state, buf);
   }
 }
 
 static void buf_adjust(void *p, ptrdiff_t size) {
-  internal_buffer_t *buf    = (internal_buffer_t *) p;
-  ptrdiff_t          offset = buf->data.size;
+  assert(p != NULL);
+  assert(size >= 0);
+
+  internal_buffer_t *const buf    = (internal_buffer_t *) p;
+  ptrdiff_t const          offset = buf->data.size;
+
   if (offset < size) {
     DA_RESIZE(buf->data, size);
     kit_out_str_t destination = {
@@ -75,7 +91,7 @@ kit_ib_handle_t kit_ib_wrap(kit_is_handle_t upstream,
   DA_INIT(buf.data, 0, alloc);
   buf.internal = buf_init(upstream, alloc);
   if (buf.internal == NULL)
-    buf.status = KIT_ERROR;
+    buf.status = KIT_ERROR_BAD_ALLOC;
   return buf;
 }
 
@@ -89,7 +105,7 @@ kit_ib_handle_t kit_ib_read(kit_ib_handle_t buf, ptrdiff_t size) {
     buf_adjust(buf.internal, buf.offset + size);
     DA_INIT(next.data, size, buf_alloc(buf.internal));
     if (next.data.size != size)
-      next.status = KIT_ERROR;
+      next.status = KIT_ERROR_BAD_ALLOC;
     kit_out_str_t destination = { .size   = next.data.size,
                                   .values = next.data.values };
     ptrdiff_t     n = buf_read(buf.internal, buf.offset, destination);
@@ -97,7 +113,7 @@ kit_ib_handle_t kit_ib_read(kit_ib_handle_t buf, ptrdiff_t size) {
     next.internal   = buf.internal;
     DA_RESIZE(next.data, n);
     if (next.data.size != n)
-      next.status = KIT_ERROR;
+      next.status = KIT_ERROR_BAD_ALLOC;
   }
   return next;
 }

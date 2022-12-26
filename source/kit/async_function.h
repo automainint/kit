@@ -232,8 +232,8 @@ typedef struct {
       }                                                   \
   } while (0)
 
-#define KIT_AF_FINISHED_ALL(return_, promises_, size_) \
-  KIT_AF_FINISHED_N((return_), (promises_),            \
+#define KIT_AF_FINISHED_ALL(return_, promises_) \
+  KIT_AF_FINISHED_N((return_), (promises_),     \
                     sizeof(promises_) / sizeof((promises_)[0]))
 
 #define KIT_AF_AWAIT_N(promises_, size_)                     \

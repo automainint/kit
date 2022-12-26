@@ -1,4 +1,5 @@
 #include "../../kit/mersenne_twister_64.h"
+#include "../../kit/secure_random.h"
 
 #define KIT_TEST_FILE mersenne_twister_64
 #include "../../kit_test/test.h"
@@ -6,7 +7,8 @@
 enum { SIZE = 1000 };
 
 TEST("mt64 same seeds") {
-  uint64_t seed = mt64_seed();
+  uint64_t seed;
+  secure_random(sizeof seed, &seed);
 
   mt64_state_t foo, bar;
   mt64_init(&foo, seed);
