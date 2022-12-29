@@ -14,6 +14,10 @@
 #    include "mutex.h"
 #    include "thread.h"
 
+#    ifndef PTHREAD_STACK_MIN
+#      define PTHREAD_STACK_MIN 16384
+#    endif
+
 /*
 Configuration macro:
 
@@ -122,7 +126,9 @@ __attribute__((weak)) int pthread_mutexattr_destroy(
 #    endif
 
 int mtx_init(mtx_t *mtx, int type) {
+#    ifdef KIT_HAVE_PTHREAD_MUTEXATTR_SETTYPE
   pthread_mutexattr_t attr;
+#    endif
   assert(mtx != NULL);
   if (type != mtx_plain && type != mtx_timed &&
       type != (mtx_plain | mtx_recursive) &&
@@ -134,11 +140,15 @@ int mtx_init(mtx_t *mtx, int type) {
     return thrd_success;
   }
 
+#    ifdef KIT_HAVE_PTHREAD_MUTEXATTR_SETTYPE
   pthread_mutexattr_init(&attr);
   pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
   pthread_mutex_init(mtx, &attr);
   pthread_mutexattr_destroy(&attr);
   return thrd_success;
+#    else
+  return thrd_error;
+#    endif
 }
 
 int mtx_lock(mtx_t *mtx) {

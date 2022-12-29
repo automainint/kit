@@ -68,7 +68,9 @@ static void handle_signal(int signum) {
 }
 
 static void setup_signals() {
-  for (int i = 0; i < sizeof signums / sizeof *signums; i++) {
+  int i;
+
+  for (i = 0; i < sizeof signums / sizeof *signums; i++) {
 #if defined(_WIN32) && !(defined __CYGWIN__)
     signal(signums[i], handle_signal);
 #else
@@ -94,8 +96,6 @@ static int run_test(volatile int i) {
 }
 
 int kit_run_tests(int argc, char **argv) {
-  setup_signals();
-
   int success_count         = 0;
   int fail_assertion_count  = 0;
   int total_assertion_count = 0;
@@ -105,9 +105,13 @@ int kit_run_tests(int argc, char **argv) {
   int line_width            = 20;
   int carriage_return       = 1;
 
+  int i, j;
+
   char const *specific_test = NULL;
 
-  for (int i = 0; i < argc; i++)
+  setup_signals();
+
+  for (i = 0; i < argc; i++)
     if (strcmp("--no-term-color", argv[i]) == 0)
       no_color = 1;
     else if (strcmp("--no-carriage-return", argv[i]) == 0)
@@ -132,7 +136,7 @@ int kit_run_tests(int argc, char **argv) {
   ptrdiff_t   file_root   = -1;
   int         tests_total = 0;
 
-  for (int i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
+  for (i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
        i++) {
     if (specific_test != NULL &&
         strstr(kit_tests_list.tests[i].test_name, specific_test) ==
@@ -147,8 +151,8 @@ int kit_run_tests(int argc, char **argv) {
   if (tests_total > 0) {
     char const *const s = kit_tests_list.tests[0].test_file;
 
-    for (int j = 1;
-         j < kit_tests_list.size && j < KIT_TESTS_SIZE_LIMIT; j++) {
+    for (j = 1; j < kit_tests_list.size && j < KIT_TESTS_SIZE_LIMIT;
+         j++) {
       if (specific_test != NULL &&
           strstr(kit_tests_list.tests[j].test_name, specific_test) ==
               NULL)
@@ -165,13 +169,13 @@ int kit_run_tests(int argc, char **argv) {
     }
 
     if (file_root == -1) {
-      for (int i = 0; s[i] != '\0'; i++)
+      for (i = 0; s[i] != '\0'; i++)
         if (s[i] == '/' || s[i] == '\\')
           file_root = i + 1;
     }
   }
 
-  for (int i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
+  for (i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
        i++) {
     if (specific_test != NULL &&
         strstr(kit_tests_list.tests[i].test_name, specific_test) ==
@@ -202,7 +206,7 @@ int kit_run_tests(int argc, char **argv) {
     int duration = (int) (ns_to_ms(end.tv_nsec - begin.tv_nsec) +
                           sec_to_ms(end.tv_sec - begin.tv_sec));
 
-    for (int j = 0; j < kit_tests_list.tests[i].assertions; j++)
+    for (j = 0; j < kit_tests_list.tests[i].assertions; j++)
       if (kit_tests_list.tests[i].status[j] == 0) {
         fail_assertion_count++;
         test_status = 0;
@@ -249,8 +253,8 @@ int kit_run_tests(int argc, char **argv) {
   no_color || print_color(light);
 
   if (status != 0) {
-    for (int i = 0;
-         i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT; i++) {
+    for (i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
+         i++) {
       if (specific_test != NULL &&
           strstr(kit_tests_list.tests[i].test_name, specific_test) ==
               NULL)
@@ -300,7 +304,7 @@ int kit_run_tests(int argc, char **argv) {
         no_color || print_color(light);
         quiet || printf("\"!.\n");
       } else
-        for (int j = 0; j < kit_tests_list.tests[i].assertions; j++)
+        for (j = 0; j < kit_tests_list.tests[i].assertions; j++)
           if (!kit_tests_list.tests[i].status[j]) {
             no_color || print_color(light);
             quiet || printf("Assertion on line ");

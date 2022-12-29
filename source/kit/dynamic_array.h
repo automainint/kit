@@ -71,12 +71,13 @@ void kit_da_resize(kit_da_void_t *array, ptrdiff_t element_size,
  */
 #define KIT_DA_INSERT(array_, index_, value_)                  \
   do {                                                         \
+    ptrdiff_t       kit_i_;                                    \
     ptrdiff_t const kit_index_back_ = (array_).size;           \
     ptrdiff_t const kit_indert_n_   = (index_);                \
     KIT_DA_RESIZE((array_), kit_index_back_ + 1);              \
     if (kit_index_back_ + 1 == (array_).size) {                \
-      for (ptrdiff_t kit_i_ = kit_index_back_;                 \
-           kit_i_ > kit_indert_n_; kit_i_--)                   \
+      for (kit_i_ = kit_index_back_; kit_i_ > kit_indert_n_;   \
+           kit_i_--)                                           \
         (array_).values[kit_i_] = (array_).values[kit_i_ - 1]; \
       (array_).values[kit_indert_n_] = (value_);               \
     }                                                          \
@@ -84,11 +85,12 @@ void kit_da_resize(kit_da_void_t *array, ptrdiff_t element_size,
 
 /*  Erase a value from dynamic array.
  */
-#define KIT_DA_ERASE(array_, index_)                            \
-  do {                                                          \
-    for (ptrdiff_t i_ = (index_) + 1; i_ < (array_).size; i_++) \
-      (array_).values[i_ - 1] = (array_).values[i_];            \
-    KIT_DA_RESIZE((array_), (array_).size - 1);                 \
+#define KIT_DA_ERASE(array_, index_)                  \
+  do {                                                \
+    ptrdiff_t i_;                                     \
+    for (i_ = (index_) + 1; i_ < (array_).size; i_++) \
+      (array_).values[i_ - 1] = (array_).values[i_];  \
+    KIT_DA_RESIZE((array_), (array_).size - 1);       \
   } while (0)
 
 typedef KIT_DA(char) kit_string_t;

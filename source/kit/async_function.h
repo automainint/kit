@@ -178,22 +178,24 @@ typedef struct {
 #define KIT_AF_RESUME(promise_) \
   (promise_)._state_machine(&(promise_), kit_af_request_resume)
 
-#define KIT_AF_RESUME_N(promises_, size_)                \
-  do {                                                   \
-    for (int kit_af_index_ = 0; kit_af_index_ < (size_); \
-         kit_af_index_++)                                \
-      KIT_AF_RESUME((promises_)[kit_af_index_]);         \
+#define KIT_AF_RESUME_N(promises_, size_)            \
+  do {                                               \
+    int kit_af_index_;                               \
+    for (kit_af_index_ = 0; kit_af_index_ < (size_); \
+         kit_af_index_++)                            \
+      KIT_AF_RESUME((promises_)[kit_af_index_]);     \
   } while (0)
 
 #define KIT_AF_JOIN(promise_)                                   \
   ((promise_)._state_machine(&(promise_), kit_af_request_join), \
    (promise_).return_value)
 
-#define KIT_AF_JOIN_N(promises_, size_)                  \
-  do {                                                   \
-    for (int kit_af_index_ = 0; kit_af_index_ < (size_); \
-         kit_af_index_++)                                \
-      KIT_AF_JOIN((promises_)[kit_af_index_]);           \
+#define KIT_AF_JOIN_N(promises_, size_)              \
+  do {                                               \
+    int kit_af_index_;                               \
+    for (kit_af_index_ = 0; kit_af_index_ < (size_); \
+         kit_af_index_++)                            \
+      KIT_AF_JOIN((promises_)[kit_af_index_]);       \
   } while (0)
 
 #define KIT_AF_RESUME_AND_JOIN(promise_)                      \
@@ -223,8 +225,9 @@ typedef struct {
 
 #define KIT_AF_FINISHED_N(return_, promises_, size_)      \
   do {                                                    \
+    int kit_af_index_;                                    \
     (return_) = 1;                                        \
-    for (int kit_af_index_ = 0; kit_af_index_ < (size_);  \
+    for (kit_af_index_ = 0; kit_af_index_ < (size_);      \
          kit_af_index_++)                                 \
       if (!KIT_AF_FINISHED((promises_)[kit_af_index_])) { \
         (return_) = 0;                                    \
@@ -238,10 +241,10 @@ typedef struct {
 
 #define KIT_AF_AWAIT_N(promises_, size_)                     \
   do {                                                       \
+    int kit_af_done_;                                        \
     case KIT_AF_LINE_():                                     \
       self->_index = KIT_AF_LINE_();                         \
       KIT_AF_RESUME_AND_JOIN_N((promises_), (size_));        \
-      int kit_af_done_;                                      \
       KIT_AF_FINISHED_N(kit_af_done_, (promises_), (size_)); \
       if (!kit_af_done_)                                     \
         return;                                              \

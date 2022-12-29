@@ -1,5 +1,5 @@
 target_sources(
-  ${KIT_TEST_LIBRARY}
+  kit_test
     PRIVATE
       test.c
     PUBLIC

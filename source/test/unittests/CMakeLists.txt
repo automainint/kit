@@ -1,5 +1,5 @@
 target_sources(
-  ${KIT_TEST_SUITE}
+  kit_test_suite
     PRIVATE
       async_function.test.c bigint.test.c mutex.test.c
       test_duration.test.c main.test.c string_ref.test.c atomic.test.c thread.test.c

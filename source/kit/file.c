@@ -25,6 +25,7 @@ static int is_delim(char const c) {
 kit_string_t kit_path_norm(kit_str_t const       path,
                            kit_allocator_t const alloc) {
   str_t const parent = SZ("..");
+  ptrdiff_t   i, i1, j;
 
   string_t norm;
   DA_INIT(norm, path.size, alloc);
@@ -35,7 +36,7 @@ kit_string_t kit_path_norm(kit_str_t const       path,
 
   memcpy(norm.values, path.values, path.size);
 
-  for (ptrdiff_t i1 = 0, i = 0; i < path.size; i++) {
+  for (i1 = 0, i = 0; i < path.size; i++) {
     if (!is_delim(path.values[i]))
       continue;
 
@@ -45,7 +46,7 @@ kit_string_t kit_path_norm(kit_str_t const       path,
       int       have_parent = 0;
       ptrdiff_t i0          = 0;
 
-      for (ptrdiff_t j = 0; j < i1; j++) {
+      for (j = 0; j < i1; j++) {
         if (norm.values[j] != '\0')
           have_parent = 1;
         if (is_delim(norm.values[j]))
@@ -65,7 +66,7 @@ kit_string_t kit_path_norm(kit_str_t const       path,
 
   ptrdiff_t size = 0;
 
-  for (ptrdiff_t i = 0; i < norm.size; i++) {
+  for (i = 0; i < norm.size; i++) {
     if (norm.values[i] != '\0') {
       if (is_delim(norm.values[i]))
         norm.values[size] = KIT_PATH_DELIM;
@@ -234,7 +235,9 @@ kit_status_t kit_file_create_folder(kit_str_t const path) {
 }
 
 kit_status_t kit_file_create_folder_recursive(kit_str_t const path) {
-  for (ptrdiff_t i = 0;; i++) {
+  ptrdiff_t i;
+
+  for (i = 0;; i++) {
     str_t const part = kit_path_take(path, i);
     int const   type = kit_path_type(part);
     if (type == KIT_PATH_FILE)
@@ -271,7 +274,8 @@ kit_status_t kit_file_remove_folder(kit_str_t const path) {
 
 kit_status_t kit_file_remove_recursive(kit_str_t const       path,
                                        kit_allocator_t const alloc) {
-  int type = kit_path_type(path);
+  int       type = kit_path_type(path);
+  ptrdiff_t i;
 
   switch (type) {
     case KIT_PATH_FILE: return kit_file_remove(path);
@@ -282,7 +286,7 @@ kit_status_t kit_file_remove_recursive(kit_str_t const       path,
         kit_path_list_destroy(list);
         return list.status;
       }
-      for (ptrdiff_t i = 0; i < list.files.size; i++) {
+      for (i = 0; i < list.files.size; i++) {
         str_t const s = { .size   = list.files.values[i].size,
                           .values = list.files.values[i].values };
         kit_file_remove_recursive(s, alloc);
@@ -434,7 +438,8 @@ kit_path_list_t kit_file_enum_folder(kit_str_t const       path,
 }
 
 void kit_path_list_destroy(kit_path_list_t list) {
-  for (ptrdiff_t i = 0; i < list.files.size; i++)
+  ptrdiff_t i;
+  for (i = 0; i < list.files.size; i++)
     DA_DESTROY(list.files.values[i]);
   DA_DESTROY(list.files);
 }

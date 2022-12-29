@@ -35,13 +35,27 @@ int timespec_get(struct timespec *ts, int base) {
 #    undef _TIMESPEC_IMPL_TICKS_PER_SECONDS
 }
 
-#  else
-
+#  elif defined(KIT_HAVE_CLOCK_GETTIME)
 int timespec_get(struct timespec *ts, int base) {
   if (ts == NULL)
     return 0;
   if (base == TIME_UTC) {
     clock_gettime(CLOCK_REALTIME, ts);
+    return base;
+  }
+  return 0;
+}
+#  else
+#    include <sys/time.h>
+
+int timespec_get(struct timespec *ts, int base) {
+  if (ts == NULL)
+    return 0;
+  if (base == TIME_UTC) {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    ts->tv_sec  = tv.tv_sec;
+    ts->tv_nsec = tv.tv_usec * 1000;
     return base;
   }
   return 0;

@@ -53,8 +53,9 @@ static void secure_random_fallback(ptrdiff_t const size,
   static uint64_t n         = 0;
   static uint64_t time_sec  = 0;
   static uint64_t time_nsec = 0;
-
   struct timespec t;
+  ptrdiff_t       i;
+
   timespec_get(&t, TIME_UTC);
 
   kit_mt64_state_t state;
@@ -80,7 +81,7 @@ static void secure_random_fallback(ptrdiff_t const size,
   time_sec  = (uint64_t) t.tv_sec;
   time_nsec = (uint64_t) t.tv_nsec;
 
-  for (ptrdiff_t i = 0; i < size; i++)
+  for (i = 0; i < size; i++)
     ((uint8_t *) data)[i] = (uint8_t) (kit_mt64_generate(&state) >>
                                        56);
 

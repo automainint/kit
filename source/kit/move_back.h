@@ -9,9 +9,10 @@ extern "C" {
 
 #define KIT_MOVE_BACK_INL(new_size, array, ...)          \
   do {                                                   \
+    ptrdiff_t     index_;                                \
     ptrdiff_t     end_ = (array).size;                   \
     unsigned char temp_[sizeof *(array).values];         \
-    for (ptrdiff_t index_ = 0; index_ < end_;) {         \
+    for (index_ = 0; index_ < end_;) {                   \
       if (__VA_ARGS__) {                                 \
         end_--;                                          \
         if (index_ != end_) {                            \

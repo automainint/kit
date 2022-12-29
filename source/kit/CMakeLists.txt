@@ -1,5 +1,5 @@
 target_sources(
-  ${KIT_LIBRARY}
+  kit
     PRIVATE
       input_buffer.c bigint.c status.c time.c secure_random.c
       thread.posix.c atomic.win32.c condition_variable.c thread.win32.c

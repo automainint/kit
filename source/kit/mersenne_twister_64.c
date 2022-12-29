@@ -8,8 +8,8 @@
 void kit_mt64_init_array(kit_mt64_state_t *const state,
                          ptrdiff_t const         size,
                          uint64_t const *const   seed) {
-  for (ptrdiff_t i = 0; i < size && i < KIT_MT64_N; i++)
-    state->mt[i] = seed[i];
+  ptrdiff_t i;
+  for (i = 0; i < size && i < KIT_MT64_N; i++) state->mt[i] = seed[i];
   for (state->index = size; state->index < KIT_MT64_N; state->index++)
     state->mt[state->index] = (6364136223846793005ull *
                                    (state->mt[state->index - 1] ^

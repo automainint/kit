@@ -37,9 +37,10 @@ static int test_run(void *p) {
 }
 
 TEST("condition variable") {
+  int i;
   int ok = 1;
 
-  for (int i = 0; i < 10; i++) {
+  for (i = 0; i < 10; i++) {
     test_data_t data;
 
     data.in    = 0;

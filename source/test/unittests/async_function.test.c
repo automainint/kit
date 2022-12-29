@@ -48,7 +48,8 @@ STATIC_CORO(int, test_nest_generator, AF_TYPE(test_gen) promise;) {
 CORO_END
 
 STATIC_CORO(int, test_join_multiple, AF_TYPE(test_bar) promises[3];) {
-  for (int i = 0; i < 3; i++)
+  int i;
+  for (i = 0; i < 3; i++)
     AF_INIT(af promises[i], test_bar, .return_value = 0);
   AF_RESUME_AND_JOIN_ALL(af promises);
   AF_RETURN(af promises[0].return_value +
@@ -59,7 +60,8 @@ CORO_END
 
 STATIC_CORO(int, test_await_multiple,
             AF_TYPE(test_bar) promises[3];) {
-  for (int i = 0; i < 3; i++)
+  int i;
+  for (i = 0; i < 3; i++)
     AF_INIT(af promises[i], test_bar, .return_value = 0);
   AF_AWAIT_ALL(af promises);
   AF_RETURN(af promises[0].return_value +
@@ -131,8 +133,9 @@ TEST("coroutine suspend") {
 }
 
 TEST("coroutine generator") {
+  int i;
   AF_CREATE(promise, test_gen, .min = 10, .max = 15);
-  for (int i = 0; i <= 5; i++)
+  for (i = 0; i <= 5; i++)
     REQUIRE(AF_RESUME_AND_JOIN(promise) == 10 + i);
 }
 

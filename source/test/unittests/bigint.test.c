@@ -4,7 +4,9 @@
 #define KIT_TEST_FILE bigint
 #include "../../kit_test/test.h"
 
+#if __STDC_VERSION__ >= 199901L
 static_assert(sizeof(bigint_t) == 256, "KIT_BIGINT_SIZE check");
+#endif
 
 TEST("bigint bin hex") {
   REQUIRE(bi_equal(HEX("10"), BIN("10000")));
@@ -76,7 +78,6 @@ TEST("bigint div") {
                    bi_int32(0)));
   REQUIRE(bi_equal(bi_div(bi_int32(3), bi_int32(-4)).remainder,
                    bi_int32(3)));
-
 
   REQUIRE(
       bi_equal(bi_div(HEX("100"), HEX("10")).quotient, HEX("10")));
