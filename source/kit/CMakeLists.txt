@@ -21,6 +21,7 @@ target_sources(
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/move_back.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/secure_random.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/input_stream.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/thread_defs.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/input_buffer.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/lower_bound.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/file.h>

@@ -2,6 +2,7 @@
 #define KIT_MUTEX_H
 
 #ifndef KIT_DISABLE_SYSTEM_THREADS
+#  include "thread_defs.h"
 #  include "time.h"
 
 #  if !defined(_WIN32) || defined(__CYGWIN__)
