@@ -36,6 +36,16 @@ include(CheckCSourceRuns)
 
 check_c_source_runs(
   "
+  __attribute__((weak)) int foo();
+  int main() { return 0; }
+  "
+  KIT_HAVE_FUNC_ATTRIBUTE_WEAK
+)
+
+set(CMAKE_REQUIRED_LIBRARIES "pthread")
+check_c_source_runs(
+  "
+  #define _GNU_SOURCE
   #include <pthread.h>
   int main() {
     pthread_mutexattr_t attr;
@@ -46,6 +56,7 @@ check_c_source_runs(
   "
   KIT_HAVE_PTHREAD_MUTEXATTR_SETTYPE
 )
+set(CMAKE_REQUIRED_LIBRARIES "")
 
 check_c_source_runs(
   "
@@ -85,6 +96,10 @@ endif()
 
 if(NOT KIT_HAVE_MALLOC)
   set(KIT_DISABLE_SYSTEM_MALLOC ON)
+endif()
+
+if(KIT_HAVE_FUNC_ATTRIBUTE_WEAK)
+  target_compile_definitions(kit PUBLIC KIT_HAVE_FUNC_ATTRIBUTE_WEAK)
 endif()
 
 if(KIT_HAVE_PTHREAD_MUTEXATTR_SETTYPE)
