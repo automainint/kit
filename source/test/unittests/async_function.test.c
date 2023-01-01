@@ -142,29 +142,29 @@ TEST("coroutine generator") {
 TEST("coroutine status finished") {
   AF_CREATE(promise, test_bar);
   REQUIRE(!AF_FINISHED(promise));
-  AF_RESUME_AND_JOIN(promise);
+  (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(!AF_FINISHED(promise));
-  AF_RESUME_AND_JOIN(promise);
+  (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(AF_FINISHED(promise));
 }
 
 TEST("coroutine task") {
   AF_CREATE(promise, test_task);
-  AF_RESUME_AND_JOIN(promise);
+  (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(!AF_FINISHED(promise));
-  AF_RESUME_AND_JOIN(promise);
+  (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(!AF_FINISHED(promise));
-  AF_RESUME_AND_JOIN(promise);
+  (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(AF_FINISHED(promise));
 }
 
 TEST("coroutine nested task") {
   AF_CREATE(promise, test_nest_task);
-  AF_RESUME_AND_JOIN(promise);
+  (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(!AF_FINISHED(promise));
-  AF_RESUME_AND_JOIN(promise);
+  (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(!AF_FINISHED(promise));
-  AF_RESUME_AND_JOIN(promise);
+  (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(AF_FINISHED(promise));
 }
 
@@ -174,7 +174,7 @@ TEST("coroutine nested generator") {
   REQUIRE(AF_RESUME_AND_JOIN(promise) == 2);
   REQUIRE(AF_RESUME_AND_JOIN(promise) == 3);
   REQUIRE(!AF_FINISHED(promise));
-  AF_RESUME_AND_JOIN(promise);
+  (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(AF_FINISHED(promise));
 }
 
@@ -198,7 +198,7 @@ TEST("coroutine custom execution context lazy") {
   AF_RESUME(promise);
   REQUIRE(promise.return_value == 0);
   REQUIRE(!AF_FINISHED(promise));
-  AF_JOIN(promise);
+  (void) AF_JOIN(promise);
   REQUIRE(promise.return_value == 42);
   REQUIRE(AF_FINISHED(promise));
 }
@@ -210,7 +210,7 @@ TEST("coroutine custom execution context immediate") {
   AF_RESUME(promise);
   REQUIRE(promise.return_value == 42);
   REQUIRE(AF_FINISHED(promise));
-  AF_JOIN(promise);
+  (void) AF_JOIN(promise);
   REQUIRE(promise.return_value == 42);
   REQUIRE(AF_FINISHED(promise));
 }

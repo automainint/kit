@@ -1,10 +1,11 @@
+#include "thread.h"
+
+#include "allocator.h"
+#include "condition_variable.h"
+#include "mutex.h"
+
 #ifndef KIT_DISABLE_SYSTEM_THREADS
 #  if !defined(_WIN32) || defined(__CYGWIN__)
-
-#    include "allocator.h"
-#    include "condition_variable.h"
-#    include "mutex.h"
-#    include "thread.h"
 
 #    include <assert.h>
 #    include <errno.h>

@@ -1,3 +1,9 @@
+#include "thread.h"
+
+#include "allocator.h"
+#include "condition_variable.h"
+#include "mutex.h"
+
 #ifndef KIT_DISABLE_SYSTEM_THREADS
 #  if defined(_WIN32) && !defined(__CYGWIN__)
 
@@ -7,11 +13,6 @@
 #    include <process.h>
 #    include <stdbool.h>
 #    include <stdlib.h>
-
-#    include "allocator.h"
-#    include "condition_variable.h"
-#    include "mutex.h"
-#    include "thread.h"
 
 #    ifndef WIN32_LEAN_AND_MEAN
 #      define WIN32_LEAN_AND_MEAN 1

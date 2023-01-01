@@ -7,15 +7,9 @@ if(NOT DEFINED CMAKE_BUILD_PARALLEL_LEVEL)
 endif()
 
 option(KIT_ENABLE_TESTING "Enable testing" ON)
-option(KIT_FORCE_ANSI_C "Force ANSI C" ${KIT_ENABLE_TESTING})
 
 option(KIT_DISABLE_SYSTEM_MALLOC "Disable system memory allocator" OFF)
 option(KIT_DISABLE_SYSTEM_THREADS "Disable system threads" OFF)
-
-if(KIT_FORCE_ANSI_C)
-  set(CMAKE_C_STANDARD 90)
-  set(CMAKE_C_EXTENSIONS OFF)
-endif()
 
 project(
   kit
@@ -30,6 +24,10 @@ target_include_directories(
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source>)
 if(WIN32)
   target_link_libraries(kit PUBLIC Shlwapi)
+endif()
+
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(kit PUBLIC -pedantic -Wall -Werror)
 endif()
 
 include(CheckCSourceRuns)

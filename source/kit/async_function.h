@@ -190,12 +190,12 @@ typedef struct {
   ((promise_)._state_machine(&(promise_), kit_af_request_join), \
    (promise_).return_value)
 
-#define KIT_AF_JOIN_N(promises_, size_)              \
-  do {                                               \
-    int kit_af_index_;                               \
-    for (kit_af_index_ = 0; kit_af_index_ < (size_); \
-         kit_af_index_++)                            \
-      KIT_AF_JOIN((promises_)[kit_af_index_]);       \
+#define KIT_AF_JOIN_N(promises_, size_)               \
+  do {                                                \
+    int kit_af_index_;                                \
+    for (kit_af_index_ = 0; kit_af_index_ < (size_);  \
+         kit_af_index_++)                             \
+      (void) KIT_AF_JOIN((promises_)[kit_af_index_]); \
   } while (0)
 
 #define KIT_AF_RESUME_AND_JOIN(promise_)                      \
