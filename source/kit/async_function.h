@@ -3,6 +3,10 @@
 
 #include <string.h>
 
+#ifdef __GNUC__
+#  pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
