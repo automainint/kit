@@ -2,6 +2,8 @@
 #define KIT_SECURE_RANDOM_H
 
 #include "status.h"
+
+#define _GNU_SOURCE
 #include <stddef.h>
 #include <stdint.h>
 

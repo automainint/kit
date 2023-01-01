@@ -35,53 +35,6 @@ include(CheckCSourceRuns)
 
 check_c_source_runs(
   "
-  #include <time.h>
-  int main() {
-    struct timespec t;
-    (void) t.tv_sec;
-    (void) t.tv_nsec;
-    return 0;
-  }
-  "
-  KIT_HAVE_STRUCT_TIMESPEC
-)
-
-check_c_source_runs(
-  "
-  #include <bits/types/struct_timespec.h>
-  int main() {
-    return 0;
-  }
-  "
-  KIT_HAVE_BITS_TYPES_STRUCT_TIMESPEC_H
-)
-
-check_c_source_runs(
-  "
-  #include <time.h>
-  int main() {
-    struct timespec t;
-    timespec_get(&t, TIME_UTC);
-    return 0;
-  }
-  "
-  KIT_HAVE_TIMESPEC_GET
-)
-
-check_c_source_runs(
-  "
-  #include <time.h>
-  int main() {
-    struct timespec t;
-    clock_gettime(CLOCK_REALTIME, &t)
-    return 0;
-  }
-  "
-  KIT_HAVE_CLOCK_GETTIME
-)
-
-check_c_source_runs(
-  "
   #include <pthread.h>
   int main() {
     pthread_mutexattr_t attr;
@@ -105,7 +58,7 @@ check_c_source_runs(
 
 check_c_source_runs(
   "
-  #include <windows.h>
+  #include <Windows.h>
   int main() {
     return 0;
   }
@@ -131,22 +84,6 @@ endif()
 
 if(NOT KIT_HAVE_MALLOC)
   set(KIT_DISABLE_SYSTEM_MALLOC ON)
-endif()
-
-if(NOT KIT_HAVE_STRUCT_TIMESPEC)
-  target_compile_definitions(kit PUBLIC KIT_NEED_STRUCT_TIMESPEC)
-endif()
-
-if(KIT_HAVE_BITS_TYPES_STRUCT_TIMESPEC_H)
-  target_compile_definitions(kit PUBLIC KIT_HAVE_BITS_TYPES_STRUCT_TIMESPEC_H)
-endif()
-
-if(NOT KIT_HAVE_TIMESPEC_GET)
-  target_compile_definitions(kit PUBLIC KIT_NEED_TIMESPEC_GET)
-endif()
-
-if(KIT_HAVE_CLOCK_GETTIME)
-  target_compile_definitions(kit PUBLIC KIT_HAVE_CLOCK_GETTIME)
 endif()
 
 if(KIT_HAVE_PTHREAD_MUTEXATTR_SETTYPE)

@@ -3,8 +3,10 @@
 
 #ifndef KIT_DISABLE_SYSTEM_THREADS
 #  include "thread_defs.h"
-#  include "time.h"
+
+#  define _GNU_SOURCE
 #  include <stddef.h>
+#  include <time.h>
 
 #  if defined(__cplusplus)
 #    define _Noreturn [[noreturn]]
