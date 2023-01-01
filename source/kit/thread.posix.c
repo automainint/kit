@@ -1,6 +1,11 @@
 #ifndef KIT_DISABLE_SYSTEM_THREADS
 #  if !defined(_WIN32) || defined(__CYGWIN__)
 
+#    include "allocator.h"
+#    include "condition_variable.h"
+#    include "mutex.h"
+#    include "thread.h"
+
 #    include <assert.h>
 #    include <errno.h>
 #    include <limits.h>
@@ -8,11 +13,6 @@
 #    include <stdint.h> /* intptr_t */
 #    include <stdlib.h>
 #    include <unistd.h>
-
-#    include "allocator.h"
-#    include "condition_variable.h"
-#    include "mutex.h"
-#    include "thread.h"
 
 #    ifndef PTHREAD_STACK_MIN
 #      define PTHREAD_STACK_MIN 16384

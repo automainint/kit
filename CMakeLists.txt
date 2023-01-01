@@ -42,6 +42,7 @@ check_c_source_runs(
   KIT_HAVE_FUNC_ATTRIBUTE_WEAK
 )
 
+set(CMAKE_REQUIRED_LIBRARIES_BACK_ ${CMAKE_REQUIRED_LIBRARIES})
 set(CMAKE_REQUIRED_LIBRARIES "pthread")
 check_c_source_runs(
   "
@@ -56,7 +57,8 @@ check_c_source_runs(
   "
   KIT_HAVE_PTHREAD_MUTEXATTR_SETTYPE
 )
-set(CMAKE_REQUIRED_LIBRARIES "")
+set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_BACK_})
+unset(CMAKE_REQUIRED_LIBRARIES_BACK_)
 
 check_c_source_runs(
   "
@@ -130,7 +132,7 @@ enable_testing()
 if(KIT_ENABLE_TESTING)
   add_executable(kit_test_suite)
   add_executable(kit::kit_test_suite ALIAS kit_test_suite)
-  target_link_libraries(kit_test_suite PRIVATE kit kit_test Threads::Threads)
+  target_link_libraries(kit_test_suite PRIVATE kit kit_test)
 
   if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(
