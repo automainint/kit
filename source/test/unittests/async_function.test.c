@@ -3,7 +3,7 @@
 #define KIT_TEST_FILE async_function
 #include "../../kit_test/test.h"
 
-AF_STATE(int, test_foo);
+AF_STATE(int, test_foo, );
 static AF_DECL(test_foo);
 
 CORO_IMPL(test_foo) {
@@ -11,7 +11,7 @@ CORO_IMPL(test_foo) {
 }
 CORO_END
 
-AF_STATE(int, test_bar);
+AF_STATE(int, test_bar, );
 static AF_DECL(test_bar);
 
 CORO_IMPL(test_bar) {
@@ -26,7 +26,7 @@ STATIC_CORO(int, test_gen, int i; int min; int max;) {
 }
 CORO_END
 
-STATIC_CORO_VOID(test_task) {
+STATIC_CORO_VOID(test_task, ) {
   AF_YIELD_VOID;
   AF_YIELD_VOID;
   AF_RETURN_VOID;
@@ -34,7 +34,7 @@ STATIC_CORO_VOID(test_task) {
 CORO_END
 
 STATIC_CORO_VOID(test_nest_task, AF_TYPE(test_task) promise;) {
-  AF_INIT(af promise, test_task);
+  AF_INIT(af promise, test_task, );
   AF_AWAIT(af promise);
   AF_AWAIT(af promise);
   AF_AWAIT(af promise);
@@ -83,13 +83,13 @@ void test_execute_immediate(void *_, void *coro, int request) {
 }
 
 TEST("coroutine create") {
-  AF_CREATE(promise, test_foo);
+  AF_CREATE(promise, test_foo, );
   REQUIRE(!AF_FINISHED(promise));
 }
 
 TEST("coroutine init") {
   AF_TYPE(test_foo) promise;
-  AF_INIT(promise, test_foo);
+  AF_INIT(promise, test_foo, );
   REQUIRE(!AF_FINISHED(promise));
 }
 
@@ -114,13 +114,13 @@ TEST("coroutine resume") {
 }
 
 TEST("coroutine resume and join") {
-  AF_CREATE(promise, test_foo);
+  AF_CREATE(promise, test_foo, );
   REQUIRE(AF_RESUME_AND_JOIN(promise) == 42);
   REQUIRE(AF_FINISHED(promise));
 }
 
 TEST("coroutine resume and join manually") {
-  AF_CREATE(promise, test_foo);
+  AF_CREATE(promise, test_foo, );
   AF_RESUME(promise);
   REQUIRE(AF_JOIN(promise) == 42);
   REQUIRE(AF_FINISHED(promise));
@@ -140,7 +140,7 @@ TEST("coroutine generator") {
 }
 
 TEST("coroutine status finished") {
-  AF_CREATE(promise, test_bar);
+  AF_CREATE(promise, test_bar, );
   REQUIRE(!AF_FINISHED(promise));
   (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(!AF_FINISHED(promise));
@@ -149,7 +149,7 @@ TEST("coroutine status finished") {
 }
 
 TEST("coroutine task") {
-  AF_CREATE(promise, test_task);
+  AF_CREATE(promise, test_task, );
   (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(!AF_FINISHED(promise));
   (void) AF_RESUME_AND_JOIN(promise);
@@ -159,7 +159,7 @@ TEST("coroutine task") {
 }
 
 TEST("coroutine nested task") {
-  AF_CREATE(promise, test_nest_task);
+  AF_CREATE(promise, test_nest_task, );
   (void) AF_RESUME_AND_JOIN(promise);
   REQUIRE(!AF_FINISHED(promise));
   (void) AF_RESUME_AND_JOIN(promise);
@@ -169,7 +169,7 @@ TEST("coroutine nested task") {
 }
 
 TEST("coroutine nested generator") {
-  AF_CREATE(promise, test_nest_generator);
+  AF_CREATE(promise, test_nest_generator, );
   REQUIRE(AF_RESUME_AND_JOIN(promise) == 1);
   REQUIRE(AF_RESUME_AND_JOIN(promise) == 2);
   REQUIRE(AF_RESUME_AND_JOIN(promise) == 3);
@@ -179,13 +179,13 @@ TEST("coroutine nested generator") {
 }
 
 TEST("coroutine join multiple") {
-  AF_CREATE(promise, test_join_multiple);
+  AF_CREATE(promise, test_join_multiple, );
   REQUIRE(AF_RESUME_AND_JOIN(promise) == 0);
   REQUIRE(AF_FINISHED(promise));
 }
 
 TEST("coroutine await multiple") {
-  AF_CREATE(promise, test_await_multiple);
+  AF_CREATE(promise, test_await_multiple, );
   REQUIRE(AF_RESUME_AND_JOIN(promise) == 0);
   REQUIRE(AF_RESUME_AND_JOIN(promise) == 42 * 3);
   REQUIRE(AF_FINISHED(promise));
