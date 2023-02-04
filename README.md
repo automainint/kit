@@ -7,6 +7,7 @@
 - Input buffer
 - Random number generation
 - Big integer math
+- SHA-256
 - Async function
 - Atomic
 - Condition variable
