@@ -195,6 +195,7 @@ int kit_run_tests(int argc, char **argv) {
     !carriage_return || no_color || print_color(yellow);
     carriage_return || no_color || print_color(light);
     quiet || printf("` %s ", kit_tests_list.tests[i].test_name);
+    !carriage_return || quiet || printf("\r");
     quiet || fflush(stdout);
 
     struct timespec begin, end;
@@ -218,10 +219,9 @@ int kit_run_tests(int argc, char **argv) {
 
     total_assertion_count += kit_tests_list.tests[i].assertions;
 
-    if (carriage_return) {
-      no_color || print_color(light);
-      quiet || printf("\r` %s ", kit_tests_list.tests[i].test_name);
-    }
+    !carriage_return || no_color || print_color(light);
+    !carriage_return || quiet ||
+        printf("` %s ", kit_tests_list.tests[i].test_name);
 
     int const l = (int) strlen(kit_tests_list.tests[i].test_name);
     quiet || printf("%*c", line_width - l, ' ');
