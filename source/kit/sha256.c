@@ -88,7 +88,7 @@ kit_sha256_hash_t kit_sha256(ptrdiff_t const      in_size,
 
   ptrdiff_t i;
   ptrdiff_t datalen = 0;
-  ptrdiff_t bitlen  = 0;
+  uint64_t  bitlen  = 0;
 
   if (in_data != NULL)
     for (i = 0; i < in_size; ++i) {
