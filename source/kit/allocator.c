@@ -18,7 +18,7 @@ static void deallocate(void *_, void *pointer) {
 #endif
 }
 
-kit_allocator_t kit_alloc_default() {
+kit_allocator_t kit_alloc_default(void) {
   kit_allocator_t alloc = { .state      = NULL,
                             .allocate   = allocate,
                             .deallocate = deallocate };

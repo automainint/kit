@@ -16,7 +16,7 @@ typedef struct {
   kit_deallocate_fn deallocate;
 } kit_allocator_t;
 
-kit_allocator_t kit_alloc_default();
+kit_allocator_t kit_alloc_default(void);
 
 #ifdef __cplusplus
 }
