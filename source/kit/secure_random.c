@@ -16,7 +16,7 @@
 #  include <unistd.h>
 #endif
 
-static uint64_t get_available_memory() {
+static uint64_t get_available_memory(void) {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   MEMORYSTATUSEX status;
   status.dwLength = sizeof(status);
@@ -33,7 +33,7 @@ static uint64_t get_available_memory() {
 static once_flag kit_secure_random_fallback_flag;
 static mtx_t     kit_secure_random_fallback_mutex;
 
-static void secure_random_fallback_init() {
+static void secure_random_fallback_init(void) {
   mtx_init(&kit_secure_random_fallback_mutex, mtx_plain);
 }
 #endif
