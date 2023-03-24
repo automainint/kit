@@ -143,8 +143,7 @@ static void impl_tss_dtor_invoke(void) {
   int i;
   for (i = 0; i < EMULATED_THREADS_TSS_DTOR_SLOTNUM; i++) {
     if (impl_tss_dtor_tbl[i].dtor) {
-      void *val = (void *) (uint64_t) tss_get(
-          impl_tss_dtor_tbl[i].key);
+      void *val = (void *) (size_t) tss_get(impl_tss_dtor_tbl[i].key);
       if (val)
         (impl_tss_dtor_tbl[i].dtor)(val);
     }
