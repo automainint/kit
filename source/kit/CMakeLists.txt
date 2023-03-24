@@ -1,11 +1,9 @@
 target_sources(
   kit
     PRIVATE
-      input_buffer.c bigint.c status.c secure_random.c
-      sha256.c thread.posix.c atomic.win32.c condition_variable.c
-      thread.win32.c move_back.c input_stream.c file.c string_ref.c
-      async_function.c allocator.c array_ref.c dynamic_array.c mutex.c
-      mersenne_twister_64.c
+      input_buffer.c secure_random.c sha256.c thread.posix.c
+      atomic.win32.c condition_variable.c thread.win32.c input_stream.c file.c
+      allocator.c array_ref.c dynamic_array.c mutex.c mersenne_twister_64.c
     PUBLIC
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/mutex.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/status.h>
