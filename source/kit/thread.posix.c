@@ -44,7 +44,7 @@ typedef struct {
 
 static void *impl_thrd_routine(void *p) {
   impl_thrd_param_t pack = *((impl_thrd_param_t *) p);
-  pack.alloc.deallocate(pack.alloc.state, p);
+  kit_alloc_dispatch(pack.alloc, KIT_DEALLOCATE, 0, 0, p);
   return (void *) (intptr_t) pack.func(pack.arg);
 }
 
@@ -214,8 +214,9 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
     attr_p = &attr;
   }
   kit_allocator_t alloc = kit_alloc_default();
-  pack                  = (impl_thrd_param_t *) alloc.allocate(
-                       alloc.state, sizeof(impl_thrd_param_t));
+
+  pack = (impl_thrd_param_t *) kit_alloc_dispatch(
+      alloc, KIT_ALLOCATE, sizeof(impl_thrd_param_t), 0, NULL);
   if (!pack) {
     if (attr_p)
       pthread_attr_destroy(attr_p);
@@ -225,7 +226,7 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
   pack->arg   = arg;
   pack->alloc = alloc;
   if (pthread_create(thr, attr_p, impl_thrd_routine, pack) != 0) {
-    alloc.deallocate(alloc.state, pack);
+    kit_alloc_dispatch(alloc, KIT_DEALLOCATE, 0, 0, pack);
     if (attr_p)
       pthread_attr_destroy(attr_p);
     return thrd_error;

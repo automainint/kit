@@ -44,11 +44,11 @@ void kit_da_resize(kit_da_void_t *array, ptrdiff_t element_size,
 
 /*  Destroy dynamic array.
  */
-#define KIT_DA_DESTROY(array_)                        \
-  do {                                                \
-    if ((array_).values != NULL)                      \
-      (array_).alloc.deallocate((array_).alloc.state, \
-                                (array_).values);     \
+#define KIT_DA_DESTROY(array_)                                 \
+  do {                                                         \
+    if ((array_).values != NULL)                               \
+      kit_alloc_dispatch((array_).alloc, KIT_DEALLOCATE, 0, 0, \
+                         (array_).values);                     \
   } while (0)
 
 /*  Resize dynamic array.

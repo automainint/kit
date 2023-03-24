@@ -13,8 +13,8 @@ typedef struct {
 static internal_buffer_t *buf_init(kit_is_handle_t upstream,
                                    kit_allocator_t alloc) {
   assert(alloc.allocate != NULL);
-  internal_buffer_t *const buf = alloc.allocate(alloc.state,
-                                                sizeof *buf);
+  internal_buffer_t *const buf = kit_alloc_dispatch(
+      alloc, KIT_ALLOCATE, sizeof *buf, 0, NULL);
 
   if (buf != NULL) {
     memset(buf, 0, sizeof *buf);
@@ -46,9 +46,7 @@ static void buf_release(void *p) {
 
   if (--buf->ref_count == 0) {
     DA_DESTROY(buf->data);
-
-    assert(buf->alloc.deallocate != NULL);
-    buf->alloc.deallocate(buf->alloc.state, buf);
+    kit_alloc_dispatch(buf->alloc, KIT_DEALLOCATE, 0, 0, buf);
   }
 }
 
