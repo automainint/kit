@@ -329,7 +329,7 @@ kit_file_size_result_t kit_file_size(kit_str_t const path) {
   PREPARE_PATH_BUF_;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  HFILE f = CreateFileW(buf, GENERIC_READ, FILE_SHARE_READ, NULL,
+  HANDLE f = CreateFileW(buf, GENERIC_READ, FILE_SHARE_READ, NULL,
                         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (f != INVALID_HANDLE_VALUE) {
     DWORD high;
