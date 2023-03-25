@@ -18,6 +18,10 @@ enum { PATH_BUF_SIZE = 4096 };
 #  include <unistd.h>
 #endif
 
+#ifdef __APPLE__
+#  define st_mtim st_mtimespec
+#endif
+
 static int is_delim(char const c) {
   return c == '/' || c == '\\';
 }
