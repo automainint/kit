@@ -51,12 +51,6 @@ extern kit_tests_list_t kit_tests_list;
     static void f(void)
 #else
 #  ifdef _MSC_VER
-#    ifdef __cplusplus
-#      define KIT_EXTERN_C_ extern "C"
-#    else
-#      define KIT_EXTERN_C_
-#    endif
-
 #    pragma section(".CRT$XCU", read)
 #    define KIT_TEST_ON_START_2_(f, p)                               \
       static void f(void);                                           \

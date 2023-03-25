@@ -29,7 +29,7 @@ static long long sec_to_ms(long long sec) {
 
 enum { white, blue, light, yellow, red, green };
 
-char const *const color_codes[] = {
+static char const *const color_codes[] = {
   [white] = "\x1b[38m",  [blue] = "\x1b[34m", [light] = "\x1b[37m",
   [yellow] = "\x1b[33m", [red] = "\x1b[31m",  [green] = "\x1b[32m"
 };
