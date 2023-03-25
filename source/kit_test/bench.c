@@ -260,10 +260,10 @@ int kit_run_benchmarks(int argc, char **argv) {
       int64_t const average =
           kit_benchs_list.benchs[i].duration_nsec[repeats / 2];
       int64_t const floor =
-          kit_benchs_list.benchs[i].duration_nsec[repeats / 10];
+          kit_benchs_list.benchs[i].duration_nsec[repeats / 20];
       int64_t const roof =
           kit_benchs_list.benchs[i]
-              .duration_nsec[repeats - repeats / 10 - 1];
+              .duration_nsec[repeats - repeats / 20 - 1];
 
       no_color || print_color(white);
       printf("%-8lld", (long long) floor);
