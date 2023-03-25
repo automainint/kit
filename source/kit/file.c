@@ -116,7 +116,7 @@ kit_string_t kit_path_user(kit_allocator_t const alloc) {
   DA_INIT(user, size, alloc);
   assert(user.size == size);
 
-  if (user.size > 0)
+  if (user.size == size)
     memcpy(user.values, home, user.size);
   else {
     DA_RESIZE(user, 1);
@@ -322,29 +322,51 @@ kit_path_type_t kit_path_type(kit_str_t const path) {
   return KIT_PATH_NONE;
 }
 
-kit_file_size_result_t kit_file_size(kit_str_t const path) {
-  kit_file_size_result_t result;
+kit_file_info_t kit_file_info(kit_str_t const path) {
+  kit_file_info_t result;
   memset(&result, 0, sizeof result);
 
   PREPARE_PATH_BUF_;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   HANDLE f = CreateFileW(buf, GENERIC_READ, FILE_SHARE_READ, NULL,
-                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+                         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (f != INVALID_HANDLE_VALUE) {
+    FILETIME ft;
+    if (GetFileTime(f, NULL, NULL, &ft) != 0) {
+      uint64_t const nsec100 = (((uint64_t) ft.dwHighDateTime)
+                                << 32) |
+                               (uint64_t) ft.dwLowDateTime;
+      result.time_modified_sec  = (int64_t) (nsec100 / 10000000);
+      result.time_modified_nsec = (int32_t) (100 *
+                                             (nsec100 % 10000000));
+    } else {
+      assert(0);
+    }
+
     DWORD high;
     DWORD low = GetFileSize(f, &high);
-    CloseHandle(f);
 
+    result.size   = (int64_t) ((((uint64_t) high) << 32) |
+                             (uint64_t) low);
     result.status = KIT_OK;
-    result.size   = (((uint64_t) high) << 32) | (uint64_t) low;
+
+    CloseHandle(f);
     return result;
   }
 #else
   struct stat info;
-  if (stat(buf, &info) == 0) {
-    result.status = KIT_OK;
-    result.size   = (uint64_t) info.st_size;
+  if (stat(buf, &info) == 0 && S_ISREG(info.st_mode)) {
+    result.size = (int64_t) info.st_size;
+#  ifndef st_mtime
+    /*  No support for nanosecond timestamps.
+     */
+    result.time_modified_sec = (int64_t) info.st_mtime;
+#  else
+    result.time_modified_sec  = (int64_t) info.st_mtim.tv_sec;
+    result.time_modified_nsec = (int32_t) info.st_mtim.tv_nsec;
+#  endif
+    result.status            = KIT_OK;
     return result;
   }
 #endif

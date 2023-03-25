@@ -51,10 +51,13 @@ kit_path_type_t kit_path_type(kit_str_t path);
 
 typedef struct {
   kit_status_t status;
-  uint64_t     size;
-} kit_file_size_result_t;
 
-kit_file_size_result_t kit_file_size(kit_str_t path);
+  int64_t time_modified_sec;
+  int32_t time_modified_nsec;
+  int64_t size;
+} kit_file_info_t;
+
+kit_file_info_t kit_file_info(kit_str_t path);
 
 typedef struct {
   kit_status_t status;
