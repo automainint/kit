@@ -73,12 +73,21 @@ void kit_bench_register(char const *name, char const *file,
   kit_bench_end_fn_(kit_bench_index_); \
   }
 
+/*  FIXME
+ */
+#define KIT_DO_NOT_OPTIMIZE(x)        \
+  do {                                \
+    volatile void *bench_ptr_ = &(x); \
+    (void) bench_ptr_;                \
+  } while (0)
+
 int kit_run_benchmarks(int argc, char **argv);
 
 #ifndef KIT_DISABLE_SHORT_NAMES
 #  define BENCHMARK KIT_BENCHMARK
 #  define BENCHMARK_BEGIN KIT_BENCHMARK_BEGIN
 #  define BENCHMARK_END KIT_BENCHMARK_END
+#  define DO_NOT_OPTIMIZE KIT_DO_NOT_OPTIMIZE
 
 #  define bench_register kit_bench_register
 #  define run_benchmarks kit_run_benchmarks
