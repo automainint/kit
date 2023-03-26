@@ -8,10 +8,10 @@ extern "C" {
 #endif
 
 enum {
-  kit_af_request_execute         = 0,
-  kit_af_request_resume          = 1,
-  kit_af_request_join            = 2,
-  kit_af_request_resume_and_join = 3
+  KIT_AF_REQUEST_EXECUTE         = 0,
+  KIT_AF_REQUEST_RESUME          = 1,
+  KIT_AF_REQUEST_JOIN            = 2,
+  KIT_AF_REQUEST_RESUME_AND_JOIN = 3
 };
 
 typedef struct {
@@ -54,13 +54,13 @@ typedef struct {
   KIT_AF_DECL(name_) {                                            \
     struct name_##_coro_state_ *self =                            \
         (struct name_##_coro_state_ *) self_void_;                \
-    if (request_ != kit_af_request_execute) {                     \
+    if (request_ != KIT_AF_REQUEST_EXECUTE) {                     \
       if (self->_context.execute != NULL)                         \
         self->_context.execute(self->_context.state, self_void_,  \
                                request_);                         \
-      else if (request_ == kit_af_request_join ||                 \
-               request_ == kit_af_request_resume_and_join)        \
-        self->_state_machine(self_void_, kit_af_request_execute); \
+      else if (request_ == KIT_AF_REQUEST_JOIN ||                 \
+               request_ == KIT_AF_REQUEST_RESUME_AND_JOIN)        \
+        self->_state_machine(self_void_, KIT_AF_REQUEST_EXECUTE); \
       return;                                                     \
     }                                                             \
     switch (self->_index) {                                       \
@@ -128,7 +128,7 @@ typedef struct {
       if ((promise_)._index != -1) {                               \
         self->_index = KIT_AF_LINE_();                             \
         (promise_)._state_machine(&(promise_),                     \
-                                  kit_af_request_resume_and_join); \
+                                  KIT_AF_REQUEST_RESUME_AND_JOIN); \
       }                                                            \
       if ((promise_)._index != -1)                                 \
         return;                                                    \
@@ -140,7 +140,7 @@ typedef struct {
       if ((promise_)._index != -1) {                               \
         self->_index = KIT_AF_LINE_();                             \
         (promise_)._state_machine(&(promise_),                     \
-                                  kit_af_request_resume_and_join); \
+                                  KIT_AF_REQUEST_RESUME_AND_JOIN); \
         self->return_value = (promise_).return_value;              \
         return;                                                    \
       }                                                            \
@@ -176,7 +176,7 @@ typedef struct {
   } while (0)
 
 #define KIT_AF_RESUME(promise_) \
-  (promise_)._state_machine(&(promise_), kit_af_request_resume)
+  (promise_)._state_machine(&(promise_), KIT_AF_REQUEST_RESUME)
 
 #define KIT_AF_RESUME_N(promises_, size_)            \
   do {                                               \
@@ -187,7 +187,7 @@ typedef struct {
   } while (0)
 
 #define KIT_AF_JOIN(promise_)                                   \
-  ((promise_)._state_machine(&(promise_), kit_af_request_join), \
+  ((promise_)._state_machine(&(promise_), KIT_AF_REQUEST_JOIN), \
    (promise_).return_value)
 
 #define KIT_AF_JOIN_N(promises_, size_)               \
@@ -200,7 +200,7 @@ typedef struct {
 
 #define KIT_AF_RESUME_AND_JOIN(promise_)                      \
   ((promise_)._state_machine(&(promise_),                     \
-                             kit_af_request_resume_and_join), \
+                             KIT_AF_REQUEST_RESUME_AND_JOIN), \
    (promise_).return_value)
 
 #define KIT_AF_RESUME_AND_JOIN_N(promises_, size_) \
@@ -256,7 +256,7 @@ typedef struct {
 
 #define KIT_AF_EXECUTE(promise_)                       \
   KIT_AF_INTERNAL(promise_)._state_machine((promise_), \
-                                           kit_af_request_execute)
+                                           KIT_AF_REQUEST_EXECUTE)
 
 #ifndef KIT_DISABLE_SHORT_NAMES
 #  ifndef KIT_DISABLE_AF_SELF_SHORTCUT
@@ -264,10 +264,10 @@ typedef struct {
 #  endif
 
 #  define af_request kit_af_request
-#  define af_request_execute kit_af_request_execute
-#  define af_request_resume kit_af_request_resume
-#  define af_request_join kit_af_request_join
-#  define af_request_resume_and_join kit_af_request_resume_and_join
+#  define AF_REQUEST_EXECUTE KIT_AF_REQUEST_EXECUTE
+#  define AF_REQUEST_RESUME KIT_AF_REQUEST_RESUME
+#  define AF_REQUEST_JOIN KIT_AF_REQUEST_JOIN
+#  define AF_REQUEST_RESUME_AND_JOIN KIT_AF_REQUEST_RESUME_AND_JOIN
 #  define af_void kit_af_void
 #  define af_state_machine kit_af_state_machine
 #  define af_execute kit_af_execute

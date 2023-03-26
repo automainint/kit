@@ -71,13 +71,13 @@ STATIC_CORO(int, test_await_multiple,
 CORO_END
 
 void test_execute_lazy(void *_, void *coro, int request) {
-  if (request == af_request_resume)
+  if (request == AF_REQUEST_RESUME)
     return;
   AF_EXECUTE(coro);
 }
 
 void test_execute_immediate(void *_, void *coro, int request) {
-  if (request == af_request_join)
+  if (request == AF_REQUEST_JOIN)
     return;
   AF_EXECUTE(coro);
 }
