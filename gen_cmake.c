@@ -22,8 +22,8 @@ char const *sz_(str_t const s) {
   int         n = s.size;
   if (n > 999)
     n = 999;
-  memcpy(buf, s.values, s.size);
-  buf[s.size] = '\0';
+  memcpy(buf, s.values, n);
+  buf[n] = '\0';
   return buf;
 }
 
