@@ -10,35 +10,51 @@
 
 kit_benchs_list_t kit_benchs_list = { 0 };
 
-static void bench_begin(int i) {
-  int const n = kit_benchs_list.benchs[i].repeats++;
+static void bench_set_repeats_limit(int i, int repeats_limit) {
+  if (kit_benchs_list.v[i].ready)
+    return;
+  if (kit_benchs_list.v[i].cycles_size >= KIT_BENCH_MAX_CYCLES)
+    return;
+  kit_benchs_list.v[i].cycles[kit_benchs_list.v[i].cycles_size] =
+      repeats_limit;
+  kit_benchs_list.v[i].cycles_size++;
+}
 
-  if (n >= KIT_BENCH_REPEATS)
+static int bench_loop(int i) {
+  if (!kit_benchs_list.v[i].ready)
+    return 0;
+  return kit_benchs_list.v[i].repeats <
+         kit_benchs_list.v[i].cycles[kit_benchs_list.v[i].cycle];
+}
+
+static void bench_begin(int i) {
+  int const n = kit_benchs_list.v[i].repeats++;
+
+  if (n >= KIT_BENCH_MAX_REPEATS)
     return;
 
   struct timespec tv;
   timespec_get(&tv, TIME_UTC);
 
-  kit_benchs_list.benchs[i].sec[n]  = (int64_t) tv.tv_sec;
-  kit_benchs_list.benchs[i].nsec[n] = (int64_t) tv.tv_nsec;
+  kit_benchs_list.v[i].sec[n]  = (int64_t) tv.tv_sec;
+  kit_benchs_list.v[i].nsec[n] = (int64_t) tv.tv_nsec;
 }
 
 static void bench_end(int i) {
-  int const n = kit_benchs_list.benchs[i].repeats - 1;
+  int const n = kit_benchs_list.v[i].repeats - 1;
 
-  if (n < 0 || n >= KIT_BENCH_REPEATS)
+  if (n < 0 || n >= KIT_BENCH_MAX_REPEATS)
     return;
 
   struct timespec tv;
   timespec_get(&tv, TIME_UTC);
 
   int64_t const sec = ((int64_t) tv.tv_sec) -
-                      kit_benchs_list.benchs[i].sec[n];
+                      kit_benchs_list.v[i].sec[n];
   int64_t const nsec = ((int64_t) tv.tv_nsec) -
-                       kit_benchs_list.benchs[i].nsec[n];
+                       kit_benchs_list.v[i].nsec[n];
 
-  kit_benchs_list.benchs[i].duration_nsec[n] = sec * 1000000000 +
-                                               nsec;
+  kit_benchs_list.v[i].duration_nsec[n] = sec * 1000000000 + nsec;
 }
 
 enum { white, blue, light, yellow, red, green };
@@ -56,10 +72,13 @@ void kit_bench_register(char const *name, char const *file,
                         kit_bench_run_fn fn) {
   int n = kit_benchs_list.size++;
   if (n < KIT_BENCHS_SIZE_LIMIT) {
-    kit_benchs_list.benchs[n].bench_fn   = fn;
-    kit_benchs_list.benchs[n].bench_name = name;
-    kit_benchs_list.benchs[n].bench_file = file;
-    kit_benchs_list.benchs[n].repeats    = 0;
+    kit_benchmark_t *const bench = kit_benchs_list.v + n;
+
+    bench->bench_fn    = fn;
+    bench->bench_name  = name;
+    bench->bench_file  = file;
+    bench->cycles_size = 0;
+    bench->ready       = 0;
   }
 }
 
@@ -85,7 +104,8 @@ static void setup_signals() {
   int i;
 
   for (i = 0; i < sizeof signums / sizeof *signums; i++) {
-#if defined(_WIN32) && !(defined __CYGWIN__)
+#if (defined(_WIN32) && !defined(__CYGWIN__)) || \
+    !defined(_POSIX_C_SOURCE)
     signal(signums[i], handle_signal);
 #else
     struct sigaction action;
@@ -101,17 +121,24 @@ static int run_bench(volatile int i) {
   int signum = setjmp(kit_bench_restore_execution);
 
   if (signum != 0) {
-    kit_benchs_list.benchs[i].signal = signum;
+    kit_benchs_list.v[i].signal = signum;
     return 0;
   }
 
-  kit_benchs_list.benchs[i].bench_fn(i, bench_begin, bench_end);
+  kit_benchs_list.v[i].bench_fn(i, bench_set_repeats_limit,
+                                bench_loop, bench_begin, bench_end);
   return 1;
 }
 
 int compare_64_(void const *x_, void const *y_) {
   int64_t const *x = (int64_t const *) x_;
   int64_t const *y = (int64_t const *) y_;
+  return *x - *y;
+}
+
+int compare_32_(void const *x_, void const *y_) {
+  int const *x = (int const *) x_;
+  int const *y = (int const *) y_;
   return *x - *y;
 }
 
@@ -122,13 +149,11 @@ int kit_run_benchmarks(int argc, char **argv) {
   int line_width      = 20;
   int carriage_return = 1;
 
-  int i, j;
-
   char const *specific_bench = NULL;
 
   setup_signals();
 
-  for (i = 0; i < argc; i++)
+  for (int i = 0; i < argc; i++)
     if (strcmp("--no-term-color", argv[i]) == 0)
       no_color = 1;
     else if (strcmp("--no-carriage-return", argv[i]) == 0)
@@ -149,41 +174,40 @@ int kit_run_benchmarks(int argc, char **argv) {
   ptrdiff_t   file_root    = -1;
   int         benchs_total = 0;
 
-  for (i = 0; i < kit_benchs_list.size && i < KIT_BENCHS_SIZE_LIMIT;
-       i++) {
+  for (int i = 0;
+       i < kit_benchs_list.size && i < KIT_BENCHS_SIZE_LIMIT; i++) {
     if (specific_bench != NULL &&
-        strstr(kit_benchs_list.benchs[i].bench_name,
-               specific_bench) == NULL)
+        strstr(kit_benchs_list.v[i].bench_name, specific_bench) ==
+            NULL)
       continue;
     benchs_total++;
-    int const l = 2 +
-                  (int) strlen(kit_benchs_list.benchs[i].bench_name);
+    int const l = 2 + (int) strlen(kit_benchs_list.v[i].bench_name);
     if (line_width < l)
       line_width = l;
   }
 
   if (benchs_total > 0) {
-    char const *const s = kit_benchs_list.benchs[0].bench_file;
+    char const *const s = kit_benchs_list.v[0].bench_file;
 
-    for (j = 1; j < kit_benchs_list.size && j < KIT_BENCHS_SIZE_LIMIT;
-         j++) {
+    for (int j = 1;
+         j < kit_benchs_list.size && j < KIT_BENCHS_SIZE_LIMIT; j++) {
+      kit_benchmark_t *const bench = kit_benchs_list.v + j;
+
       if (specific_bench != NULL &&
-          strstr(kit_benchs_list.benchs[j].bench_name,
-                 specific_bench) == NULL)
+          strstr(bench->bench_name, specific_bench) == NULL)
         continue;
-      if (strcmp(s, kit_benchs_list.benchs[j].bench_file) == 0)
+      if (strcmp(s, bench->bench_file) == 0)
         continue;
       int k = 0;
-      for (; s[k] != '\0' &&
-             kit_benchs_list.benchs[j].bench_file[k] != '\0' &&
-             s[k] == kit_benchs_list.benchs[j].bench_file[k];
+      for (; s[k] != '\0' && bench->bench_file[k] != '\0' &&
+             s[k] == bench->bench_file[k];
            k++) { }
       if (file_root == -1 || file_root > k)
         file_root = k;
     }
 
     if (file_root == -1) {
-      for (i = 0; s[i] != '\0'; i++)
+      for (int i = 0; s[i] != '\0'; i++)
         if (s[i] == '/' || s[i] == '\\')
           file_root = i + 1;
     }
@@ -207,91 +231,150 @@ int kit_run_benchmarks(int argc, char **argv) {
   no_color || print_color(light);
   printf(" in nanoseconds\n\n");
 
-  for (i = 0; i < kit_benchs_list.size && i < KIT_BENCHS_SIZE_LIMIT;
-       i++) {
+  /*  Prepare cycles.
+   */
+
+  for (int i = 0;
+       i < kit_benchs_list.size && i < KIT_BENCHS_SIZE_LIMIT; i++) {
+    kit_benchmark_t *const bench = kit_benchs_list.v + i;
+
     if (specific_bench != NULL &&
-        strstr(kit_benchs_list.benchs[i].bench_name,
-               specific_bench) == NULL)
+        strstr(bench->bench_name, specific_bench) == NULL)
       continue;
-    if (file == NULL ||
-        strcmp(file, kit_benchs_list.benchs[i].bench_file) != 0) {
-      if (file != NULL)
-        printf("\n");
-      file = kit_benchs_list.benchs[i].bench_file;
-      no_color || print_color(blue);
-      printf("* ");
-      no_color || print_color(white);
-      printf("%s\n", file + file_root);
+
+    run_bench(i);
+
+    if (bench->cycles_size == 0) {
+      bench->cycles_size = 2;
+      bench->cycles[0]   = KIT_BENCH_REPEATS_DEFAULT_1;
+      bench->cycles[1]   = KIT_BENCH_REPEATS_DEFAULT_2;
     }
 
-    !carriage_return || no_color || print_color(yellow);
-    carriage_return || no_color || print_color(light);
-    printf("` %s ", kit_benchs_list.benchs[i].bench_name);
-    !carriage_return || printf("\r");
-    fflush(stdout);
+    qsort(bench->cycles, bench->cycles_size, sizeof *bench->cycles,
+          compare_32_);
 
-    int bench_status = run_bench(i);
+    kit_benchs_list.v[i].ready = 1;
+  }
 
-    if (kit_benchs_list.benchs[i].repeats > KIT_BENCH_REPEATS)
-      bench_status = 0;
+  /*  Run cycles.
+   */
 
-    !carriage_return || no_color || print_color(light);
-    !carriage_return ||
-        printf("` %s ", kit_benchs_list.benchs[i].bench_name);
+  for (int cycle = 0; cycle < KIT_BENCH_MAX_CYCLES; cycle++) {
+    /*  Prepare cycle.
+     */
 
-    int const l = (int) strlen(kit_benchs_list.benchs[i].bench_name);
-    printf("%*c", line_width - l, ' ');
+    int cycles_done = 1;
 
-    if (kit_benchs_list.benchs[i].repeats <= 0) {
-      no_color || print_color(yellow);
-      printf("                             0 runs\n");
-      success_count++;
-    } else if (bench_status == 0) {
-      no_color || print_color(red);
-      printf("                             FAIL\n");
-      status = 1;
-    } else {
-      int const repeats = kit_benchs_list.benchs[i].repeats;
+    for (int i = 0;
+         i < kit_benchs_list.size && i < KIT_BENCHS_SIZE_LIMIT; i++) {
+      kit_benchmark_t *const bench = kit_benchs_list.v + i;
 
-      qsort(kit_benchs_list.benchs[i].duration_nsec, repeats,
-            sizeof *kit_benchs_list.benchs[i].duration_nsec,
-            compare_64_);
+      if (specific_bench != NULL &&
+          strstr(bench->bench_name, specific_bench) == NULL)
+        continue;
+      if (cycle >= bench->cycles_size)
+        continue;
 
-      int64_t const average =
-          kit_benchs_list.benchs[i].duration_nsec[repeats / 2];
-      int64_t const floor =
-          kit_benchs_list.benchs[i].duration_nsec[repeats / 20];
-      int64_t const roof =
-          kit_benchs_list.benchs[i]
-              .duration_nsec[repeats - repeats / 20 - 1];
+      bench->repeats = 0;
+      bench->cycle   = cycle;
+      cycles_done    = 0;
+    }
 
-      no_color || print_color(white);
-      printf("%-8lld", (long long) floor);
-      no_color || print_color(light);
-      printf("| ");
-      no_color || print_color(white);
-      printf("%-8lld", (long long) average);
-      no_color || print_color(light);
-      printf("| ");
-      no_color || print_color(white);
-      printf("%-8lld", (long long) roof);
-      no_color || print_color(light);
-      printf(" %d runs\n", repeats);
-      success_count++;
+    if (cycles_done)
+      break;
+
+    /*  Run benchmarks.
+     */
+
+    for (int i = 0;
+         i < kit_benchs_list.size && i < KIT_BENCHS_SIZE_LIMIT; i++) {
+      kit_benchmark_t *const bench = kit_benchs_list.v + i;
+
+      if (specific_bench != NULL &&
+          strstr(bench->bench_name, specific_bench) == NULL)
+        continue;
+      if (cycle >= bench->cycles_size)
+        continue;
+
+      if (file == NULL || strcmp(file, bench->bench_file) != 0) {
+        if (file != NULL)
+          printf("\n");
+        file = bench->bench_file;
+        no_color || print_color(blue);
+        printf("* ");
+        no_color || print_color(white);
+        printf("%s\n", file + file_root);
+      }
+
+      !carriage_return || no_color || print_color(yellow);
+      carriage_return || no_color || print_color(light);
+      printf("` %s ", bench->bench_name);
+      !carriage_return || printf("\r");
+      fflush(stdout);
+
+      int bench_status = run_bench(i);
+
+      if (bench->repeats > KIT_BENCH_MAX_REPEATS)
+        bench_status = 0;
+
+      !carriage_return || no_color || print_color(light);
+      !carriage_return || printf("` %s ", bench->bench_name);
+
+      int const l = (int) strlen(bench->bench_name);
+      printf("%*c", line_width - l, ' ');
+
+      if (bench->repeats <= 0) {
+        no_color || print_color(yellow);
+        printf("                             0 runs\n");
+        success_count++;
+      } else if (bench_status == 0) {
+        no_color || print_color(red);
+        printf("                             FAIL\n");
+        status = 1;
+      } else {
+        int const repeats = bench->repeats;
+
+        memcpy(bench->duration_sorted_nsec, bench->duration_nsec,
+               repeats * sizeof *bench->duration_sorted_nsec);
+        qsort(bench->duration_sorted_nsec, repeats,
+              sizeof *bench->duration_sorted_nsec, compare_64_);
+
+        int64_t const average =
+            bench->duration_sorted_nsec[repeats / 2];
+        int64_t const floor =
+            bench->duration_sorted_nsec[repeats / 20];
+        int64_t const roof =
+            bench->duration_sorted_nsec[repeats - repeats / 20 - 1];
+
+        no_color || print_color(white);
+        printf("%-8lld", (long long) floor);
+        no_color || print_color(light);
+        printf("| ");
+        no_color || print_color(white);
+        printf("%-8lld", (long long) average);
+        no_color || print_color(light);
+        printf("| ");
+        no_color || print_color(white);
+        printf("%-8lld", (long long) roof);
+        no_color || print_color(light);
+        printf(" %d runs\n", repeats);
+        success_count++;
+      }
     }
   }
 
   printf("\n");
 
   if (status != 0) {
-    for (i = 0; i < kit_benchs_list.size && i < KIT_BENCHS_SIZE_LIMIT;
-         i++) {
+    for (int i = 0;
+         i < kit_benchs_list.size && i < KIT_BENCHS_SIZE_LIMIT; i++) {
+      kit_benchmark_t *const bench = kit_benchs_list.v + i;
+
       if (specific_bench != NULL &&
-          strstr(kit_benchs_list.benchs[i].bench_name,
-                 specific_bench) == NULL)
+          strstr(bench->bench_name, specific_bench) == NULL)
         continue;
-      if (kit_benchs_list.benchs[i].signal != 0) {
-        int signum = kit_benchs_list.benchs[i].signal;
+      if (bench->signal != 0) {
+        int signum = bench->signal;
         if (signum >= 0 &&
             signum < sizeof signames / sizeof *signames &&
             signames[signum] != NULL) {
@@ -299,24 +382,22 @@ int kit_run_benchmarks(int argc, char **argv) {
           printf("Signal \"%s\" (%d) for \"", signames[signum],
                  signum);
           no_color || print_color(white);
-          printf("%s", kit_benchs_list.benchs[i].bench_name);
+          printf("%s", bench->bench_name);
           no_color || print_color(light);
           printf("\" in \"");
           no_color || print_color(white);
-          printf("%s",
-                 kit_benchs_list.benchs[i].bench_file + file_root);
+          printf("%s", bench->bench_file + file_root);
           no_color || print_color(light);
           printf("\"!.\n");
         } else {
           no_color || print_color(light);
           printf("Unknown signal (%d) for \"", signum);
           no_color || print_color(white);
-          printf("%s", kit_benchs_list.benchs[i].bench_name);
+          printf("%s", bench->bench_name);
           no_color || print_color(light);
           printf("\" in \"");
           no_color || print_color(white);
-          printf("%s",
-                 kit_benchs_list.benchs[i].bench_file + file_root);
+          printf("%s", bench->bench_file + file_root);
           no_color || print_color(light);
           printf("\"!.\n");
         }

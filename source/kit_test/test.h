@@ -35,7 +35,7 @@ typedef struct {
 
 typedef struct {
   int             size;
-  kit_test_case_t tests[KIT_TESTS_SIZE_LIMIT];
+  kit_test_case_t v[KIT_TESTS_SIZE_LIMIT];
 } kit_tests_list_t;
 
 extern kit_tests_list_t kit_tests_list;

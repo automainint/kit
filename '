@@ -6,15 +6,10 @@ struct test_foo_ {
 };
 
 BENCHMARK("foo") {
-
-  /*  Benchmark setup.
-   */
+  BENCHMARK_REPEAT(800);
 
   BENCHMARK_BEGIN;
   {
-    /*  Measured code snippet.
-     */
-
     int              x = 0;
     struct test_foo_ f = { 0. };
 
@@ -23,19 +18,10 @@ BENCHMARK("foo") {
       x ^= i;
       f.f += 0.1;
     }
-
     DO_NOT_OPTIMIZE(x);
     DO_NOT_OPTIMIZE(f);
   }
   BENCHMARK_END;
 }
 
-BENCHMARK("bar") {
-  BENCHMARK_REPEAT(10);
-  BENCHMARK_REPEAT(100);
-
-  BENCHMARK_BEGIN;
-  BENCHMARK_END;
-}
-
-BENCHMARK("empty") { }
+BENCHMARK("bar") { }
