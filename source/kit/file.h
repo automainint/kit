@@ -10,10 +10,12 @@ extern "C" {
 #endif
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#  define KIT_PATH_DELIM '\\'
+#  define KIT_PATH_DELIM_C '\\'
+#  define KIT_PATH_DELIM "\\"
 #  define KIT_ENV_HOME "USERPROFILE"
 #else
-#  define KIT_PATH_DELIM '/'
+#  define KIT_PATH_DELIM_C '/'
+#  define KIT_PATH_DELIM "/"
 #  define KIT_ENV_HOME "HOME"
 #endif
 
@@ -88,6 +90,10 @@ void kit_path_list_destroy(kit_path_list_t list);
 #  define path_list_t kit_path_list_t
 #  define file_enum_folder kit_file_enum_folder
 #  define path_list_destroy kit_path_list_destroy
+
+#  define PATH_DELIM_C KIT_PATH_DELIM_C
+#  define PATH_DELIM KIT_PATH_DELIM
+#  define ENV_HOME KIT_ENV_HOME
 
 #  define PATH_NONE KIT_PATH_NONE
 #  define PATH_FILE KIT_PATH_FILE

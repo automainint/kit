@@ -73,7 +73,7 @@ kit_string_t kit_path_norm(kit_str_t const       path,
   for (i = 0; i < norm.size; i++) {
     if (norm.values[i] != '\0') {
       if (is_delim(norm.values[i]))
-        norm.values[size] = KIT_PATH_DELIM;
+        norm.values[size] = KIT_PATH_DELIM_C;
       else
         norm.values[size] = norm.values[i];
       size++;
@@ -106,7 +106,7 @@ kit_string_t kit_path_join(kit_str_t const       left,
     return joined;
 
   memcpy(joined.values, left.values, left_size);
-  joined.values[left_size] = KIT_PATH_DELIM;
+  joined.values[left_size] = KIT_PATH_DELIM_C;
   memcpy(joined.values + left_size + 1, right_values, right_size);
 
   return joined;

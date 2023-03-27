@@ -205,19 +205,17 @@ int main(int argc, char **argv) {
   str_t const targets[] = { SZ("kit"), SZ("kit_test"),
                             SZ("kit_test_suite") };
 
-  string_t folders[] = { path_norm(SZ("./source/kit"), ALLOC),
-                         path_norm(SZ("./source/kit_test"), ALLOC),
-                         path_norm(SZ("./source/test/unittests"),
-                                   ALLOC) };
+  str_t const folders[] = {
+    SZ("." PATH_DELIM "source" PATH_DELIM "kit"),
+    SZ("." PATH_DELIM "source" PATH_DELIM "kit_test"),
+    SZ("." PATH_DELIM "source" PATH_DELIM "test/unittests")
+  };
 
   int ok = 1;
 
   for (ptrdiff_t i = 0; i < sizeof folders / sizeof *folders; i++)
-    ok = ok && gen_cmakelists_for(targets[i], WRAP_STR(folders[i]))
-                       .status == KIT_OK;
-
-  for (ptrdiff_t i = 0; i < sizeof folders / sizeof *folders; i++)
-    DA_DESTROY(folders[i]);
+    ok = ok &&
+         gen_cmakelists_for(targets[i], folders[i]).status == KIT_OK;
 
   return ok ? 0 : 1;
 }

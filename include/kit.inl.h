@@ -364,10 +364,12 @@ extern "C" {
 #endif
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#  define KIT_PATH_DELIM '\\'
+#  define KIT_PATH_DELIM_C '\\'
+#  define KIT_PATH_DELIM "\\"
 #  define KIT_ENV_HOME "USERPROFILE"
 #else
-#  define KIT_PATH_DELIM '/'
+#  define KIT_PATH_DELIM_C '/'
+#  define KIT_PATH_DELIM "/"
 #  define KIT_ENV_HOME "HOME"
 #endif
 
@@ -442,6 +444,10 @@ void kit_path_list_destroy(kit_path_list_t list);
 #  define path_list_t kit_path_list_t
 #  define file_enum_folder kit_file_enum_folder
 #  define path_list_destroy kit_path_list_destroy
+
+#  define PATH_DELIM_C KIT_PATH_DELIM_C
+#  define PATH_DELIM KIT_PATH_DELIM
+#  define ENV_HOME KIT_ENV_HOME
 
 #  define PATH_NONE KIT_PATH_NONE
 #  define PATH_FILE KIT_PATH_FILE
@@ -717,7 +723,7 @@ kit_string_t kit_path_norm(kit_str_t const       path,
   for (i = 0; i < norm.size; i++) {
     if (norm.values[i] != '\0') {
       if (is_delim(norm.values[i]))
-        norm.values[size] = KIT_PATH_DELIM;
+        norm.values[size] = KIT_PATH_DELIM_C;
       else
         norm.values[size] = norm.values[i];
       size++;
@@ -750,7 +756,7 @@ kit_string_t kit_path_join(kit_str_t const       left,
     return joined;
 
   memcpy(joined.values, left.values, left_size);
-  joined.values[left_size] = KIT_PATH_DELIM;
+  joined.values[left_size] = KIT_PATH_DELIM_C;
   memcpy(joined.values + left_size + 1, right_values, right_size);
 
   return joined;
