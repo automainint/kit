@@ -126,7 +126,6 @@ int main(int argc, char **argv) {
       return 1;
     }
 
-  fprintf(out, "\n");
   fprintf(out, "#endif\n");
 
   fclose(out);

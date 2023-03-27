@@ -1114,5 +1114,4 @@ void kit_path_list_destroy(kit_path_list_t list) {
   DA_DESTROY(list.files);
 }
 
-
 #endif
