@@ -88,6 +88,10 @@ void kit_path_list_destroy(kit_path_list_t list);
 #  define path_list_t kit_path_list_t
 #  define file_enum_folder kit_file_enum_folder
 #  define path_list_destroy kit_path_list_destroy
+
+#  define PATH_NONE KIT_PATH_NONE
+#  define PATH_FILE KIT_PATH_FILE
+#  define PATH_FOLDER KIT_PATH_FOLDER
 #endif
 
 #ifdef __cplusplus

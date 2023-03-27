@@ -35,6 +35,9 @@ static kit_str_t kit_str(ptrdiff_t const   size,
 #define KIT_SZ(static_str_) \
   kit_str(sizeof(static_str_) - 1, (static_str_))
 
+#define KIT_WRAP_STR(string_) \
+  kit_str((string_).size, (string_).values)
+
 #ifndef KIT_DISABLE_SHORT_NAMES
 #  define string_mut_t kit_string_mut_t
 #  define string_ref_t kit_string_ref_t
@@ -42,6 +45,7 @@ static kit_str_t kit_str(ptrdiff_t const   size,
 #  define str_t kit_str_t
 
 #  define SZ KIT_SZ
+#  define WRAP_STR KIT_WRAP_STR
 #endif
 
 #ifdef __cplusplus

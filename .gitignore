@@ -1,2 +1,4 @@
 /*build*/
 *.swp
+gen_inl
+gen_cmake

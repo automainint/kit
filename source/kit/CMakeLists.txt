@@ -1,9 +1,5 @@
 target_sources(
   kit
-    PRIVATE
-      input_buffer.c secure_random.c sha256.c thread.posix.c
-      atomic.win32.c condition_variable.c thread.win32.c input_stream.c file.c
-      allocator.c array_ref.c dynamic_array.c mutex.c mersenne_twister_64.c
     PUBLIC
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/mutex.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/status.h>
@@ -24,4 +20,8 @@ target_sources(
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/sha256.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/file.h>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/array_ref.h>
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/mersenne_twister_64.h>)
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/mersenne_twister_64.h>
+    PRIVATE
+      input_buffer.c secure_random.c sha256.c thread.posix.c atomic.win32.c
+      condition_variable.c thread.win32.c input_stream.c file.c allocator.c
+      array_ref.c dynamic_array.c mutex.c mersenne_twister_64.c)
