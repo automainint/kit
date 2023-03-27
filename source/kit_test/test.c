@@ -9,14 +9,17 @@
 
 kit_tests_list_t kit_tests_list = { 0 };
 
-static void report(int i, int line, int ok) {
+static void report(int i, int line, long long value,
+                   long long expected) {
   int const n = kit_tests_list.v[i].assertions++;
 
   if (n >= KIT_TEST_ASSERTIONS_LIMIT)
     return;
 
-  kit_tests_list.v[i].line[n]   = line;
-  kit_tests_list.v[i].status[n] = ok;
+  kit_tests_list.v[i].line[n]     = line;
+  kit_tests_list.v[i].status[n]   = value == expected;
+  kit_tests_list.v[i].value[n]    = value;
+  kit_tests_list.v[i].expected[n] = expected;
 }
 
 static long long ns_to_ms(long long ns) {
@@ -250,7 +253,9 @@ int kit_run_tests(int argc, char **argv) {
 
   no_color || print_color(light);
 
-  if (status != 0) {
+  if (!quiet && status != 0) {
+    int have_reports = 0;
+
     for (i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
          i++) {
       if (specific_test != NULL &&
@@ -263,62 +268,99 @@ int kit_run_tests(int argc, char **argv) {
             signum < sizeof signames / sizeof *signames &&
             signames[signum] != NULL) {
           no_color || print_color(light);
-          quiet || printf("Signal \"%s\" (%d) for \"",
-                          signames[signum], signum);
+          printf("Signal \"%s\" (%d) for \"", signames[signum],
+                 signum);
           no_color || print_color(white);
-          quiet || printf("%s", kit_tests_list.v[i].test_name);
+          printf("%s", kit_tests_list.v[i].test_name);
           no_color || print_color(light);
-          quiet || printf("\" in \"");
+          printf("\" in \"");
           no_color || print_color(white);
-          quiet ||
-              printf("%s", kit_tests_list.v[i].test_file + file_root);
+
+          printf("%s", kit_tests_list.v[i].test_file + file_root);
           no_color || print_color(light);
-          quiet || printf("\"!.\n");
+          printf("\"!.\n");
         } else {
           no_color || print_color(light);
-          quiet || printf("Unknown signal (%d) for \"", signum);
+          printf("Unknown signal (%d) for \"", signum);
           no_color || print_color(white);
-          quiet || printf("%s", kit_tests_list.v[i].test_name);
+          printf("%s", kit_tests_list.v[i].test_name);
           no_color || print_color(light);
-          quiet || printf("\" in \"");
+          printf("\" in \"");
           no_color || print_color(white);
-          quiet ||
-              printf("%s", kit_tests_list.v[i].test_file + file_root);
+
+          printf("%s", kit_tests_list.v[i].test_file + file_root);
           no_color || print_color(light);
-          quiet || printf("\"!.\n");
+          printf("\"!.\n");
         }
+        have_reports = 1;
       }
       if (kit_tests_list.v[i].assertions >
           KIT_TEST_ASSERTIONS_LIMIT) {
         no_color || print_color(light);
-        quiet || printf("Too many assertions for \"");
+        printf("Too many assertions for \"");
         no_color || print_color(white);
-        quiet || printf("%s", kit_tests_list.v[i].test_name);
+        printf("%s", kit_tests_list.v[i].test_name);
         no_color || print_color(light);
-        quiet || printf("\" in \"");
+        printf("\" in \"");
         no_color || print_color(white);
-        quiet ||
-            printf("%s", kit_tests_list.v[i].test_file + file_root);
+
+        printf("%s", kit_tests_list.v[i].test_file + file_root);
         no_color || print_color(light);
-        quiet || printf("\"!.\n");
-      } else
+        printf("\"!.\n");
+        have_reports = 1;
+      }
+    }
+
+    have_reports &&printf("\n");
+  }
+
+  if (!quiet && status != 0) {
+    for (i = 0; i < kit_tests_list.size && i < KIT_TESTS_SIZE_LIMIT;
+         i++) {
+      if (specific_test != NULL &&
+          strstr(kit_tests_list.v[i].test_name, specific_test) ==
+              NULL)
+        continue;
+
+      if (kit_tests_list.v[i].assertions <= KIT_TEST_ASSERTIONS_LIMIT)
         for (j = 0; j < kit_tests_list.v[i].assertions; j++)
           if (!kit_tests_list.v[i].status[j]) {
             no_color || print_color(light);
-            quiet || printf("Assertion on line ");
+            printf("Assertion on line ");
             no_color || print_color(white);
-            quiet || printf("%d", kit_tests_list.v[i].line[j]);
+            printf("%d", kit_tests_list.v[i].line[j]);
             no_color || print_color(light);
-            quiet || printf(" in \"");
+            printf(" in \"");
             no_color || print_color(white);
-            quiet || printf("%s", kit_tests_list.v[i].test_file +
-                                      file_root);
+            printf("%s", kit_tests_list.v[i].test_file + file_root);
             no_color || print_color(light);
-            quiet || printf("\" failed.\n");
+            printf("\" failed.\n");
+            no_color || print_color(red);
+            printf(" -> ");
+            no_color || print_color(light);
+            printf("Got wrong value");
+            no_color || print_color(white);
+            printf("%10lld", kit_tests_list.v[i].value[j]);
+            no_color || print_color(light);
+            printf("  (");
+            no_color || print_color(white);
+            printf("0x%08llx", kit_tests_list.v[i].value[j]);
+            no_color || print_color(light);
+            printf(")\n");
+            no_color || print_color(green);
+            printf(" -> ");
+            no_color || print_color(light);
+            printf("Expected value ");
+            no_color || print_color(white);
+            printf("%10lld", kit_tests_list.v[i].expected[j]);
+            no_color || print_color(light);
+            printf("  (");
+            no_color || print_color(white);
+            printf("0x%08llx", kit_tests_list.v[i].expected[j]);
+            no_color || print_color(light);
+            printf(")\n\n");
           }
     }
-
-    quiet || printf("\n");
   }
 
   if (kit_tests_list.size > KIT_TESTS_SIZE_LIMIT) {
