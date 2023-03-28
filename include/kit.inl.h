@@ -326,15 +326,19 @@ static kit_str_t kit_str(ptrdiff_t const   size,
 
 /*  Make a barbarian string for C standard library functions.
  *  Not thread safe.
+ *  Use with caution.
  */
 static char const *kit_make_bs(kit_str_t const s) {
-  static char buf[4096];
-  ptrdiff_t   n = s.size;
+  static char buf[8][4096];
+  static int  index = 0;
+  ptrdiff_t   n     = s.size;
   if (n > 4095)
     n = 4095;
-  memcpy(buf, s.values, n);
-  buf[n] = '\0';
-  return buf;
+  memcpy(buf[index], s.values, n);
+  buf[index][n]      = '\0';
+  char const *result = buf[index];
+  index              = (index + 1) % 8;
+  return result;
 }
 
 #ifdef __GNUC__
