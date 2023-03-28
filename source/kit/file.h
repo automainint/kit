@@ -25,8 +25,6 @@ typedef enum {
   KIT_PATH_FOLDER
 } kit_path_type_t;
 
-enum { KIT_FILE_SIZE_ERROR = -1 };
-
 kit_string_t kit_path_norm(kit_str_t path, kit_allocator_t alloc);
 
 kit_string_t kit_path_join(kit_str_t left, kit_str_t right,
