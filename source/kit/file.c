@@ -26,6 +26,23 @@ static int is_delim(char const c) {
   return c == '/' || c == '\\';
 }
 
+static kit_string_t kit_get_env_(char *const           name,
+                                 kit_allocator_t const alloc) {
+  char *const     val  = getenv(name);
+  ptrdiff_t const size = val != NULL ? (ptrdiff_t) strlen(val) : 0;
+
+  string_t result;
+  DA_INIT(result, size, alloc);
+  assert(result.size == size);
+
+  if (result.size == size && size > 0)
+    memcpy(result.values, val, result.size);
+  else
+    DA_RESIZE(result, 0);
+
+  return result;
+}
+
 kit_string_t kit_path_norm(kit_str_t const       path,
                            kit_allocator_t const alloc) {
   str_t const parent = SZ("..");
@@ -113,24 +130,39 @@ kit_string_t kit_path_join(kit_str_t const       left,
 }
 
 kit_string_t kit_path_user(kit_allocator_t const alloc) {
-  char           *home = getenv(KIT_ENV_HOME);
-  ptrdiff_t const size = home != NULL ? (ptrdiff_t) strlen(home) : 0;
-
-  string_t user;
-  DA_INIT(user, size, alloc);
-  assert(user.size == size);
-
-  if (user.size == size)
-    memcpy(user.values, home, user.size);
-  else {
+  kit_string_t user = kit_get_env_(KIT_ENV_HOME, alloc);
+  if (user.size == 0) {
     DA_RESIZE(user, 1);
-    assert(user.size == 1);
-
     if (user.size == 1)
       user.values[0] = '.';
   }
-
   return user;
+}
+
+kit_string_t kit_path_cache(kit_allocator_t alloc) {
+  kit_string_t cache, user;
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  user = kit_get_env_("APPDATA", alloc);
+  if (user.size != 0) {
+    cache = kit_path_join(WRAP_STR(user), SZ("Local"), alloc);
+    DA_DESTROY(user);
+    return cache;
+  }
+#endif
+
+#ifdef __APPLE__
+  user  = kit_path_user(alloc);
+  cache = kit_path_join(WRAP_STR(user),
+                        SZ("Library" PATH_DELIM "Caches"), alloc);
+  DA_DESTROY(user);
+#else
+  user  = kit_path_user(alloc);
+  cache = kit_path_join(WRAP_STR(user), SZ(".cache"), alloc);
+  DA_DESTROY(user);
+#endif
+
+  return cache;
 }
 
 kit_str_t kit_path_index(kit_str_t const path,
@@ -214,7 +246,7 @@ static void win32_prepare_path_(WCHAR *const    buf,
     WCHAR buf[PATH_BUF_SIZE]; \
     win32_prepare_path_(buf, path)
 #else
-static void unix_prepare_path_(char *const     buf,
+static void unix_prepare_path_(char *const buf,
                                kit_str_t const path) {
   assert(path.size == 0 || path.values != NULL);
   assert(path.size + 1 < PATH_BUF_SIZE);
@@ -370,7 +402,7 @@ kit_file_info_t kit_file_info(kit_str_t const path) {
     result.time_modified_sec  = (int64_t) info.st_mtim.tv_sec;
     result.time_modified_nsec = (int32_t) info.st_mtim.tv_nsec;
 #  endif
-    result.status            = KIT_OK;
+    result.status = KIT_OK;
     return result;
   }
 #endif

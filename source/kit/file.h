@@ -34,6 +34,8 @@ kit_string_t kit_path_join(kit_str_t left, kit_str_t right,
 
 kit_string_t kit_path_user(kit_allocator_t alloc);
 
+kit_string_t kit_path_cache(kit_allocator_t alloc);
+
 kit_str_t kit_path_index(kit_str_t path, ptrdiff_t index);
 
 kit_str_t kit_path_take(kit_str_t path, ptrdiff_t count);
@@ -75,6 +77,7 @@ void kit_path_list_destroy(kit_path_list_t list);
 #  define path_norm kit_path_norm
 #  define path_join kit_path_join
 #  define path_user kit_path_user
+#  define path_cache kit_path_cache
 #  define path_index kit_path_index
 #  define path_take kit_path_take
 #  define file_create_folder kit_file_create_folder

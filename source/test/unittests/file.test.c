@@ -11,6 +11,37 @@
 #  define S_DELIM_ "/"
 #endif
 
+#include <stdio.h>
+
+TEST("file path cache") {
+  kit_allocator_t alloc = kit_alloc_default();
+
+  string_t user  = path_user(alloc);
+  string_t cache = path_cache(alloc);
+
+  DA_RESIZE(cache, cache.size + 1);
+  cache.values[cache.size - 1] = '\0';
+  DA_RESIZE(cache, cache.size - 1);
+  printf("\nCache folder: %s\n", cache.values);
+
+  string_t expected =
+#if defined(_WIN32) && !defined(__CYGWIN__)
+      path_join(WRAP_STR(user), SZ("AppData" PATH_DELIM "Local"),
+                alloc);
+#elif defined(__APPLE__)
+      path_join(WRAP_STR(user), SZ("Library" PATH_DELIM "Caches"),
+                alloc);
+#else
+      path_join(WRAP_STR(user), SZ(".cache"), alloc);
+#endif
+
+  REQUIRE(AR_EQUAL(cache, expected));
+
+  DA_DESTROY(user);
+  DA_DESTROY(cache);
+  DA_DESTROY(expected);
+}
+
 TEST("file path normalize one") {
   str_t foo      = SZ("foo/bar/../baz");
   str_t foo_norm = SZ("foo" S_DELIM_ "baz");
