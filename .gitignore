@@ -2,3 +2,4 @@
 *.swp
 gen_inl
 gen_cmake
+build_c

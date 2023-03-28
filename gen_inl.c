@@ -1,5 +1,5 @@
 #if 0
-gcc gen_inl.c -o gen_inl && ./gen_inl
+gcc -fsanitize=address,undefined,leak gen_inl.c -o gen_inl && ./gen_inl
 exit
 #endif
 
@@ -68,43 +68,33 @@ int write_file(FILE *out, char const *const source) {
     return 1;
   }
 
-  fprintf(out, "/*%s*\n", repeat(70, '*'));
-  fprintf(out, " *%s*\n", repeat(70, ' '));
-  fprintf(out, " *%s*\n", repeat(70, ' '));
-  fprintf(out, " *    FILE:   %s%s*\n", source,
-          repeat(58 - strlen(source), ' '));
-  fprintf(out, " *%s*\n", repeat(70, ' '));
-  fprintf(out, " *%s*\n", repeat(70, ' '));
-  fprintf(out, " *%s*/\n", repeat(70, '*'));
+  fprintf(out, "/*%s*\n", repeat(67, '*'));
+  fprintf(out, " *%s*\n", repeat(67, ' '));
+  fprintf(out, " *    File:   %s%s*\n", source,
+          repeat(55 - strlen(source), ' '));
+  fprintf(out, " *%s*\n", repeat(67, ' '));
+  fprintf(out, " *%s*/\n", repeat(67, '*'));
 
   char line[200];
   char buf[400];
-  int  prev_empty = 0;
 
   while (fgets(line, 199, in) != NULL) {
-    int empty = is_empty_line(line) || is_local_include(line);
+    if (is_empty_line(line) || is_local_include(line))
+      continue;
 
-    if (empty) {
-      if (!prev_empty)
-        fprintf(out, "\n");
-    } else {
-      int j = 0;
-      for (int i = 0; line[i] != '\0'; i++) {
-        if (line[i] == '\t') {
-          buf[j++] = ' ';
-          buf[j++] = ' ';
-        } else if (line[i] != '\n' && line[i] != '\r')
-          buf[j++] = line[i];
-      }
-      buf[j] = '\0';
-      fprintf(out, "%s\n", buf);
+    int j = 0;
+    for (int i = 0; line[i] != '\0'; i++) {
+      if (line[i] == '\t') {
+        buf[j++] = ' ';
+        buf[j++] = ' ';
+      } else if (line[i] != '\n' && line[i] != '\r')
+        buf[j++] = line[i];
     }
-
-    prev_empty = empty;
+    buf[j] = '\0';
+    fprintf(out, "%s\n", buf);
   }
 
   fclose(in);
-  fprintf(out, "\n");
   return 0;
 }
 
@@ -118,7 +108,6 @@ int main(int argc, char **argv) {
 
   fprintf(out, "#ifndef KIT_INL_H\n");
   fprintf(out, "#define KIT_INL_H\n");
-  fprintf(out, "\n");
 
   for (int i = 0; i < sizeof SOURCES / sizeof *SOURCES; i++)
     if (write_file(out, SOURCES[i]) != 0) {

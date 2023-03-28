@@ -1,5 +1,5 @@
 #if 0
-gcc -fsanitize=address,leak gen_cmake.c -o gen_cmake && ./gen_cmake
+gcc -fsanitize=address,undefined,leak gen_cmake.c -o gen_cmake && ./gen_cmake
 exit
 #endif
 

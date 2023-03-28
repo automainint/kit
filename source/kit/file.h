@@ -19,12 +19,6 @@ extern "C" {
 #  define KIT_ENV_HOME "HOME"
 #endif
 
-typedef enum {
-  KIT_PATH_NONE,
-  KIT_PATH_FILE,
-  KIT_PATH_FOLDER
-} kit_path_type_t;
-
 kit_string_t kit_path_norm(kit_str_t path, kit_allocator_t alloc);
 
 kit_string_t kit_path_join(kit_str_t left, kit_str_t right,
@@ -48,6 +42,12 @@ kit_status_t kit_file_remove_folder(kit_str_t path);
 
 kit_status_t kit_file_remove_recursive(kit_str_t       path,
                                        kit_allocator_t alloc);
+
+typedef enum {
+  KIT_PATH_NONE,
+  KIT_PATH_FILE,
+  KIT_PATH_FOLDER
+} kit_path_type_t;
 
 kit_path_type_t kit_path_type(kit_str_t path);
 
@@ -84,10 +84,10 @@ void kit_path_list_destroy(kit_path_list_t list);
 #  define file_remove kit_file_remove
 #  define file_remove_folder kit_file_remove_folder
 #  define file_remove_recursive kit_file_remove_recursive
-#  define path_type kit_path_type
-#  define file_size_result_t kit_file_size_result_t
-#  define file_size kit_file_size
 #  define path_type_t kit_path_type_t
+#  define path_type kit_path_type
+#  define file_info_t kit_file_info_t
+#  define file_info kit_file_info
 #  define path_list_t kit_path_list_t
 #  define file_enum_folder kit_file_enum_folder
 #  define path_list_destroy kit_path_list_destroy
