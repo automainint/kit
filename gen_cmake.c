@@ -14,30 +14,6 @@ typedef struct {
   int          have_cmakelists;
 } gen_result_t;
 
-/*  FIXME
- *  Barbarian strings!!!
- */
-char const *sz_(str_t const s) {
-  static char buf[1000];
-  int         n = s.size;
-  if (n > 999)
-    n = 999;
-  memcpy(buf, s.values, n);
-  buf[n] = '\0';
-  return buf;
-}
-
-int make_sz(string_t *const s) {
-  ptrdiff_t const n = s->size;
-  DA_RESIZE(*s, n + 1);
-  if (s->size != n + 1) {
-    printf("Error: Bad alloc.\n");
-    return 0;
-  }
-  s->values[n] = '\0';
-  return 1;
-}
-
 int is_header(str_t const file) {
   return file.size > 2 && file.values[file.size - 2] == '.' &&
          file.values[file.size - 1] == 'h';
@@ -70,7 +46,10 @@ gen_result_t gen_cmakelists_for(str_t const target,
   string_t cmakelists_path = path_join(folder, SZ("CMakeLists.txt"),
                                        ALLOC);
 
-  if (!make_sz(&cmakelists_path)) {
+  DA_APPEND(cmakelists_path, '\0');
+
+  if (cmakelists_path.size == 0 ||
+      cmakelists_path.values[cmakelists_path.size - 1] != '\0') {
     result.status          = KIT_ERROR_BAD_ALLOC;
     result.have_cmakelists = 0;
     DA_DESTROY(cmakelists_path);
@@ -112,12 +91,12 @@ gen_result_t gen_cmakelists_for(str_t const target,
 
     if (!have_headers)
       fprintf(out, "target_sources(\n  %*s\n    PUBLIC",
-              (int) target.size, sz_(target));
+              (int) target.size, BS(target));
 
     fprintf(
         out,
         "\n      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/%*s>",
-        (int) item.size, sz_(item));
+        (int) item.size, BS(item));
 
     have_headers = 1;
   }
@@ -137,7 +116,7 @@ gen_result_t gen_cmakelists_for(str_t const target,
 
     if (!have_headers && !have_sources)
       fprintf(out, "target_sources(\n  %*s\n    PRIVATE",
-              (int) target.size, sz_(target));
+              (int) target.size, BS(target));
     else if (!have_sources)
       fprintf(out, "\n    PRIVATE");
 
@@ -146,7 +125,7 @@ gen_result_t gen_cmakelists_for(str_t const target,
       line_length = 5;
     }
 
-    fprintf(out, " %*s", (int) item.size, sz_(item));
+    fprintf(out, " %*s", (int) item.size, BS(item));
     line_length += 1 + item.size;
 
     have_sources = 1;
@@ -178,7 +157,7 @@ gen_result_t gen_cmakelists_for(str_t const target,
       fprintf(out, "\n");
 
     fprintf(out, "add_subdirectory(%*s)\n", (int) item.size,
-            sz_(item));
+            BS(item));
 
     have_folders = 1;
   }
