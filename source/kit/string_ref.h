@@ -59,13 +59,14 @@ static char const *kit_make_bs(kit_str_t const s) {
   kit_str((string_).size, (string_).values)
 
 #ifndef KIT_DISABLE_SHORT_NAMES
+#  define BS(string_) kit_make_bs(KIT_WRAP_STR(string_))
+
 #  define string_mut_t kit_string_mut_t
 #  define string_ref_t kit_string_ref_t
 #  define out_str_t kit_out_str_t
 #  define str_t kit_str_t
 
 #  define SZ KIT_SZ
-#  define BS kit_make_bs
 #  define WRAP_BS KIT_WRAP_BS
 #  define WRAP_STR KIT_WRAP_STR
 #endif
