@@ -143,12 +143,9 @@ kit_string_t kit_path_cache(kit_allocator_t alloc) {
   kit_string_t cache, user;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  user = kit_get_env_("APPDATA", alloc);
-  if (user.size != 0) {
-    cache = kit_path_join(WRAP_STR(user), SZ("Local"), alloc);
-    DA_DESTROY(user);
+  cache = kit_get_env_("LOCALAPPDATA", alloc);
+  if (cache.size != 0)
     return cache;
-  }
 #endif
 
 #ifdef __APPLE__
