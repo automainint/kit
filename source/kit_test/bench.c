@@ -219,17 +219,17 @@ int kit_run_benchmarks(int argc, char **argv) {
   printf("BENCHMARK");
   printf("%*c", line_width - 9, ' ');
   no_color || print_color(green);
-  printf(" LOW     ");
+  printf(" LOW      ");
   no_color || print_color(light);
   printf("|");
   no_color || print_color(blue);
-  printf(" MEDIAN  ");
+  printf(" MEDIAN   ");
   no_color || print_color(light);
   printf("|");
   no_color || print_color(yellow);
-  printf(" HIGH    ");
+  printf(" HIGH     ");
   no_color || print_color(light);
-  printf(" in nanoseconds\n\n");
+  printf(" in microseconds\n\n");
 
   /*  Prepare cycles.
    */
@@ -325,11 +325,11 @@ int kit_run_benchmarks(int argc, char **argv) {
 
       if (bench->repeats <= 0) {
         no_color || print_color(yellow);
-        printf("                             0 runs\n");
+        printf("                                0 runs\n");
         success_count++;
       } else if (bench_status == 0) {
         no_color || print_color(red);
-        printf("                             FAIL\n");
+        printf("                                FAIL\n");
         status = 1;
       } else {
         int const repeats = bench->repeats;
@@ -347,15 +347,15 @@ int kit_run_benchmarks(int argc, char **argv) {
             bench->duration_sorted_nsec[repeats - repeats / 20 - 1];
 
         no_color || print_color(white);
-        printf("%-8lld", (long long) floor);
+        printf("%-9g", (double) floor * 0.001);
         no_color || print_color(light);
         printf("| ");
         no_color || print_color(white);
-        printf("%-8lld", (long long) average);
+        printf("%-9g", (double) average * 0.001);
         no_color || print_color(light);
         printf("| ");
         no_color || print_color(white);
-        printf("%-8lld", (long long) roof);
+        printf("%-9g", (double) roof * 0.001);
         no_color || print_color(light);
         printf(" %d runs\n", repeats);
         success_count++;
