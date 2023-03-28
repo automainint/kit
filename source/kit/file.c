@@ -146,18 +146,23 @@ kit_string_t kit_path_cache(kit_allocator_t alloc) {
   cache = kit_get_env_("LOCALAPPDATA", alloc);
   if (cache.size != 0)
     return cache;
+  DA_DESTROY(cache);
 #endif
 
+  cache = kit_get_env_("XDG_CACHE_HOME", alloc);
+  if (cache.size != 0)
+    return cache;
+  DA_DESTROY(cache);
+
+  user = kit_path_user(alloc);
+  cache =
 #ifdef __APPLE__
-  user  = kit_path_user(alloc);
-  cache = kit_path_join(WRAP_STR(user),
-                        SZ("Library" PATH_DELIM "Caches"), alloc);
-  DA_DESTROY(user);
+      kit_path_join(WRAP_STR(user), SZ("Library" PATH_DELIM "Caches"),
+                    alloc);
 #else
-  user  = kit_path_user(alloc);
-  cache = kit_path_join(WRAP_STR(user), SZ(".cache"), alloc);
-  DA_DESTROY(user);
+      kit_path_join(WRAP_STR(user), SZ(".cache"), alloc);
 #endif
+  DA_DESTROY(user);
 
   return cache;
 }
