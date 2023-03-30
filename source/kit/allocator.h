@@ -22,7 +22,7 @@ typedef struct {
 /*  Application should implement this function if custom allocator
  *  dispatch is enabled.
  *
- *  See KIT_ENABLE_CUSTOM_ALLOC_DISPATCH
+ *  See KIT_ENABLE_CUSTOM_ALLOC_DISPATCH macro.
  */
 void *kit_alloc_dispatch(kit_allocator_t alloc, int request,
                          ptrdiff_t size, ptrdiff_t previous_size,
