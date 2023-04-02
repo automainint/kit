@@ -94,8 +94,9 @@ TEST("atomic byte concurrency") {
 
   thrd_t threads[THREAD_COUNT];
   for (i = 0; i < THREAD_COUNT; i++)
-    thrd_create(threads + i, test_8_,
-                (void *) ((i % 2) ? &foo : &bar));
+    REQUIRE_EQ(thrd_create(threads + i, test_8_,
+                           (void *) ((i % 2) ? &foo : &bar)),
+               thrd_success);
   for (i = 0; i < THREAD_COUNT; i++) thrd_join(threads[i], NULL);
 
   REQUIRE(atomic_load_explicit(&foo, memory_order_relaxed) == 42);
@@ -130,8 +131,9 @@ TEST("atomic int16 concurrency") {
 
   thrd_t threads[THREAD_COUNT];
   for (i = 0; i < THREAD_COUNT; i++)
-    thrd_create(threads + i, test_16_,
-                (void *) ((i % 2) ? &foo : &bar));
+    REQUIRE_EQ(thrd_create(threads + i, test_16_,
+                           (void *) ((i % 2) ? &foo : &bar)),
+               thrd_success);
   for (i = 0; i < THREAD_COUNT; i++) thrd_join(threads[i], NULL);
 
   REQUIRE(atomic_load_explicit(&foo, memory_order_relaxed) == 42);
@@ -166,8 +168,9 @@ TEST("atomic int32 concurrency") {
 
   thrd_t threads[THREAD_COUNT];
   for (i = 0; i < THREAD_COUNT; i++)
-    thrd_create(threads + i, test_32_,
-                (void *) ((i % 2) ? &foo : &bar));
+    REQUIRE_EQ(thrd_create(threads + i, test_32_,
+                           (void *) ((i % 2) ? &foo : &bar)),
+               thrd_success);
   for (i = 0; i < THREAD_COUNT; i++) thrd_join(threads[i], NULL);
 
   REQUIRE(atomic_load_explicit(&foo, memory_order_relaxed) == 42);
@@ -205,8 +208,9 @@ TEST("atomic int64 concurrency") {
 
   thrd_t threads[THREAD_COUNT];
   for (i = 0; i < THREAD_COUNT; i++)
-    thrd_create(threads + i, test_64_,
-                (void *) ((i % 2) ? &foo : &bar));
+    REQUIRE_EQ(thrd_create(threads + i, test_64_,
+                           (void *) ((i % 2) ? &foo : &bar)),
+               thrd_success);
   for (i = 0; i < THREAD_COUNT; i++) thrd_join(threads[i], NULL);
 
   REQUIRE(atomic_load_explicit(&foo, memory_order_relaxed) == 42);
