@@ -8,7 +8,6 @@ void kit_da_init(kit_da_void_t *array, ptrdiff_t element_size,
   assert(array != NULL);
   assert(element_size > 0);
   assert(size >= 0);
-  assert(alloc.allocate != NULL);
 
   memset(array, 0, sizeof(kit_da_void_t));
 
@@ -43,8 +42,6 @@ void kit_da_resize(kit_da_void_t *array, ptrdiff_t element_size,
     array->size = size;
   } else {
     ptrdiff_t capacity = eval_capacity(array->capacity, size);
-
-    assert(array->alloc.allocate != NULL);
 
     void *bytes = kit_alloc_dispatch(
         array->alloc, KIT_ALLOCATE, element_size * capacity, 0, NULL);

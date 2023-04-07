@@ -6,10 +6,11 @@ if(NOT DEFINED CMAKE_BUILD_PARALLEL_LEVEL)
   set(CMAKE_BUILD_PARALLEL_LEVEL 4 CACHE STRING "" FORCE)
 endif()
 
-option(KIT_DISABLE_SYSTEM_MALLOC        "Disable system memory allocator"   OFF)
-option(KIT_DISABLE_SYSTEM_THREADS       "Disable system threads"            OFF)
-option(KIT_ENABLE_CUSTOM_ALLOC_DISPATCH "Enable custom allocator dispatch"  OFF)
-option(KIT_ENABLE_TESTING               "Enable testing"                    ON)
+option(KIT_DISABLE_SYSTEM_MALLOC                 "Disable system memory allocator"       OFF)
+option(KIT_DISABLE_SYSTEM_THREADS                "Disable system threads"                OFF)
+option(KIT_ENABLE_CUSTOM_ALLOC_DISPATCH          "Enable custom allocator dispatch"      OFF)
+option(KIT_ENABLE_CUSTOM_ASYNC_FUNCTION_DISPATCH "Enable custom async function dispatch" OFF)
+option(KIT_ENABLE_TESTING                        "Enable testing"                        ON)
 
 project(
   kit
@@ -116,6 +117,10 @@ endif()
 
 if(KIT_ENABLE_CUSTOM_ALLOC_DISPATCH)
   target_compile_definitions(kit PUBLIC KIT_ENABLE_CUSTOM_ALLOC_DISPATCH)
+endif()
+
+if(KIT_ENABLE_CUSTOM_ASYNC_FUNCTION_DISPATCH)
+  target_compile_definitions(kit PUBLIC KIT_ENABLE_CUSTOM_ASYNC_FUNCTION_DISPATCH)
 endif()
 
 if(NOT KIT_DISABLE_SYSTEM_THREADS)
