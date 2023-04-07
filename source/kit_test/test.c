@@ -242,6 +242,8 @@ int kit_run_tests(int argc, char **argv) {
       quiet || printf("\n");
       success_count++;
     }
+
+    quiet || fflush(stdout);
   }
 
   no_color || print_color(white);
