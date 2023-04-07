@@ -7,6 +7,12 @@
 extern "C" {
 #endif
 
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunused-function"
+#  pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
+
 typedef struct {
   int _;
 } kit_af_void;
@@ -38,6 +44,10 @@ static void kit_async_function_dispatch(void *promise) {
    */
   KIT_AF_INTERNAL(promise)._state_machine(promise);
 }
+#endif
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
 #endif
 
 #define KIT_AF_STATE(ret_type_, name_, ...) \
