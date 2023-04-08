@@ -12,8 +12,9 @@ typedef struct {
 } test_data_t;
 
 static int test_run(void *data) {
+  int          i;
   test_data_t *x = (test_data_t *) data;
-  for (int i = 0; i < TICK_COUNT; i++) {
+  for (i = 0; i < TICK_COUNT; i++) {
     mtx_lock(&x->lock);
 
     x->value += i;
@@ -30,15 +31,16 @@ static int test_run(void *data) {
 }
 
 TEST("mutex lock") {
+  ptrdiff_t i;
+
   test_data_t data;
   thrd_t      pool[THREAD_COUNT];
   data.value = 42;
   REQUIRE(mtx_init(&data.lock, mtx_plain) == thrd_success);
 
-  for (ptrdiff_t i = 0; i < THREAD_COUNT; i++)
+  for (i = 0; i < THREAD_COUNT; i++)
     thrd_create(pool + i, test_run, &data);
-  for (ptrdiff_t i = 0; i < THREAD_COUNT; i++)
-    thrd_join(pool[i], NULL);
+  for (i = 0; i < THREAD_COUNT; i++) thrd_join(pool[i], NULL);
 
   mtx_destroy(&data.lock);
   REQUIRE(data.value == 42);

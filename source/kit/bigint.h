@@ -13,6 +13,7 @@ extern "C" {
 #  define KIT_BIGINT_SIZE 64
 #endif
 
+#if __STDC_VERSION__ >= 199901L
 static_assert(sizeof(uint8_t) == 1, "uint8_t size should be 1 byte");
 static_assert(sizeof(uint32_t) == 4,
               "uint32_t size should be 4 bytes");
@@ -20,6 +21,7 @@ static_assert(sizeof(uint64_t) == 8,
               "uint64_t size should be 8 bytes");
 static_assert(KIT_BIGINT_SIZE > 0 && (KIT_BIGINT_SIZE % 8) == 0,
               "Invalid big integer size");
+#endif
 
 typedef struct {
   uint32_t v[KIT_BIGINT_SIZE / 4];
@@ -66,7 +68,8 @@ static kit_bigint_t kit_bi_int64(int64_t const x) {
 }
 
 static int kit_bi_is_zero(kit_bigint_t const x) {
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++)
+  ptrdiff_t i;
+  for (i = 0; i < KIT_BIGINT_SIZE / 4; i++)
     if (x.v[i] != 0)
       return 0;
   return 1;
@@ -83,7 +86,8 @@ static int kit_bi_equal(kit_bigint_t const x, kit_bigint_t const y) {
 
 static int kit_bi_compare(kit_bigint_t const x,
                           kit_bigint_t const y) {
-  for (ptrdiff_t i = KIT_BIGINT_SIZE / 4 - 1; i >= 0; i--)
+  ptrdiff_t i;
+  for (i = KIT_BIGINT_SIZE / 4 - 1; i >= 0; i--)
     if (x.v[i] < y.v[i])
       return -1;
     else if (x.v[i] > y.v[i])
@@ -140,9 +144,9 @@ static ptrdiff_t kit_bi_significant_bit_count(kit_bigint_t const x) {
 static kit_bigint_t kit_bi_and(kit_bigint_t const x,
                                kit_bigint_t const y) {
   kit_bigint_t z;
+  ptrdiff_t    i;
 
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++)
-    z.v[i] = x.v[i] & y.v[i];
+  for (i = 0; i < KIT_BIGINT_SIZE / 4; i++) z.v[i] = x.v[i] & y.v[i];
 
   return z;
 }
@@ -150,9 +154,9 @@ static kit_bigint_t kit_bi_and(kit_bigint_t const x,
 static kit_bigint_t kit_bi_or(kit_bigint_t const x,
                               kit_bigint_t const y) {
   kit_bigint_t z;
+  ptrdiff_t    i;
 
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++)
-    z.v[i] = x.v[i] | y.v[i];
+  for (i = 0; i < KIT_BIGINT_SIZE / 4; i++) z.v[i] = x.v[i] | y.v[i];
 
   return z;
 }
@@ -160,9 +164,9 @@ static kit_bigint_t kit_bi_or(kit_bigint_t const x,
 static kit_bigint_t kit_bi_xor(kit_bigint_t const x,
                                kit_bigint_t const y) {
   kit_bigint_t z;
+  ptrdiff_t    i;
 
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++)
-    z.v[i] = x.v[i] ^ y.v[i];
+  for (i = 0; i < KIT_BIGINT_SIZE / 4; i++) z.v[i] = x.v[i] ^ y.v[i];
 
   return z;
 }
@@ -174,8 +178,9 @@ static kit_bigint_t kit_bi_shl_uint(kit_bigint_t const x,
 
   ptrdiff_t const words = (ptrdiff_t) (y / 32);
   ptrdiff_t const bits  = (ptrdiff_t) (y % 32);
+  ptrdiff_t       i;
 
-  for (ptrdiff_t i = words; i < KIT_BIGINT_SIZE / 4; i++) {
+  for (i = words; i < KIT_BIGINT_SIZE / 4; i++) {
     z.v[i] |= x.v[i - words] << bits;
     if (bits != 0 && i + 1 < KIT_BIGINT_SIZE / 4)
       z.v[i + 1] = x.v[i - words] >> (32 - bits);
@@ -191,8 +196,9 @@ static kit_bigint_t kit_bi_shr_uint(kit_bigint_t const x,
 
   ptrdiff_t const words = (ptrdiff_t) (y / 32);
   ptrdiff_t const bits  = (ptrdiff_t) (y % 32);
+  ptrdiff_t       i;
 
-  for (ptrdiff_t i = KIT_BIGINT_SIZE / 4 - words - 1; i >= 0; i--) {
+  for (i = KIT_BIGINT_SIZE / 4 - words - 1; i >= 0; i--) {
     z.v[i] |= x.v[i + words] >> bits;
     if (bits != 0 && i > 0)
       z.v[i - 1] = x.v[i + words] << (32 - bits);
@@ -212,8 +218,9 @@ static kit_bit_t kit_bi_carry(uint32_t const x, uint32_t const y,
 static kit_bigint_t kit_bi_inc(kit_bigint_t const x) {
   kit_bigint_t z;
   kit_bit_t    carry = 1;
+  ptrdiff_t    i;
 
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
+  for (i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
     z.v[i] = x.v[i] + carry;
     carry  = kit_bi_carry(x.v[i], 0, carry);
   }
@@ -226,8 +233,9 @@ static kit_bigint_t kit_bi_inc(kit_bigint_t const x) {
 static kit_bigint_t kit_bi_dec(kit_bigint_t const x) {
   kit_bigint_t z;
   kit_bit_t    carry = 0;
+  ptrdiff_t    i;
 
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
+  for (i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
     z.v[i] = x.v[i] + 0xffffffff + carry;
     carry  = kit_bi_carry(x.v[i], 0xffffffff, carry);
   }
@@ -241,8 +249,9 @@ static kit_bigint_t kit_bi_add(kit_bigint_t const x,
                                kit_bigint_t const y) {
   kit_bigint_t z;
   kit_bit_t    carry = 0;
+  ptrdiff_t    i;
 
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
+  for (i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
     z.v[i] = x.v[i] + y.v[i] + carry;
     carry  = kit_bi_carry(x.v[i], y.v[i], carry);
   }
@@ -255,8 +264,9 @@ static kit_bigint_t kit_bi_add(kit_bigint_t const x,
 static kit_bigint_t kit_bi_neg(kit_bigint_t const x) {
   kit_bigint_t y;
   kit_bit_t    carry = 1;
+  ptrdiff_t    i;
 
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
+  for (i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
     y.v[i] = (x.v[i] ^ 0xffffffff) + carry;
     carry  = kit_bi_carry(x.v[i] ^ 0xffffffff, 0, carry);
   }
@@ -270,8 +280,9 @@ static kit_bigint_t kit_bi_sub(kit_bigint_t const x,
                                kit_bigint_t const y) {
   kit_bigint_t z;
   kit_bit_t    carry = 1;
+  ptrdiff_t    i;
 
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
+  for (i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
     z.v[i] = x.v[i] + (y.v[i] ^ 0xffffffff) + carry;
     carry  = kit_bi_carry(x.v[i], (y.v[i] ^ 0xffffffff), carry);
   }
@@ -282,17 +293,18 @@ static kit_bigint_t kit_bi_sub(kit_bigint_t const x,
 static kit_bigint_t kit_bi_mul_uint32(kit_bigint_t const x,
                                       uint32_t const     y) {
   kit_bigint_t z;
+  ptrdiff_t    i, k;
+
   memset(&z, 0, sizeof z);
 
   if (y != 0)
-    for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
+    for (i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
       if (x.v[i] == 0)
         continue;
 
       uint64_t carry = ((uint64_t) x.v[i]) * ((uint64_t) y);
 
-      for (ptrdiff_t k = i; k < KIT_BIGINT_SIZE / 4 && carry != 0;
-           k++) {
+      for (k = i; k < KIT_BIGINT_SIZE / 4 && carry != 0; k++) {
         uint64_t const sum = ((uint64_t) z.v[k]) + carry;
         z.v[k]             = ((uint32_t) (sum & 0xffffffffull));
         carry              = sum >> 32;
@@ -307,20 +319,21 @@ static kit_bigint_t kit_bi_mul_uint32(kit_bigint_t const x,
 static kit_bigint_t kit_bi_mul(kit_bigint_t const x,
                                kit_bigint_t const y) {
   kit_bigint_t z;
+  ptrdiff_t    i, j, k;
+
   memset(&z, 0, sizeof z);
 
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
+  for (i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
     if (x.v[i] == 0)
       continue;
 
-    for (ptrdiff_t j = 0; i + j < KIT_BIGINT_SIZE / 4; j++) {
+    for (j = 0; i + j < KIT_BIGINT_SIZE / 4; j++) {
       if (y.v[j] == 0)
         continue;
 
       uint64_t carry = ((uint64_t) x.v[i]) * ((uint64_t) y.v[j]);
 
-      for (ptrdiff_t k = i + j; k < KIT_BIGINT_SIZE / 4 && carry != 0;
-           k++) {
+      for (k = i + j; k < KIT_BIGINT_SIZE / 4 && carry != 0; k++) {
         uint64_t const sum = ((uint64_t) z.v[k]) + carry;
         z.v[k]             = ((uint32_t) (sum & 0xffffffffull));
         carry              = sum >> 32;
@@ -400,9 +413,11 @@ static kit_bi_division_t kit_bi_div(kit_bigint_t const x,
 
 static void kit_bi_serialize(kit_bigint_t const in,
                              uint8_t *const     out) {
+  ptrdiff_t i;
+
   assert(out != NULL);
 
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
+  for (i = 0; i < KIT_BIGINT_SIZE / 4; i++) {
     out[i * 4]     = (uint8_t) (in.v[i] & 0xff);
     out[i * 4 + 1] = (uint8_t) ((in.v[i] >> 8) & 0xff);
     out[i * 4 + 2] = (uint8_t) ((in.v[i] >> 16) & 0xff);
@@ -411,12 +426,14 @@ static void kit_bi_serialize(kit_bigint_t const in,
 }
 
 static kit_bigint_t kit_bi_deserialize(uint8_t const *const in) {
+  ptrdiff_t    i;
+  kit_bigint_t out;
+
   assert(in != NULL);
 
-  kit_bigint_t out;
   memset(&out, 0, sizeof out);
 
-  for (ptrdiff_t i = 0; i < KIT_BIGINT_SIZE; i++)
+  for (i = 0; i < KIT_BIGINT_SIZE; i++)
     out.v[i / 4] |= ((uint32_t) in[i]) << (8 * (i % 4));
 
   return out;
@@ -429,10 +446,11 @@ static uint8_t kit_bin_digit(char const hex) {
 
 static kit_bigint_t kit_bi_from_bin(kit_str_t const bin) {
   kit_bigint_t z;
+  ptrdiff_t    i;
+
   memset(&z, 0, sizeof z);
 
-  for (ptrdiff_t i = 0; i < bin.size && i / 8 < KIT_BIGINT_SIZE;
-       i++) {
+  for (i = 0; i < bin.size && i / 8 < KIT_BIGINT_SIZE; i++) {
     uint8_t const digit = kit_bin_digit(bin.values[bin.size - i - 1]);
     z.v[i / 32] |= digit << (i % 32);
   }
@@ -448,8 +466,9 @@ static uint8_t kit_dec_digit(char const c) {
 static kit_bigint_t kit_bi_from_dec(kit_str_t const dec) {
   kit_bigint_t z      = kit_bi_uint32(0);
   kit_bigint_t factor = kit_bi_uint32(1);
+  ptrdiff_t    i;
 
-  for (ptrdiff_t i = 0; i < dec.size; i++) {
+  for (i = 0; i < dec.size; i++) {
     uint32_t const digit = kit_dec_digit(
         dec.values[dec.size - i - 1]);
     z      = kit_bi_add(z, kit_bi_mul_uint32(factor, digit));
@@ -475,10 +494,11 @@ static uint8_t kit_hex_digit(char const hex) {
 
 static kit_bigint_t kit_bi_from_hex(kit_str_t const hex) {
   kit_bigint_t z;
+  ptrdiff_t    i;
+
   memset(&z, 0, sizeof z);
 
-  for (ptrdiff_t i = 0; i < hex.size && i / 2 < KIT_BIGINT_SIZE;
-       i++) {
+  for (i = 0; i < hex.size && i / 2 < KIT_BIGINT_SIZE; i++) {
     uint8_t const digit = kit_hex_digit(hex.values[hex.size - i - 1]);
     z.v[i / 8] |= digit << (4 * (i % 8));
   }
@@ -508,9 +528,11 @@ static uint8_t kit_base32_digit(char const c) {
 
 static kit_bigint_t kit_bi_from_base32(kit_str_t const base32) {
   kit_bigint_t z;
+  ptrdiff_t    i;
+
   memset(&z, 0, sizeof z);
 
-  for (ptrdiff_t i = 0; i < base32.size; i++) {
+  for (i = 0; i < base32.size; i++) {
     z = kit_bi_shl_uint(z, 5 * i);
     z.v[0] |= kit_base32_digit(base32.values[i]);
   }
@@ -546,8 +568,9 @@ static uint8_t kit_base58_digit(char const c) {
 static kit_bigint_t kit_bi_from_base58(kit_str_t const base58) {
   kit_bigint_t z      = kit_bi_uint32(0);
   kit_bigint_t factor = kit_bi_uint32(1);
+  ptrdiff_t    i;
 
-  for (ptrdiff_t i = 0; i < base58.size; i++) {
+  for (i = 0; i < base58.size; i++) {
     uint32_t const digit = kit_base58_digit(
         base58.values[base58.size - i - 1]);
     z      = kit_bi_add(z, kit_bi_mul_uint32(factor, digit));

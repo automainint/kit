@@ -29,7 +29,6 @@ uint64_t kit_mt64_generate(kit_mt64_state_t *state);
 #  define mt64_init kit_mt64_init
 #  define mt64_rotate kit_mt64_rotate
 #  define mt64_generate kit_mt64_generate
-#  define mt64_seed kit_mt64_seed
 #endif
 
 #ifdef __cplusplus

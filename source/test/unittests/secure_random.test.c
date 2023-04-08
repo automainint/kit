@@ -5,6 +5,8 @@
 #include "../../kit_test/test.h"
 
 TEST("secure random") {
+  int i, j;
+
   int v[20];
   memset(v, 0, sizeof v);
 
@@ -13,8 +15,8 @@ TEST("secure random") {
 
   int repeats = 0;
 
-  for (int i = 1; i < sizeof v / sizeof *v; i++)
-    for (int j = 0; j < i; j++)
+  for (i = 1; i < sizeof v / sizeof *v; i++)
+    for (j = 0; j < i; j++)
       if (v[i] == v[j])
         repeats++;
 

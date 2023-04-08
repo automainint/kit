@@ -1,3 +1,9 @@
+#include "thread.h"
+
+#include "allocator.h"
+#include "condition_variable.h"
+#include "mutex.h"
+
 #ifndef KIT_DISABLE_SYSTEM_THREADS
 #  if defined(_WIN32) && !defined(__CYGWIN__)
 
@@ -7,11 +13,6 @@
 #    include <process.h>
 #    include <stdbool.h>
 #    include <stdlib.h>
-
-#    include "allocator.h"
-#    include "condition_variable.h"
-#    include "mutex.h"
-#    include "thread.h"
 
 #    ifndef WIN32_LEAN_AND_MEAN
 #      define WIN32_LEAN_AND_MEAN 1
@@ -84,7 +85,7 @@ static unsigned __stdcall impl_thrd_routine(void *p) {
   impl_current_thread.thrd              = pack_p->thrd;
   impl_current_thread.handle_need_close = false;
   memcpy(&pack, pack_p, sizeof(impl_thrd_param_t));
-  pack.alloc.deallocate(pack.alloc.state, p);
+  kit_alloc_dispatch(pack.alloc, KIT_DEALLOCATE, 0, 0, p);
   code = pack.func(pack.arg);
   return (unsigned) code;
 }
@@ -142,7 +143,7 @@ static void impl_tss_dtor_invoke(void) {
   int i;
   for (i = 0; i < EMULATED_THREADS_TSS_DTOR_SLOTNUM; i++) {
     if (impl_tss_dtor_tbl[i].dtor) {
-      void *val = tss_get(impl_tss_dtor_tbl[i].key);
+      void *val = (void *) (size_t) tss_get(impl_tss_dtor_tbl[i].key);
       if (val)
         (impl_tss_dtor_tbl[i].dtor)(val);
     }
@@ -272,8 +273,9 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
   assert(thr != NULL);
   assert(stack_size >= 0 && stack_size < 0x100000000);
   kit_allocator_t alloc = kit_alloc_default();
-  pack                  = (impl_thrd_param_t *) alloc.allocate(
-                       alloc.state, (sizeof(impl_thrd_param_t)));
+
+  pack = (impl_thrd_param_t *) kit_alloc_dispatch(
+      alloc, KIT_ALLOCATE, (sizeof(impl_thrd_param_t)), 0, NULL);
   if (!pack)
     return thrd_nomem;
   pack->func  = func;
@@ -283,7 +285,7 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
                                impl_thrd_routine, pack, CREATE_SUSPENDED,
                                NULL);
   if (handle == 0) {
-    alloc.deallocate(alloc.state, pack);
+    kit_alloc_dispatch(alloc, KIT_DEALLOCATE, 0, 0, pack);
     if (errno == EAGAIN || errno == EACCES)
       return thrd_nomem;
     return thrd_error;

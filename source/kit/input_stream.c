@@ -41,8 +41,9 @@ kit_is_handle_t kit_is_wrap_string(kit_str_t       string,
                                    kit_allocator_t alloc) {
   kit_is_handle_t in;
   memset(&in, 0, sizeof in);
-  kit_is_state_str_t *state = (kit_is_state_str_t *) alloc.allocate(
-      alloc.state, sizeof(kit_is_state_str_t));
+  kit_is_state_str_t *state = (kit_is_state_str_t *)
+      kit_alloc_dispatch(alloc, KIT_ALLOCATE,
+                         sizeof(kit_is_state_str_t), 0, NULL);
   if (state != NULL) {
     memset(state, 0, sizeof *state);
     state->type   = input_stream_str;
@@ -57,5 +58,5 @@ kit_is_handle_t kit_is_wrap_string(kit_str_t       string,
 void kit_is_destroy(kit_is_handle_t in) {
   kit_is_state_basic_t *basic = (kit_is_state_basic_t *) in.state;
   if (basic != NULL)
-    basic->alloc.deallocate(basic->alloc.state, in.state);
+    kit_alloc_dispatch(basic->alloc, KIT_DEALLOCATE, 0, 0, in.state);
 }

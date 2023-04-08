@@ -13,8 +13,8 @@ typedef struct {
 static internal_buffer_t *buf_init(kit_is_handle_t upstream,
                                    kit_allocator_t alloc) {
   assert(alloc.allocate != NULL);
-  internal_buffer_t *const buf = alloc.allocate(alloc.state,
-                                                sizeof *buf);
+  internal_buffer_t *const buf = kit_alloc_dispatch(
+      alloc, KIT_ALLOCATE, sizeof *buf, 0, NULL);
 
   if (buf != NULL) {
     memset(buf, 0, sizeof *buf);
@@ -46,9 +46,7 @@ static void buf_release(void *p) {
 
   if (--buf->ref_count == 0) {
     DA_DESTROY(buf->data);
-
-    assert(buf->alloc.deallocate != NULL);
-    buf->alloc.deallocate(buf->alloc.state, buf);
+    kit_alloc_dispatch(buf->alloc, KIT_DEALLOCATE, 0, 0, buf);
   }
 }
 
@@ -98,23 +96,72 @@ kit_ib_handle_t kit_ib_wrap(kit_is_handle_t upstream,
 kit_ib_handle_t kit_ib_read(kit_ib_handle_t buf, ptrdiff_t size) {
   kit_ib_handle_t next;
   memset(&next, 0, sizeof next);
+
   if (buf.status != KIT_OK) {
     next.status = buf.status;
-  } else {
-    buf_acquire(buf.internal);
-    buf_adjust(buf.internal, buf.offset + size);
-    DA_INIT(next.data, size, buf_alloc(buf.internal));
-    if (next.data.size != size)
-      next.status = KIT_ERROR_BAD_ALLOC;
-    kit_out_str_t destination = { .size   = next.data.size,
-                                  .values = next.data.values };
-    ptrdiff_t     n = buf_read(buf.internal, buf.offset, destination);
-    next.offset     = buf.offset + n;
-    next.internal   = buf.internal;
-    DA_RESIZE(next.data, n);
-    if (next.data.size != n)
-      next.status = KIT_ERROR_BAD_ALLOC;
+    return next;
   }
+
+  buf_acquire(buf.internal);
+  buf_adjust(buf.internal, buf.offset + size);
+
+  DA_INIT(next.data, size, buf_alloc(buf.internal));
+  if (next.data.size != size)
+    next.status = KIT_ERROR_BAD_ALLOC;
+
+  kit_out_str_t   destination = { .size   = next.data.size,
+                                  .values = next.data.values };
+  ptrdiff_t const n = buf_read(buf.internal, buf.offset, destination);
+  next.offset       = buf.offset + n;
+  next.internal     = buf.internal;
+
+  DA_RESIZE(next.data, n);
+  if (next.data.size != n)
+    next.status = KIT_ERROR_BAD_ALLOC;
+
+  return next;
+}
+
+kit_ib_handle_t kit_ib_read_while(
+    kit_ib_handle_t buf, kit_ib_read_condition_fn condition) {
+  kit_ib_handle_t next;
+  memset(&next, 0, sizeof next);
+
+  if (buf.status != KIT_OK) {
+    next.status = buf.status;
+    return next;
+  }
+
+  buf_acquire(buf.internal);
+
+  DA_INIT(next.data, 0, buf_alloc(buf.internal));
+
+  ptrdiff_t size = 0;
+
+  for (;; ++size) {
+    buf_adjust(buf.internal, buf.offset + size + 1);
+
+    DA_RESIZE(next.data, size + 1);
+    if (next.data.size != size + 1)
+      next.status = KIT_ERROR_BAD_ALLOC;
+
+    kit_out_str_t   destination = { .size   = 1,
+                                    .values = next.data.values + size };
+    ptrdiff_t const n = buf_read(buf.internal, buf.offset + size,
+                                 destination);
+
+    kit_str_t data = { .size = size + 1, .values = next.data.values };
+    if (n != 1 || condition == NULL || condition(data) == 0)
+      break;
+  }
+
+  next.offset   = buf.offset + size;
+  next.internal = buf.internal;
+
+  DA_RESIZE(next.data, size);
+  if (next.data.size != size)
+    next.status = KIT_ERROR_BAD_ALLOC;
+
   return next;
 }
 

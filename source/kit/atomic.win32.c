@@ -3,7 +3,7 @@
 #ifdef _MSC_VER
 static_assert(sizeof(char) == 1, "Wrong char size");
 static_assert(sizeof(short) == 2, "Wrong short size");
-static_assert(sizeof(long) == 4, "Wrong long size");
+static_assert(sizeof(int) == 4, "Wrong int size");
 
 #  include <intrin.h>
 
@@ -31,8 +31,8 @@ void kit_atomic_store_explicit_16(uint16_t volatile *var,
 
 void kit_atomic_store_explicit_32(uint32_t volatile *var,
                                   uint32_t value, int memory_order) {
-  long volatile *dst = (long volatile *) var;
-  long           src = (long) value;
+  int volatile *dst = (int volatile *) var;
+  int           src = (int) value;
 
   switch (memory_order) {
     case memory_order_relaxed: *dst = src; break;
@@ -51,7 +51,7 @@ void kit_atomic_store_explicit_64(uint64_t volatile *var,
 #  ifdef _WIN64
       _InterlockedExchange64(dst, src);
 #  else
-      _InterlockedExchange((long volatile *) dst, (long) src);
+      _InterlockedExchange((int volatile *) dst, (int) src);
 #  endif
   }
 }
@@ -78,7 +78,7 @@ uint16_t kit_atomic_load_explicit_16(uint16_t volatile *var,
 
 uint32_t kit_atomic_load_explicit_32(uint32_t volatile *var,
                                      int memory_order) {
-  long volatile *dst = (long volatile *) var;
+  int volatile *dst = (int volatile *) var;
 
   if (memory_order == memory_order_relaxed)
     return (uint32_t) *dst;
@@ -96,7 +96,7 @@ uint64_t kit_atomic_load_explicit_64(uint64_t volatile *var,
 #  ifdef _WIN64
   return (uint64_t) _InterlockedOr64(dst, 0);
 #  else
-  return (uint64_t) _InterlockedOr((long volatile *) dst, 0);
+  return (uint64_t) _InterlockedOr((int volatile *) dst, 0);
 #  endif
 }
 
@@ -121,8 +121,8 @@ uint16_t kit_atomic_exchange_explicit_16(uint16_t volatile *var,
 uint32_t kit_atomic_exchange_explicit_32(uint32_t volatile *var,
                                          uint32_t           value,
                                          int memory_order) {
-  long volatile *dst = (long volatile *) var;
-  long           src = (long) value;
+  int volatile *dst = (int volatile *) var;
+  int           src = (int) value;
 
   return (uint32_t) _InterlockedExchange(dst, src);
 }
@@ -136,8 +136,8 @@ uint64_t kit_atomic_exchange_explicit_64(uint64_t volatile *var,
 #  ifdef _WIN64
   return (uint64_t) _InterlockedExchange64(dst, src);
 #  else
-  return (uint64_t) _InterlockedExchange((long volatile *) dst,
-                                         (long) src);
+  return (uint64_t) _InterlockedExchange((int volatile *) dst,
+                                         (int) src);
 #  endif
 }
 
@@ -162,8 +162,8 @@ uint16_t kit_atomic_fetch_add_explicit_16(uint16_t volatile *var,
 uint32_t kit_atomic_fetch_add_explicit_32(uint32_t volatile *var,
                                           uint32_t           value,
                                           int memory_order) {
-  long volatile *dst = (long volatile *) var;
-  long           src = (long) value;
+  int volatile *dst = (int volatile *) var;
+  int           src = (int) value;
 
   return (uint32_t) _InterlockedExchangeAdd(dst, src);
 }
@@ -177,8 +177,8 @@ uint64_t kit_atomic_fetch_add_explicit_64(uint64_t volatile *var,
 #  ifdef _WIN64
   return (uint64_t) _InterlockedExchangeAdd64(dst, src);
 #  else
-  return (uint64_t) _InterlockedExchangeAdd((long volatile *) dst,
-                                            (long) src);
+  return (uint64_t) _InterlockedExchangeAdd((int volatile *) dst,
+                                            (int) src);
 #  endif
 }
 

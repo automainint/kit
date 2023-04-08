@@ -24,13 +24,13 @@ int kit_ar_compare(ptrdiff_t left_element_size, ptrdiff_t left_size,
   struct {                       \
     ptrdiff_t size;              \
     type_    *values;            \
-  } 
+  }
 
 #define KIT_AR(type_) \
   struct {                   \
     ptrdiff_t    size;       \
     type_ const *values;     \
-  } 
+  }
 
 #define KIT_AR_MUT_WRAP(name_, element_type_, array_)           \
   struct {                                                      \

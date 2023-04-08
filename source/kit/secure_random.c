@@ -3,7 +3,7 @@
 #include "condition_variable.h"
 #include "mersenne_twister_64.h"
 #include "mutex.h"
-#include "time.h"
+
 #include <assert.h>
 #include <stdio.h>
 
@@ -16,7 +16,7 @@
 #  include <unistd.h>
 #endif
 
-static uint64_t get_available_memory() {
+static uint64_t get_available_memory(void) {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   MEMORYSTATUSEX status;
   status.dwLength = sizeof(status);
@@ -33,7 +33,7 @@ static uint64_t get_available_memory() {
 static once_flag kit_secure_random_fallback_flag;
 static mtx_t     kit_secure_random_fallback_mutex;
 
-static void secure_random_fallback_init() {
+static void secure_random_fallback_init(void) {
   mtx_init(&kit_secure_random_fallback_mutex, mtx_plain);
 }
 #endif
@@ -53,8 +53,9 @@ static void secure_random_fallback(ptrdiff_t const size,
   static uint64_t n         = 0;
   static uint64_t time_sec  = 0;
   static uint64_t time_nsec = 0;
-
   struct timespec t;
+  ptrdiff_t       i;
+
   timespec_get(&t, TIME_UTC);
 
   kit_mt64_state_t state;
@@ -80,7 +81,7 @@ static void secure_random_fallback(ptrdiff_t const size,
   time_sec  = (uint64_t) t.tv_sec;
   time_nsec = (uint64_t) t.tv_nsec;
 
-  for (ptrdiff_t i = 0; i < size; i++)
+  for (i = 0; i < size; i++)
     ((uint8_t *) data)[i] = (uint8_t) (kit_mt64_generate(&state) >>
                                        56);
 

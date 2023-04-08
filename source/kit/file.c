@@ -18,13 +18,35 @@ enum { PATH_BUF_SIZE = 4096 };
 #  include <unistd.h>
 #endif
 
+#ifdef __APPLE__
+#  define st_mtim st_mtimespec
+#endif
+
 static int is_delim(char const c) {
   return c == '/' || c == '\\';
+}
+
+static kit_string_t kit_get_env_(char *const           name,
+                                 kit_allocator_t const alloc) {
+  char *const     val  = getenv(name);
+  ptrdiff_t const size = val != NULL ? (ptrdiff_t) strlen(val) : 0;
+
+  string_t result;
+  DA_INIT(result, size, alloc);
+  assert(result.size == size);
+
+  if (result.size == size && size > 0)
+    memcpy(result.values, val, result.size);
+  else
+    DA_RESIZE(result, 0);
+
+  return result;
 }
 
 kit_string_t kit_path_norm(kit_str_t const       path,
                            kit_allocator_t const alloc) {
   str_t const parent = SZ("..");
+  ptrdiff_t   i, i1, j;
 
   string_t norm;
   DA_INIT(norm, path.size, alloc);
@@ -35,7 +57,7 @@ kit_string_t kit_path_norm(kit_str_t const       path,
 
   memcpy(norm.values, path.values, path.size);
 
-  for (ptrdiff_t i1 = 0, i = 0; i < path.size; i++) {
+  for (i1 = 0, i = 0; i < path.size; i++) {
     if (!is_delim(path.values[i]))
       continue;
 
@@ -45,7 +67,7 @@ kit_string_t kit_path_norm(kit_str_t const       path,
       int       have_parent = 0;
       ptrdiff_t i0          = 0;
 
-      for (ptrdiff_t j = 0; j < i1; j++) {
+      for (j = 0; j < i1; j++) {
         if (norm.values[j] != '\0')
           have_parent = 1;
         if (is_delim(norm.values[j]))
@@ -65,10 +87,10 @@ kit_string_t kit_path_norm(kit_str_t const       path,
 
   ptrdiff_t size = 0;
 
-  for (ptrdiff_t i = 0; i < norm.size; i++) {
+  for (i = 0; i < norm.size; i++) {
     if (norm.values[i] != '\0') {
       if (is_delim(norm.values[i]))
-        norm.values[size] = KIT_PATH_DELIM;
+        norm.values[size] = KIT_PATH_DELIM_C;
       else
         norm.values[size] = norm.values[i];
       size++;
@@ -101,31 +123,48 @@ kit_string_t kit_path_join(kit_str_t const       left,
     return joined;
 
   memcpy(joined.values, left.values, left_size);
-  joined.values[left_size] = KIT_PATH_DELIM;
+  joined.values[left_size] = KIT_PATH_DELIM_C;
   memcpy(joined.values + left_size + 1, right_values, right_size);
 
   return joined;
 }
 
 kit_string_t kit_path_user(kit_allocator_t const alloc) {
-  char           *home = getenv(KIT_ENV_HOME);
-  ptrdiff_t const size = home != NULL ? (ptrdiff_t) strlen(home) : 0;
-
-  string_t user;
-  DA_INIT(user, size, alloc);
-  assert(user.size == size);
-
-  if (user.size > 0)
-    memcpy(user.values, home, user.size);
-  else {
+  kit_string_t user = kit_get_env_(KIT_ENV_HOME, alloc);
+  if (user.size == 0) {
     DA_RESIZE(user, 1);
-    assert(user.size == 1);
-
     if (user.size == 1)
       user.values[0] = '.';
   }
-
   return user;
+}
+
+kit_string_t kit_path_cache(kit_allocator_t alloc) {
+  kit_string_t cache, user;
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  cache = kit_get_env_("LOCALAPPDATA", alloc);
+  if (cache.size != 0)
+    return cache;
+  DA_DESTROY(cache);
+#endif
+
+  cache = kit_get_env_("XDG_CACHE_HOME", alloc);
+  if (cache.size != 0)
+    return cache;
+  DA_DESTROY(cache);
+
+  user = kit_path_user(alloc);
+  cache =
+#ifdef __APPLE__
+      kit_path_join(WRAP_STR(user), SZ("Library" PATH_DELIM "Caches"),
+                    alloc);
+#else
+      kit_path_join(WRAP_STR(user), SZ(".cache"), alloc);
+#endif
+  DA_DESTROY(user);
+
+  return cache;
 }
 
 kit_str_t kit_path_index(kit_str_t const path,
@@ -209,7 +248,7 @@ static void win32_prepare_path_(WCHAR *const    buf,
     WCHAR buf[PATH_BUF_SIZE]; \
     win32_prepare_path_(buf, path)
 #else
-static void unix_prepare_path_(char *const     buf,
+static void unix_prepare_path_(char *const buf,
                                kit_str_t const path) {
   assert(path.size == 0 || path.values != NULL);
   assert(path.size + 1 < PATH_BUF_SIZE);
@@ -234,7 +273,9 @@ kit_status_t kit_file_create_folder(kit_str_t const path) {
 }
 
 kit_status_t kit_file_create_folder_recursive(kit_str_t const path) {
-  for (ptrdiff_t i = 0;; i++) {
+  ptrdiff_t i;
+
+  for (i = 0;; i++) {
     str_t const part = kit_path_take(path, i);
     int const   type = kit_path_type(part);
     if (type == KIT_PATH_FILE)
@@ -271,7 +312,8 @@ kit_status_t kit_file_remove_folder(kit_str_t const path) {
 
 kit_status_t kit_file_remove_recursive(kit_str_t const       path,
                                        kit_allocator_t const alloc) {
-  int type = kit_path_type(path);
+  int       type = kit_path_type(path);
+  ptrdiff_t i;
 
   switch (type) {
     case KIT_PATH_FILE: return kit_file_remove(path);
@@ -282,7 +324,7 @@ kit_status_t kit_file_remove_recursive(kit_str_t const       path,
         kit_path_list_destroy(list);
         return list.status;
       }
-      for (ptrdiff_t i = 0; i < list.files.size; i++) {
+      for (i = 0; i < list.files.size; i++) {
         str_t const s = { .size   = list.files.values[i].size,
                           .values = list.files.values[i].values };
         kit_file_remove_recursive(s, alloc);
@@ -318,29 +360,51 @@ kit_path_type_t kit_path_type(kit_str_t const path) {
   return KIT_PATH_NONE;
 }
 
-kit_file_size_result_t kit_file_size(kit_str_t const path) {
-  kit_file_size_result_t result;
+kit_file_info_t kit_file_info(kit_str_t const path) {
+  kit_file_info_t result;
   memset(&result, 0, sizeof result);
 
   PREPARE_PATH_BUF_;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  HFILE f = CreateFileW(buf, GENERIC_READ, FILE_SHARE_READ, NULL,
-                        OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  HANDLE f = CreateFileW(buf, GENERIC_READ, FILE_SHARE_READ, NULL,
+                         OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
   if (f != INVALID_HANDLE_VALUE) {
+    FILETIME ft;
+    if (GetFileTime(f, NULL, NULL, &ft) != 0) {
+      uint64_t const nsec100 = (((uint64_t) ft.dwHighDateTime)
+                                << 32) |
+                               (uint64_t) ft.dwLowDateTime;
+      result.time_modified_sec  = (int64_t) (nsec100 / 10000000);
+      result.time_modified_nsec = (int32_t) (100 *
+                                             (nsec100 % 10000000));
+    } else {
+      assert(0);
+    }
+
     DWORD high;
     DWORD low = GetFileSize(f, &high);
-    CloseHandle(f);
 
+    result.size   = (int64_t) ((((uint64_t) high) << 32) |
+                             (uint64_t) low);
     result.status = KIT_OK;
-    result.size   = (((uint64_t) high) << 32) | (uint64_t) low;
+
+    CloseHandle(f);
     return result;
   }
 #else
   struct stat info;
-  if (stat(buf, &info) == 0) {
+  if (stat(buf, &info) == 0 && S_ISREG(info.st_mode)) {
+    result.size = (int64_t) info.st_size;
+#  ifndef st_mtime
+    /*  No support for nanosecond timestamps.
+     */
+    result.time_modified_sec = (int64_t) info.st_mtime;
+#  else
+    result.time_modified_sec  = (int64_t) info.st_mtim.tv_sec;
+    result.time_modified_nsec = (int32_t) info.st_mtim.tv_nsec;
+#  endif
     result.status = KIT_OK;
-    result.size   = (uint64_t) info.st_size;
     return result;
   }
 #endif
@@ -434,7 +498,8 @@ kit_path_list_t kit_file_enum_folder(kit_str_t const       path,
 }
 
 void kit_path_list_destroy(kit_path_list_t list) {
-  for (ptrdiff_t i = 0; i < list.files.size; i++)
+  ptrdiff_t i;
+  for (i = 0; i < list.files.size; i++)
     DA_DESTROY(list.files.values[i]);
   DA_DESTROY(list.files);
 }

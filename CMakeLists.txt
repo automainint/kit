@@ -6,57 +6,58 @@ if(NOT DEFINED CMAKE_BUILD_PARALLEL_LEVEL)
   set(CMAKE_BUILD_PARALLEL_LEVEL 4 CACHE STRING "" FORCE)
 endif()
 
-option(KIT_ENABLE_TESTING "Enable testing" ON)
-
-option(KIT_DISABLE_SYSTEM_MALLOC "Disable system memory allocator" OFF)
-option(KIT_DISABLE_SYSTEM_THREADS "Disable system threads" OFF)
-
-set(KIT_PROJECT kit)
-set(KIT_LIBRARY kit)
-set(KIT_TEST_LIBRARY kit_test)
-set(KIT_TEST_SUITE kit_test_suite)
-set(KIT_TARGETS kit-targets)
+option(KIT_DISABLE_SYSTEM_MALLOC                 "Disable system memory allocator"       OFF)
+option(KIT_DISABLE_SYSTEM_THREADS                "Disable system threads"                OFF)
+option(KIT_ENABLE_CUSTOM_ALLOC_DISPATCH          "Enable custom allocator dispatch"      OFF)
+option(KIT_ENABLE_CUSTOM_ASYNC_FUNCTION_DISPATCH "Enable custom async function dispatch" OFF)
+option(KIT_ENABLE_TESTING                        "Enable testing"                        ON)
 
 project(
-  ${KIT_PROJECT}
+  kit
   VERSION 0.1.1
   DESCRIPTION "A collection of C libraries"
   LANGUAGES C)
 
-add_library(${KIT_LIBRARY} STATIC)
-add_library(${KIT_PROJECT}::${KIT_LIBRARY} ALIAS ${KIT_LIBRARY})
+add_library(kit STATIC)
+add_library(kit::kit ALIAS kit)
 target_include_directories(
-  ${KIT_LIBRARY} INTERFACE
+  kit INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source>)
-target_compile_features(${KIT_LIBRARY} PUBLIC c_std_11)
 if(WIN32)
-  target_link_libraries(${KIT_LIBRARY} PUBLIC Shlwapi)
+  target_link_libraries(kit PUBLIC Shlwapi)
+endif()
+
+if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+  target_compile_options(kit PUBLIC -pedantic -Wall -Werror)
 endif()
 
 include(CheckCSourceRuns)
 
 check_c_source_runs(
   "
-  #include <time.h>
-  int main() {
-    struct timespec t;
-    return 0;
-  }
+  __attribute__((weak)) int foo();
+  int main() { return 0; }
   "
-  KIT_HAVE_STRUCT_TIMESPEC
+  KIT_HAVE_FUNC_ATTRIBUTE_WEAK
 )
 
+set(CMAKE_REQUIRED_LIBRARIES_BACK_ ${CMAKE_REQUIRED_LIBRARIES})
+set(CMAKE_REQUIRED_LIBRARIES "pthread")
 check_c_source_runs(
   "
-  #include <time.h>
+  #define _GNU_SOURCE
+  #include <pthread.h>
   int main() {
-    struct timespec t;
-    timespec_get(&t, TIME_UTC);
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
     return 0;
   }
   "
-  KIT_HAVE_TIMESPEC_GET
+  KIT_HAVE_PTHREAD_MUTEXATTR_SETTYPE
 )
+set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES_BACK_})
+unset(CMAKE_REQUIRED_LIBRARIES_BACK_)
 
 check_c_source_runs(
   "
@@ -70,7 +71,7 @@ check_c_source_runs(
 
 check_c_source_runs(
   "
-  #include <windows.h>
+  #include <Windows.h>
   int main() {
     return 0;
   }
@@ -98,58 +99,64 @@ if(NOT KIT_HAVE_MALLOC)
   set(KIT_DISABLE_SYSTEM_MALLOC ON)
 endif()
 
-if(NOT KIT_HAVE_STRUCT_TIMESPEC)
-  target_compile_definitions(${KIT_LIBRARY} PUBLIC KIT_NEED_STRUCT_TIMESPEC)
+if(KIT_HAVE_FUNC_ATTRIBUTE_WEAK)
+  target_compile_definitions(kit PUBLIC KIT_HAVE_FUNC_ATTRIBUTE_WEAK)
 endif()
 
-if(NOT KIT_HAVE_TIMESPEC_GET)
-  target_compile_definitions(${KIT_LIBRARY} PUBLIC KIT_NEED_TIMESPEC_GET)
+if(KIT_HAVE_PTHREAD_MUTEXATTR_SETTYPE)
+  target_compile_definitions(kit PUBLIC KIT_HAVE_PTHREAD_MUTEXATTR_SETTYPE)
 endif()
 
 if(KIT_DISABLE_SYSTEM_MALLOC)
-  target_compile_definitions(${KIT_LIBRARY} PUBLIC KIT_DISABLE_SYSTEM_MALLOC)
+  target_compile_definitions(kit PUBLIC KIT_DISABLE_SYSTEM_MALLOC)
 endif()
 
 if(KIT_DISABLE_SYSTEM_THREADS)
-  target_compile_definitions(${KIT_LIBRARY} PUBLIC KIT_DISABLE_SYSTEM_THREADS)
+  target_compile_definitions(kit PUBLIC KIT_DISABLE_SYSTEM_THREADS)
+endif()
+
+if(KIT_ENABLE_CUSTOM_ALLOC_DISPATCH)
+  target_compile_definitions(kit PUBLIC KIT_ENABLE_CUSTOM_ALLOC_DISPATCH)
+endif()
+
+if(KIT_ENABLE_CUSTOM_ASYNC_FUNCTION_DISPATCH)
+  target_compile_definitions(kit PUBLIC KIT_ENABLE_CUSTOM_ASYNC_FUNCTION_DISPATCH)
 endif()
 
 if(NOT KIT_DISABLE_SYSTEM_THREADS)
   find_package(Threads REQUIRED)
-  target_link_libraries(${KIT_LIBRARY} PUBLIC Threads::Threads)
+  target_link_libraries(kit PUBLIC Threads::Threads)
 endif()
 
-add_library(${KIT_TEST_LIBRARY} STATIC)
-add_library(${KIT_PROJECT}::${KIT_TEST_LIBRARY} ALIAS ${KIT_TEST_LIBRARY})
+add_library(kit_test STATIC)
+add_library(kit::kit_test ALIAS kit_test)
 target_include_directories(
-  ${KIT_TEST_LIBRARY} INTERFACE
+  kit_test INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/source>)
-target_compile_features(${KIT_TEST_LIBRARY} PUBLIC c_std_11)
 
 enable_testing()
 
 if(KIT_ENABLE_TESTING)
-  add_executable(${KIT_TEST_SUITE})
-  add_executable(${KIT_PROJECT}::${KIT_TEST_SUITE} ALIAS ${KIT_TEST_SUITE})
-  target_compile_features(${KIT_TEST_SUITE} PRIVATE c_std_11)
-  target_link_libraries(${KIT_TEST_SUITE} PRIVATE ${KIT_LIBRARY} ${KIT_TEST_LIBRARY} Threads::Threads)
+  add_executable(kit_test_suite)
+  add_executable(kit::kit_test_suite ALIAS kit_test_suite)
+  target_link_libraries(kit_test_suite PRIVATE kit kit_test)
 
   if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(
-      ${KIT_LIBRARY} PUBLIC
+      kit PUBLIC
       -fsanitize=undefined,address
       --coverage -O0 -g)
     target_link_options(
-      ${KIT_LIBRARY} PUBLIC
+      kit PUBLIC
       -fsanitize=undefined,address
       --coverage)
   endif()
 
   add_test(
-    NAME ${KIT_LIBRARY}_unittests
-    COMMAND ${KIT_TEST_SUITE} --no-carriage-return)
+    NAME kit_unittests
+    COMMAND kit_test_suite --no-carriage-return)
   set_tests_properties(
-    ${KIT_LIBRARY}_unittests
+    kit_unittests
     PROPERTIES
     TIMEOUT "120")
 endif()
@@ -176,21 +183,21 @@ unset(path_)
 unset(dir_)
 
 install(
-  TARGETS ${KIT_LIBRARY} ${KIT_TEST_LIBRARY}
-  EXPORT ${KIT_TARGETS}
+  TARGETS kit kit_test
+  EXPORT kit-targets
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 install(
-  EXPORT ${KIT_TARGETS}
-  FILE ${KIT_TARGETS}.cmake
+  EXPORT kit-targets
+  FILE kit-targets.cmake
   NAMESPACE ${PROJECT_NAME}::
   DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 
 export(
-  EXPORT ${KIT_TARGETS}
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/${KIT_TARGETS}.cmake"
+  EXPORT kit-targets
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/kit-targets.cmake"
   NAMESPACE ${PROJECT_NAME}::)
 
 include(CMakePackageConfigHelpers)

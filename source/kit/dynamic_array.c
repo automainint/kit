@@ -8,13 +8,12 @@ void kit_da_init(kit_da_void_t *array, ptrdiff_t element_size,
   assert(array != NULL);
   assert(element_size > 0);
   assert(size >= 0);
-  assert(alloc.allocate != NULL);
-  assert(alloc.deallocate != NULL);
 
   memset(array, 0, sizeof(kit_da_void_t));
 
   if (size > 0)
-    array->values = alloc.allocate(alloc.state, element_size * size);
+    array->values = kit_alloc_dispatch(alloc, KIT_ALLOCATE,
+                                       element_size * size, 0, NULL);
 
   if (array->values != NULL) {
     array->capacity = size;
@@ -44,16 +43,15 @@ void kit_da_resize(kit_da_void_t *array, ptrdiff_t element_size,
   } else {
     ptrdiff_t capacity = eval_capacity(array->capacity, size);
 
-    assert(array->alloc.allocate != NULL);
-    assert(array->alloc.deallocate != NULL);
+    void *bytes = kit_alloc_dispatch(
+        array->alloc, KIT_ALLOCATE, element_size * capacity, 0, NULL);
 
-    void *bytes = array->alloc.allocate(array->alloc.state,
-                                        element_size * capacity);
     if (bytes != NULL) {
       if (array->size > 0)
         memcpy(bytes, array->values, element_size * array->size);
       if (array->values != NULL)
-        array->alloc.deallocate(array->alloc.state, array->values);
+        kit_alloc_dispatch(array->alloc, KIT_DEALLOCATE, 0, 0,
+                           array->values);
       array->capacity = capacity;
       array->size     = size;
       array->values   = bytes;

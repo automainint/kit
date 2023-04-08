@@ -1,6 +1,7 @@
 target_sources(
-  ${KIT_TEST_LIBRARY}
-    PRIVATE
-      test.c
+  kit_test
     PUBLIC
-      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/test.h>)
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/bench.h>
+      $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/test.h>
+    PRIVATE
+      test.c bench.c)

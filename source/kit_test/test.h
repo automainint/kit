@@ -19,7 +19,9 @@ extern "C" {
 #  define KIT_TEST_ASSERTIONS_LIMIT 0x50
 #endif
 
-typedef void (*kit_test_report_fn)(int test_index, int line, int ok);
+typedef void (*kit_test_report_fn)(int test_index, int line,
+                                   long long value,
+                                   long long expected);
 typedef void (*kit_test_run_fn)(
     int kit_test_index_, kit_test_report_fn kit_test_report_fn_);
 
@@ -30,12 +32,14 @@ typedef struct {
   int             assertions;
   int             line[KIT_TEST_ASSERTIONS_LIMIT];
   int             status[KIT_TEST_ASSERTIONS_LIMIT];
+  long long       value[KIT_TEST_ASSERTIONS_LIMIT];
+  long long       expected[KIT_TEST_ASSERTIONS_LIMIT];
   int             signal;
 } kit_test_case_t;
 
 typedef struct {
   int             size;
-  kit_test_case_t tests[KIT_TESTS_SIZE_LIMIT];
+  kit_test_case_t v[KIT_TESTS_SIZE_LIMIT];
 } kit_tests_list_t;
 
 extern kit_tests_list_t kit_tests_list;
@@ -51,12 +55,6 @@ extern kit_tests_list_t kit_tests_list;
     static void f(void)
 #else
 #  ifdef _MSC_VER
-#    ifdef __cplusplus
-#      define KIT_EXTERN_C_ extern "C"
-#    else
-#      define KIT_EXTERN_C_
-#    endif
-
 #    pragma section(".CRT$XCU", read)
 #    define KIT_TEST_ON_START_2_(f, p)                               \
       static void f(void);                                           \
@@ -93,13 +91,17 @@ void kit_test_register(char const *name, char const *file,
       int kit_test_index_, kit_test_report_fn kit_test_report_fn_)
 
 #define KIT_REQUIRE(...) \
-  kit_test_report_fn_(kit_test_index_, __LINE__, (__VA_ARGS__))
+  kit_test_report_fn_(kit_test_index_, __LINE__, (__VA_ARGS__), 1)
+
+#define KIT_REQUIRE_EQ(...) \
+  kit_test_report_fn_(kit_test_index_, __LINE__, __VA_ARGS__)
 
 int kit_run_tests(int argc, char **argv);
 
 #ifndef KIT_DISABLE_SHORT_NAMES
 #  define TEST KIT_TEST
 #  define REQUIRE KIT_REQUIRE
+#  define REQUIRE_EQ KIT_REQUIRE_EQ
 
 #  define test_register kit_test_register
 #  define run_tests kit_run_tests

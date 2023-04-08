@@ -5,15 +5,37 @@
 #define KIT_TEST_FILE file
 #include "../../kit_test/test.h"
 
+TEST("file path cache") {
+  kit_allocator_t alloc = kit_alloc_default();
+
+  string_t user  = path_user(alloc);
+  string_t cache = path_cache(alloc);
+
+  DA_RESIZE(cache, cache.size + 1);
+  cache.values[cache.size - 1] = '\0';
+  DA_RESIZE(cache, cache.size - 1);
+
+  string_t expected =
 #if defined(_WIN32) && !defined(__CYGWIN__)
-#  define S_DELIM_ "\\"
+      path_join(WRAP_STR(user), SZ("AppData" PATH_DELIM "Local"),
+                alloc);
+#elif defined(__APPLE__)
+      path_join(WRAP_STR(user), SZ("Library" PATH_DELIM "Caches"),
+                alloc);
 #else
-#  define S_DELIM_ "/"
+      path_join(WRAP_STR(user), SZ(".cache"), alloc);
 #endif
+
+  REQUIRE(AR_EQUAL(cache, expected));
+
+  DA_DESTROY(user);
+  DA_DESTROY(cache);
+  DA_DESTROY(expected);
+}
 
 TEST("file path normalize one") {
   str_t foo      = SZ("foo/bar/../baz");
-  str_t foo_norm = SZ("foo" S_DELIM_ "baz");
+  str_t foo_norm = SZ("foo" PATH_DELIM "baz");
 
   string_t bar = path_norm(foo, kit_alloc_default());
 
@@ -35,7 +57,7 @@ TEST("file path normalize two") {
 
 TEST("file path normalize parent") {
   str_t foo      = SZ("../baz");
-  str_t foo_norm = SZ(".." S_DELIM_ "baz");
+  str_t foo_norm = SZ(".." PATH_DELIM "baz");
 
   string_t bar = path_norm(foo, kit_alloc_default());
 
@@ -46,7 +68,7 @@ TEST("file path normalize parent") {
 
 TEST("file path normalize double parent") {
   str_t foo      = SZ("foo/../../baz");
-  str_t foo_norm = SZ(".." S_DELIM_ "baz");
+  str_t foo_norm = SZ(".." PATH_DELIM "baz");
 
   string_t bar = path_norm(foo, kit_alloc_default());
 
@@ -57,7 +79,7 @@ TEST("file path normalize double parent") {
 
 TEST("file path normalize windows delim") {
   str_t foo      = SZ("foo\\bar\\..\\baz");
-  str_t foo_norm = SZ("foo" S_DELIM_ "baz");
+  str_t foo_norm = SZ("foo" PATH_DELIM "baz");
 
   string_t bar = path_norm(foo, kit_alloc_default());
 
@@ -69,7 +91,7 @@ TEST("file path normalize windows delim") {
 TEST("file path join no delim") {
   str_t foo    = SZ("foo");
   str_t bar    = SZ("bar");
-  str_t joined = SZ("foo" S_DELIM_ "bar");
+  str_t joined = SZ("foo" PATH_DELIM "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 
@@ -81,7 +103,7 @@ TEST("file path join no delim") {
 TEST("file path join delim left") {
   str_t foo    = SZ("foo/");
   str_t bar    = SZ("bar");
-  str_t joined = SZ("foo" S_DELIM_ "bar");
+  str_t joined = SZ("foo" PATH_DELIM "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 
@@ -93,7 +115,7 @@ TEST("file path join delim left") {
 TEST("file path join delim right") {
   str_t foo    = SZ("foo");
   str_t bar    = SZ("/bar");
-  str_t joined = SZ("foo" S_DELIM_ "bar");
+  str_t joined = SZ("foo" PATH_DELIM "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 
@@ -105,7 +127,7 @@ TEST("file path join delim right") {
 TEST("file path join delim both") {
   str_t foo    = SZ("foo/");
   str_t bar    = SZ("/bar");
-  str_t joined = SZ("foo" S_DELIM_ "bar");
+  str_t joined = SZ("foo" PATH_DELIM "bar");
 
   string_t foobar = path_join(foo, bar, kit_alloc_default());
 

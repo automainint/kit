@@ -21,6 +21,11 @@ kit_ib_handle_t kit_ib_wrap(kit_is_handle_t upstream,
 
 kit_ib_handle_t kit_ib_read(kit_ib_handle_t buf, ptrdiff_t size);
 
+typedef int (*kit_ib_read_condition_fn)(kit_str_t data);
+
+kit_ib_handle_t kit_ib_read_while(kit_ib_handle_t          buf,
+                                  kit_ib_read_condition_fn condition);
+
 void kit_ib_destroy(kit_ib_handle_t buf);
 
 #define KIT_IB_WRAP(upstream) \
@@ -28,8 +33,10 @@ void kit_ib_destroy(kit_ib_handle_t buf);
 
 #ifndef KIT_DISABLE_SHORT_NAMES
 #  define ib_handle_t kit_ib_handle_t
+#  define ib_read_condition_fn kit_ib_read_condition_fn
 #  define ib_wrap kit_ib_wrap
 #  define ib_read kit_ib_read
+#  define ib_read_while kit_ib_read_while
 #  define ib_destroy kit_ib_destroy
 
 #  define IB_WRAP KIT_IB_WRAP

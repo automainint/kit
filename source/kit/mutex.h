@@ -2,7 +2,10 @@
 #define KIT_MUTEX_H
 
 #ifndef KIT_DISABLE_SYSTEM_THREADS
-#  include "time.h"
+#  include "thread_defs.h"
+
+#  define _GNU_SOURCE
+#  include <time.h>
 
 #  if !defined(_WIN32) || defined(__CYGWIN__)
 #    include <pthread.h>

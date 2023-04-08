@@ -2,8 +2,11 @@
 #define KIT_THREAD_H
 
 #ifndef KIT_DISABLE_SYSTEM_THREADS
-#  include "time.h"
+#  include "thread_defs.h"
+
+#  define _GNU_SOURCE
 #  include <stddef.h>
+#  include <time.h>
 
 #  if defined(__cplusplus)
 #    define _Noreturn [[noreturn]]
@@ -62,15 +65,6 @@ typedef unsigned long tss_t;
 typedef pthread_t     thrd_t;
 typedef pthread_key_t tss_t;
 #  endif
-
-enum {
-  thrd_success = 0,
-  thrd_timedout,
-  thrd_error,
-  thrd_busy,
-  thrd_nomem,
-  thrd_wrong_stack_size
-};
 
 int            thrd_create(thrd_t *, thrd_start_t, void *);
 int            thrd_create_with_stack(thrd_t *, thrd_start_t, void *,

@@ -1,3 +1,9 @@
+#include "thread.h"
+
+#include "allocator.h"
+#include "condition_variable.h"
+#include "mutex.h"
+
 #ifndef KIT_DISABLE_SYSTEM_THREADS
 #  if !defined(_WIN32) || defined(__CYGWIN__)
 
@@ -9,10 +15,9 @@
 #    include <stdlib.h>
 #    include <unistd.h>
 
-#    include "allocator.h"
-#    include "condition_variable.h"
-#    include "mutex.h"
-#    include "thread.h"
+#    ifndef PTHREAD_STACK_MIN
+#      define PTHREAD_STACK_MIN 16384
+#    endif
 
 /*
 Configuration macro:
@@ -39,7 +44,7 @@ typedef struct {
 
 static void *impl_thrd_routine(void *p) {
   impl_thrd_param_t pack = *((impl_thrd_param_t *) p);
-  pack.alloc.deallocate(pack.alloc.state, p);
+  kit_alloc_dispatch(pack.alloc, KIT_DEALLOCATE, 0, 0, p);
   return (void *) (intptr_t) pack.func(pack.arg);
 }
 
@@ -110,7 +115,7 @@ void mtx_destroy(mtx_t *mtx) {
  * Thus the linker will be happy and things don't clash when building
  * with -O1 or greater.
  */
-#    if defined(HAVE_FUNC_ATTRIBUTE_WEAK) && !defined(__CYGWIN__)
+#    if defined(KIT_HAVE_FUNC_ATTRIBUTE_WEAK) && !defined(__CYGWIN__)
 __attribute__((weak)) int pthread_mutexattr_init(
     pthread_mutexattr_t *attr);
 
@@ -122,7 +127,9 @@ __attribute__((weak)) int pthread_mutexattr_destroy(
 #    endif
 
 int mtx_init(mtx_t *mtx, int type) {
+#    ifdef KIT_HAVE_PTHREAD_MUTEXATTR_SETTYPE
   pthread_mutexattr_t attr;
+#    endif
   assert(mtx != NULL);
   if (type != mtx_plain && type != mtx_timed &&
       type != (mtx_plain | mtx_recursive) &&
@@ -134,11 +141,15 @@ int mtx_init(mtx_t *mtx, int type) {
     return thrd_success;
   }
 
+#    ifdef KIT_HAVE_PTHREAD_MUTEXATTR_SETTYPE
   pthread_mutexattr_init(&attr);
   pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
   pthread_mutex_init(mtx, &attr);
   pthread_mutexattr_destroy(&attr);
   return thrd_success;
+#    else
+  return thrd_error;
+#    endif
 }
 
 int mtx_lock(mtx_t *mtx) {
@@ -203,8 +214,9 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
     attr_p = &attr;
   }
   kit_allocator_t alloc = kit_alloc_default();
-  pack                  = (impl_thrd_param_t *) alloc.allocate(
-                       alloc.state, sizeof(impl_thrd_param_t));
+
+  pack = (impl_thrd_param_t *) kit_alloc_dispatch(
+      alloc, KIT_ALLOCATE, sizeof(impl_thrd_param_t), 0, NULL);
   if (!pack) {
     if (attr_p)
       pthread_attr_destroy(attr_p);
@@ -214,7 +226,7 @@ int thrd_create_with_stack(thrd_t *thr, thrd_start_t func, void *arg,
   pack->arg   = arg;
   pack->alloc = alloc;
   if (pthread_create(thr, attr_p, impl_thrd_routine, pack) != 0) {
-    alloc.deallocate(alloc.state, pack);
+    kit_alloc_dispatch(alloc, KIT_DEALLOCATE, 0, 0, pack);
     if (attr_p)
       pthread_attr_destroy(attr_p);
     return thrd_error;

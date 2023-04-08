@@ -29,10 +29,10 @@ TEST("move back val") {
 
   MOVE_BACK(ref.size, ref, 2, is_equal);
 
-  REQUIRE(ref.size == 3);
-  REQUIRE(v[0] == 1);
-  REQUIRE(v[1] == 1);
-  REQUIRE(v[2] == 1);
+  REQUIRE_EQ(ref.size, 3);
+  REQUIRE_EQ(v[0], 1);
+  REQUIRE_EQ(v[1], 1);
+  REQUIRE_EQ(v[2], 1);
 }
 
 TEST("move back ref val") {
