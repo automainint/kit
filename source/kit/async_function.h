@@ -1,6 +1,7 @@
 #ifndef KIT_ASYNC_FUNCTION_H
 #define KIT_ASYNC_FUNCTION_H
 
+#include <stddef.h>
 #include <string.h>
 
 #ifdef __cplusplus
@@ -22,6 +23,7 @@ typedef void (*kit_af_state_machine)(void *self_void_);
 #define KIT_AF_STATE_DATA                \
   struct {                               \
     int                  _index;         \
+    ptrdiff_t            _id;            \
     kit_af_state_machine _state_machine; \
   }
 
@@ -152,11 +154,16 @@ static void kit_async_function_dispatch(void *promise) {
 
 #define KIT_AF_TYPE(coro_) struct coro_##_coro_state_
 
-#define KIT_AF_INITIAL(coro_) ._index = 0, ._state_machine = (coro_)
+#define KIT_AF_INITIAL(id_, coro_) \
+  ._index = 0, ._id = (id_), ._state_machine = (coro_)
 
 #define KIT_AF_CREATE(promise_, coro_, ...) \
   KIT_AF_TYPE(coro_)                        \
-  promise_ = { KIT_AF_INITIAL(coro_), __VA_ARGS__ }
+  promise_ = { KIT_AF_INITIAL(0, coro_), __VA_ARGS__ }
+
+#define KIT_AF_CREATE_ID(promise_, id_, ...) \
+  KIT_AF_TYPE(coro_)                         \
+  promise_ = { KIT_AF_INITIAL(id_, NULL), __VA_ARGS__ }
 
 #define KIT_AF_INIT(promise_, coro_, ...)                    \
   do {                                                       \
@@ -164,10 +171,10 @@ static void kit_async_function_dispatch(void *promise) {
     memcpy(&(promise_), &kit_af_temp_, sizeof kit_af_temp_); \
   } while (0)
 
-#define KIT_AF_INIT_EXPLICIT(promise_, size_, coro_func_) \
-  do {                                                    \
-    memset(&(promise_), 0, size_);                        \
-    (promise_)._state_machine = (coro_func_);             \
+#define KIT_AF_INIT_ID(promise_, id_, ...)                   \
+  do {                                                       \
+    KIT_AF_CREATE_ID(kit_af_temp_, id_, __VA_ARGS__);        \
+    memcpy(&(promise_), &kit_af_temp_, sizeof kit_af_temp_); \
   } while (0)
 
 #define KIT_AF_FINISHED(promise_) ((promise_)._index == -1)
@@ -216,7 +223,6 @@ static void kit_async_function_dispatch(void *promise) {
 #  define AF_INITIAL KIT_AF_INITIAL
 #  define AF_CREATE KIT_AF_CREATE
 #  define AF_INIT KIT_AF_INIT
-#  define AF_INIT_EXPLICIT KIT_AF_INIT_EXPLICIT
 #  define AF_FINISHED KIT_AF_FINISHED
 #  define AF_FINISHED_N KIT_AF_FINISHED_N
 #  define AF_FINISHED_ALL KIT_AF_FINISHED_ALL
