@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 #ifndef KIT_BENCHS_SIZE_LIMIT
-#  define KIT_BENCHS_SIZE_LIMIT 0x1000
+#  define KIT_BENCHS_SIZE_LIMIT 200
 #endif
 
 #ifndef KIT_BENCH_MAX_REPEATS
